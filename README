@@ -1,0 +1,97 @@
+Compiling MOST requires an ANSI C compiler.  In addition you MUST have
+a copy of the S-Lang library.  This library is available from
+ftp://space.mit.edu/pub/davis/slang.
+
+                          INSTALLATION INSTRUCTIONS
+			  
+On Unix, you should be able to simply type:
+
+    ./configure; make
+
+at the Unix prompt.  If you want to try the new support for memory
+mapping files, use:
+
+    ./configure --enable-mmap; make
+
+(Memory mapping a file has many performance advantages).
+
+If using DJGPP or MINGW32, do:
+   
+    <edit src/makefile.w32, setting ARCH to either dgj or gw32>
+    cd src
+    make -f makefile.w32
+
+For VMS, edit the file `vmsmake.com'.  When finished, either type `@vmsmake'
+or `@vmsmake gcc' at the VMS prompt.  Once MOST has been created, it must be
+installed as a foreign command.  This means that you must first type:
+
+      $  most :== $device:[dir.containing.most]most.exe
+
+I suggest that you first build MOST then view the doc file using MOST (`most
+most.doc').  If you need help, hit the `h' key from within MOST. 
+
+MOST understands the following environment variables:
+
+    MOST_SWITCHES 
+    MOST_EDITOR, SLANG_EDITOR, EDITOR
+    MOST_INITFILE
+    MOST_HELP
+
+  1. MOST_SWITCHES is a list of commonly used switches.  
+
+  2. MOST_EDITOR and SLANG_EDITOR are formatted strings describing what
+     editor to use.  The string can contain %s and %d formatting descriptors
+     that represent the file name and line number, respectively.  For
+     example, if JED is your editor, then set MOST_EDITOR to 'jed %s -g %d'.
+     Since MOST is just one of several programs that use the S-Lang library,
+     I suggest that you use SLANG_EDITOR instead of MOST_EDITOR.
+
+ 3. MOST_INITFILE specifies a configuration file for MOST.  One can specifiy
+    keymaps, colors, etc. via this file.  In the absence of
+    MOST_INITFILE, the program will look for a file call .mostrc in
+    the home directory (most.rc on non-Unix systems).
+
+    See `lesskeys.rc' for an example of a key definition file that
+    causes MOST to emulate the `less' pager.  See also most-fun.txt
+    for a list of functions that can be used for key definitions.  The
+    file `most.rc' list the bindings that are built-in to the
+    viewer.
+
+ 4. If MOST_HELP is defined to point to an existing file, MOST will load a
+    file as a help file.  This is useful for describing custom keymaps.
+    
+Any problems with MOST should be reported to davis@space.mit.edu.
+
+  [Note also that this is really the first non-trivial C program that
+  I ever wrote.  Because of this, much of the code appears very
+  amateurish.  For example, I tried very hard to avoid C constructs
+  that some some authors considered very bad, e.g., goto, continue,
+  break.  Of course this made some of the code convoluted, e.g.,
+  contrast
+
+      int test = 1;
+      while (test)
+       {
+           function ();
+
+           if (-1 == some_function ())
+	     test = 0;
+	   
+	   if (test)
+	     some_other_function ();
+       }
+       
+   with:
+       
+       while (1)
+         {
+	    function ();
+	    if (-1 == some_function ()) break;
+	    some_other_function ();
+	 }
+
+   I have since concluded that many text-book authors never actually
+   wrote anything non-trivial.  Whenever I work on MOST, I try to make
+   some changes in an effort to clean it up. ]
+
+--John Davis

@@ -1,0 +1,347 @@
+1 MOST
+ browse or page through a text file
+
+2 Synopsis
+  most [-Cbstvwz] [+lineno] [+c] [+d] [+/string] [filename...]
+
+2 Description
+ most  is  a paging program that displays, one windowful at a time, the
+ contents of a file on a terminal.  It pauses after each windowful  and
+ prints  on  the  window  status line the screen the file name, current
+ line number, and the percentage of the file so far displayed.
+
+ Unlike  other  paging  programs,  most  is  capable  of  displaying an
+ arbitrary number of windows as long as each window occupies  at  least
+ two  screen  lines.   Each  window  may  contain  the  same  file or a
+ different file.  In addition, each  window  has  its  own  mode.   For
+ example,  one  window  may display a file with its lines wrapped while
+ another may be truncating the lines.  Windows may be `locked' together
+ in  the  sense  that  if one of the locked windows scrolls, all locked
+ windows will scroll.  most is also capable of ignoring lines that  are
+ indented  beyond  a  user specified value. This is useful when viewing
+ computer programs to pick out gross features of  the  code.   See  the
+ `:o' command for a description of this feature.
+
+ In  addition  to displaying ordinary text files, most can also display
+ binary files as well as files with arbitrary ascii characters.  When a
+ file  is  read  into a buffer, most examines the first 32 bytes of the
+ file to determine if the file is a binary file and  then  switches  to
+ the  appropriate mode.  However, this feature may be disabled with the
+ -k option.  See the description of the -b, -k, -v, and -t options  for
+ further details.
+
+ Text  files  may  contain  combinations  of  underscore  and backspace
+ characters causing a printer to underline or  overstrike.   When  most
+ recognizes  this,  it  inserts  the  appropriate  escape  sequences to
+ achieve the desired effect. In addition, some files cause the  printer
+ to  overstrike some characters by embedding carriage return characters
+ in the middle  of  a  line.   When  this  occurs,  most  displays  the
+ overstruck  character with a bold attribute.  This feature facilitates
+ the reading of UNIX man pages or a document produced  by  runoff.   In
+ particular,  viewing  this  document  with most should illustrate this
+ behavior  provided  that  the  underline  characters  have  not   been
+ stripped.  This may be turned off with the -v option.
+
+ By default, lines with more characters than the terminal width are not
+ wrapped but are instead truncated.  When truncation  occurs,  this  is
+ indicated  by  a  `$' in the far right column of the terminal screen.
+ The RIGHT and LEFT arrow keys may be used to view lines  which  extend
+ past the margins of the screen.  The -w option may be used to override
+ this feature.  When a window is wrapped, the character `\' will appear
+ at the right edge of the window.
+
+  Commands are listed below.
+
+2 Options
+
+  -1   VT100 mode.  This is meaningful only on VMS systems.  This option
+       should be used if the terminal is strictly a VT100. This  implies
+       that  the terminal does not have the ability to delete and insert
+       multiple lines.  VT102s and above have this ability.
+
+  -b   Binary  mode.   Use  this  switch  when  you  want  to view files
+       containing 8 bit characters.  most will display the file 16 bytes
+       per line in hexidecimal notation.  A typical line looks like:
+
+
+            01000000 40001575 9C23A020 4000168D     ....@..u.#. @...
+
+       When used with the -v option, the same line looks like:
+
+
+            ^A^@^@^@  @^@^U u 9C #A0    @^@^V8D     ....@..u.#. @...
+
+  -k   `Kanji' option.  Ordinarily, most will go into binary mode if the
+       file consists of non-ascii characters.  Sometimes this feature is
+       not  desirable since some terminals have a special interpretation
+       for eight bit characters.  The -k option turns off the  automatic
+       sensing.
+
+  -C   Disable color support.
+
+  -s   Squeeze.  Replace multiple blank lines with a single blank line.
+
+  -z   option turns off gunzip-on-the-fly.
+
+  -v   Display  control  characters  as in `^A' for control A.  Normally
+       most does not interpret control characters.
+
+  -t   Display  tabs  as `^I'.  This option is meaningful only when used
+       with the -v option.  +lineno Start up at lineno.
+
+  +c   Make search case sensitive.  By default, they are not.
+
+  +d   This  switch should only be used if you want the option to delete
+       a file while viewing it.  This makes it easier to clean  unwanted
+       files  out  of  a  directory.   The  file  is  deleted  with  the
+       interactive key sequence `:D' and then confirming with `y'.
+
+  +/string
+       Start up at the line containing the first occurrence of string.
+
+2 Command_usage
+ The  commands  take  effect immediately; it is not necessary to type a
+ carriage return.
+
+  In the following commands, i is a numerical argument (1 by default).
+
+  SPACE, CTRL-D, NEXT_SCREEN
+       Display another windowful, or jump i windowfuls if i is specified.
+
+  RETURN, DOWN_ARROW, V, CTRL-N
+       Display another line, or i more lines, if specified.
+
+  UP_ARROW, ^, CTRL-P
+       Display previous line, or i previous lines, if specified.
+
+  T, ESCAPE<
+       Move to top of buffer.
+
+  B, ESCAPE>
+       Move to bottom of buffer.
+
+  RIGHT_ARROW, TAB, >
+       Scroll  window left 60i columns to view lines that are beyond the
+       right margin of the window.
+
+  LEFT_ARROW, CTRL-B, <
+       Scroll window right 60i columns to view lines that are beyond the
+       left margin of the window.
+
+  U, CTRL-U, DELETE, PREV_SCREEN
+       Skip back i windowfuls and then print a windowful.
+
+  R, CTRL-R
+       Redraw the window.
+
+  J, G If i is not specified, then prompt for a line number then jump to
+       that line otherwise just jump to line i.
+
+  %    If i is not specified, then prompt for a percent number then jump
+       to that percent of the file otherwise just jump to i  percent  of
+       the file.
+
+  W, w If  the  current screen width is 80, make it 132 and vice-versa.
+       For other values, this command is ignored.
+
+  Q, CTRL-X CTRL-C, CTRL-K E
+       Exit from most.  On VMS, ^Z also exits.
+
+  h, CTRL-H, HELP,
+       Help.   Give  a  description  of all the most commands.  The most
+       environment variable  MOST_HELP  must  be  set  for  this  to  be
+       meaningful.
+
+  f, /, CTRL-F, FIND, GOLD PF3
+       Prompt  for a string and search forward from the current line for
+       ith distinct line containing the string.  CTRL-G aborts.
+
+  ?    Prompt for a string and search backward for the ith distinct line
+       containing the string.  CTRL-G aborts.
+
+  n    Search  for the next i lines containing an occurrence of the last
+       search string in the direction of the previous search.
+
+  m, SELECT, CTRL-@, CTRL-K M, PERIOD
+       Set a mark on the current line for later reference.
+
+  INSERT_HERE, CTRL-X CTRL-X, COMMA, CTRL-K RETURN, GOLD PERIOD
+       Set a mark on the current line but return to previous mark.  This
+       allows the user to toggle back and forth between two positions in
+       the file.
+
+  l, L Toggle locking for this window.  The window is locked if there is
+       a `*' at the left  edge  of  the  status  line.   Windows  locked
+       together, scroll together.
+
+  CTRL-X 2, CTRL-W 2, GOLD X
+       Split this window in half.
+
+  CTRL-X o, CTRL-W o, o,
+       Move to other window.
+
+  CTRL-X 0, CTRL-W 0, GOLD V
+       Delete this window.
+
+  CTRL-X 1, CTRL-W 1, GOLD O
+       Delete all other windows, leaving only one window.
+
+  E, e Edit this file.
+
+  $, ESC $
+       This  is  system  dependent.  On VMS, this causes most to spawn a
+       subprocess.  When the user exits the process, most is  resumed.
+       On UNIX systems, most simply suspends itself.
+
+  :n   Skip  to  the  next  filename given in the command line.  Use the
+       arrow keys to scroll forward or backward through the file list.
+       `Q' quits most and any other key selects the given file.
+
+  :c   Toggle case sensitive search.
+
+  :D   Delete current file.  This command is only meaningful with the +d
+       switch.
+
+  :o, :O
+       Toggle  various options.  With this key sequence, most displays a
+       prompt asking the user to hit one of:  bdtvw.  The `b', `t', `v',
+       and  `w'  options  have  the  same  meaning  as  the command line
+       switches.  For example, the `w' option will  toggle  wrapping  on
+       and off for the current window.
+
+       The  `d'  option must be used with a prefix integer i.  All lines
+       indented beyond i columns will not be  displayed.   For  example,
+       consider the fragment:
+
+
+            int main(int argc, char **argv)
+            {
+                    int i;
+
+                    for (i = 0; i < argc, i++)
+                    {
+                            fprintf(stdout,"%i: %s\n",i,argv[i]);
+                    }
+                    return 0;
+            }
+
+       The  key  sequence  `1:od'  will  cause  most to display the file
+       ignoring all lines indented beyond the first column.  So for  the
+       example above, most would display:
+
+
+            int main(int argc, char **argv)...
+            }
+
+       where the `...' indicates lines follow are not displayed.
+
+2 Hints
+ CTRL-G  aborts the commands requiring the user to type something in at
+ a prompt.  The backquote key has a special meaning here.  It  is  used
+ to  quote  certain  characters.   This  is  useful when search for the
+ occurrence of a string with a control character or  a  string  at  the
+ beginning  of  a  line.  In the latter case, to find the occurrence of
+ `The' at the beginning of a line, enter  `^JThe  where  `  quotes  the
+ CTRL-J.
+
+2 Environment
+  most uses the following environment variables:
+
+  MOST_SWITCHES
+       This  variable  sets  commonly  used switches.  For example, some
+       people prefer to use most with the -s option so that excess blank
+       lines  are  not  displayed.  On VMS this is normally done done in
+       the login.com through the line:
+
+            $ define MOST_SWITCHES "-s"
+
+  MOST_EDITOR, SLANG_EDITOR
+       Either  of these environment variables specify an editor for most
+       to invoke to edit a file.   The  value  can  contain  %s  and  %d
+       formatting  descriptors  that  represent  the  file name and line
+       number, respectively.  For example, if JED is your  editor,  then
+       set MOST_EDITOR to 'jed %s -g %d'.
+
+  MOST_HELP
+       This variable may be used to specify an alternate help file.
+
+  MOST_INITFILE
+       Set  this  variable  to  specify  the initialization file to load
+       during startup.   The  default  action  is  to  load  the  system
+       configuration  file and then a personal configuration file called
+       .mostrc on Unix, and most.rc on other systems.
+
+2 Configuration_file_syntax
+ When  most  starts up, it tries to read a system confiuration file and
+ then a personal configuration  file.   These  files  may  be  used  to
+ specify keybind ings and colors.
+
+ To bind a key to a particular function use the syntax:
+
+ setkey function-name key-sequence
+
+ The setkey command requires two arguments.  The function-name argument
+ specifies the function that is to be executed as  a  response  to  the
+ keys specified by the key-sequence argument are pressed.  For example,
+
+        setkey   "up"     "^P"
+
+ indicates  that  when  Ctrl-P is pressed then the function up is to be
+ executed.
+
+ Sometimes,  it  is  necessary  to  first  unbind a key-sequence before
+ rebinding it in order via the unsetkey function:
+
+         unsetkey "^F"
+
+ Colors  may be defined through the use of the color keyword in the the
+ configuration file using the syntax:
+
+ color OBJECT-NAME FOREGROUND-COLOR BACKGROUND-COLOR
+
+ Here, OBJECT-NAME can be any one of the following items:
+
+      status           -- the status line
+      underline        -- underlined text
+      overstrike       -- overstriked text
+      normal           -- anything else
+
+ See the sample configuration files for more information.
+
+2 Bugs
+ Almost  all  of  the  known  bugs  or limitations of most are due to a
+ desire to read and interpret control characters in files.  One problem
+ concerns  the  use of backspace characters to underscore or overstrike
+ other characters.  most  makes  an  attempt  to  use  terminal  escape
+ sequences  to simulate this behavior.  One side effect is the one does
+ not always get what one expects when scrolling right and left  through
+ a file.  When in doubt, use the -v and -b options of most.
+
+2 Author
+  John E. Davis
+  davis@space.mit.edu
+
+2 Acknowledgements
+ I  would  like  to  thank  the users of most for valuable comments and
+ criticisms.  I would especially like to thank  those  individuals  who
+ have contributed code to most.
+
+ Mats Akerberg, Henk D.  Davids, Rex O.  Livingston, and Mark Pizzolato
+ contributed to the early VMS versions of most.   In  particular,  Mark
+ worked on it to get it ready for DECUS.
+
+ Foteos Macrides <MACRIDES@SCI.WFEB.EDU> adapted most for use in cswing
+ and gopher.  A few  features  of  the  present  version  of  most  was
+ inspired from his work.
+
+ I  am  grateful to Robert Mills <robert@jna.com.au> for re-writing the
+ search routines to use regular expressions.
+
+ Sven Oliver Moll <smol0075@rz.uni-hildesheim.de> came up with the idea
+ of automatic detection of zipped files.
+
+ I  would  also like to thank Shinichi Hama for his valuable criticisms
+ of most.
+
+ Thanks  to  David  W.   Sanderson  (dws@cs.wisc.edu)  for adapting the
+ documentation to nroff man page source format.

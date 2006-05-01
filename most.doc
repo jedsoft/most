@@ -1,0 +1,528 @@
+
+
+
+MOST(1)                                                   MOST(1)
+
+
+NNAAMMEE
+       most - browse or page through a text file
+
+SSYYNNOOPPSSIISS
+       mmoosstt  [--bbssttvvwwzz]  [++_l_i_n_e_n_o]  [++cc]  [++dd]  [++//_s_t_r_i_n_g]  [_f_i_l_e_-
+       _n_a_m_e...]
+
+DDEESSCCRRIIPPTTIIOONN
+       _m_o_s_t is a paging program that displays, one windowful at a
+       time,  the  contents  of  a file on a terminal.  It pauses
+       after each windowful and prints on the window status  line
+       the  screen  the  file  name, current line number, and the
+       percentage of the file so far displayed.
+
+       Unlike other paging programs, _m_o_s_t is capable of  display-
+       ing  an arbitrary number of windows as long as each window
+       occupies at least two screen lines.  Each window may  con-
+       tain the same file or a different file.  In addition, each
+       window has its own mode.  For example, one window may dis-
+       play  a  file  with its lines wrapped while another may be
+       truncating the lines.  Windows may be `locked' together in
+       the  sense  that if one of the locked windows scrolls, all
+       locked windows will  scroll.   _m_o_s_t  is  also  capable  of
+       ignoring  lines  that are indented beyond a user specified
+       value.  This is useful when viewing computer  programs  to
+       pick out gross features of the code.  See the `::oo' command
+       for a description of this feature.
+
+       In addition to displaying ordinary text  files,  _m_o_s_t  can
+       also  display binary files as well as files with arbitrary
+       ascii characters.  When a file is read into a buffer, _m_o_s_t
+       examines  the  first  32 bytes of the file to determine if
+       the file is a binary file and then switches to the  appro-
+       priate  mode.   However, this feature may be disabled with
+       the --kk option.  See the description of the --bb, --kk, --vv, and
+       --tt options for further details.
+
+       Text  files  may  contain  combinations  of underscore and
+       backspace characters causing a  printer  to  underline  or
+       overstrike.   When  _m_o_s_t  recognizes  this, it inserts the
+       appropriate  escape  sequences  to  achieve  the   desired
+       effect.   In  addition,  some  files  cause the printer to
+       overstrike some characters by  embedding  carriage  return
+       characters  in  the  middle  of a line.  When this occurs,
+       _m_o_s_t  displays  the  overstruck  character  with  a   bold
+       attribute.   This  feature facilitates the reading of UNIX
+       man pages or a document produced by _r_u_n_o_f_f.   In  particu-
+       lar,  viewing  this  document  with _m_o_s_t should illustrate
+       this behavior provided that the underline characters  have
+       not  been  stripped.   This  may be turned off with the --vv
+       option.
+
+       By default, lines with more characters than  the  terminal
+       width  are  not  wrapped  but are instead truncated.  When
+
+
+
+                             May 1999                           1
+
+
+
+
+
+MOST(1)                                                   MOST(1)
+
+
+       truncation occurs, this is indicated by a `$' in  the  far
+       right  column  of the terminal screen.  The RIGHT and LEFT
+       arrow keys may be used to view lines which extend past the
+       margins of the screen.  The --ww option may be used to over-
+       ride this feature.  When a window is wrapped, the  charac-
+       ter `\' will appear at the right edge of the window.
+
+       Commands are listed below.
+
+OOPPTTIIOONNSS
+       --11     VT100  mode.   This  is meaningful only on VMS sys-
+              tems.  This option should be used if  the  terminal
+              is  strictly a VT100.  This implies that the termi-
+              nal does not have the ability to delete and  insert
+              multiple  lines.   VT102s and above have this abil-
+              ity.
+
+       --bb     Binary mode.  Use this switch when you want to view
+              files  containing 8 bit characters.  _m_o_s_t will dis-
+              play the file 16  bytes  per  line  in  hexidecimal
+              notation.  A typical line looks like:
+
+                   01000000 40001575 9C23A020 4000168D     ....@..u.#. @...
+
+              When  used  with the --vv option, the same line looks
+              like:
+
+                   ^A^@^@^@  @^@^U u 9C #A0    @^@^V8D     ....@..u.#. @...
+
+       --kk     `Kanji' option.   Ordinarily,  _m_o_s_t  will  go  into
+              binary mode if the file consists of non-ascii char-
+              acters.  Sometimes this feature  is  not  desirable
+              since  some terminals have a special interpretation
+              for eight bit characters.  The --kk option turns  off
+              the automatic sensing.
+
+       --ss     Squeeze.   Replace multiple blank lines with a sin-
+              gle blank line.
+
+       --zz     option turns off gunzip-on-the-fly.
+
+       --vv     Display control characters as in `^A'  for  control
+              A.   Normally _m_o_s_t does not interpret control char-
+              acters.
+
+       --tt     Display tabs as `^I'.  This  option  is  meaningful
+              only  when  used with the --vv option.  ++_l_i_n_e_n_o Start
+              up at _l_i_n_e_n_o.
+
+       ++cc     Make search case sensitive.  By default,  they  are
+              not.
+
+       ++dd     This  switch  should  only  be used if you want the
+              option to delete a file  while  viewing  it.   This
+
+
+
+                             May 1999                           2
+
+
+
+
+
+MOST(1)                                                   MOST(1)
+
+
+              makes  it  easier  to clean unwanted files out of a
+              directory.  The file is deleted with  the  interac-
+              tive  key  sequence  `::DD'  and then confirming with
+              `yy'.
+
+       ++//_s_t_r_i_n_g
+              Start up at the line containing  the  first  occur-
+              rence of _s_t_r_i_n_g.
+
+CCOOMMMMAANNDD UUSSAAGGEE
+       The  commands take effect immediately; it is not necessary
+       to type a carriage return.
+
+       In the following commands, _i is a numerical argument (1 by
+       default).
+
+       SSPPAACCEE, CCTTRRLL--DD, NNEEXXTT__SSCCRREEEENN
+              Display  another windowful, or jump _i windowfuls if
+              _i is specified.
+
+       RREETTUURRNN, DDOOWWNN__AARRRROOWW, VV, CCTTRRLL--NN
+              Display another line, or _i more  lines,  if  speci-
+              fied.
+
+       UUPP__AARRRROOWW, ^^, CCTTRRLL--PP
+              Display  previous  line,  or  _i  previous lines, if
+              specified.
+
+       TT, EESSCCAAPPEE<
+              Move to top of buffer.
+
+       BB, EESSCCAAPPEE>
+              Move to bottom of buffer.
+
+       RRIIGGHHTT__AARRRROOWW, TTAABB, >>
+              Scroll window left 60_i columns to view  lines  that
+              are beyond the right margin of the window.
+
+       LLEEFFTT__AARRRROOWW, CCTTRRLL--BB, <<
+              Scroll  window right 60_i columns to view lines that
+              are beyond the left margin of the window.
+
+       UU, CCTTRRLL--UU, DDEELLEETTEE, PPRREEVV__SSCCRREEEENN
+              Skip back _i windowfuls and then print a  windowful.
+
+       RR, CCTTRRLL--RR
+              Redraw the window.
+
+       JJ, GG   If  _i is not specified, then prompt for a line num-
+              ber then jump to that line otherwise just  jump  to
+              line _i.
+
+       %%      If  _i  is  not specified, then prompt for a percent
+              number then  jump  to  that  percent  of  the  file
+
+
+
+                             May 1999                           3
+
+
+
+
+
+MOST(1)                                                   MOST(1)
+
+
+              otherwise just jump to _i percent of the file.
+
+       WW, ww   If  the current screen width is 80, make it 132 and
+              vice-versa.  For  other  values,  this  command  is
+              ignored.
+
+       QQ, CCTTRRLL--XX CCTTRRLL--CC, CCTTRRLL--KK EE
+              Exit from _m_o_s_t.  On VMS, ^Z also exits.
+
+       hh, CCTTRRLL--HH, HHEELLPP, PPFF22
+              Help.  Give a description of all the _m_o_s_t commands.
+              The _m_o_s_t environment variable MMOOSSTT__HHEELLPP must be set
+              for this to be meaningful.
+
+       ff, //, CCTTRRLL--FF, FFIINNDD, GGOOLLDD PPFF33
+              Prompt  for  a  string  and search forward from the
+              current line for _ith distinct line  containing  the
+              string.  CCTTRRLL--GG aborts.
+
+       ??      Prompt for a string and search backward for the _ith
+              distinct  line  containing  the   string.    CCTTRRLL--GG
+              aborts.
+
+       nn      Search  for  the  next _i lines containing an occur-
+              rence of the last search string in the direction of
+              the previous search.
+
+       mm, SSEELLEECCTT, CCTTRRLL--@@, CCTTRRLL--KK MM, PPEERRIIOODD
+              Set a mark on the current line for later reference.
+
+       IINNSSEERRTT__HHEERREE,, CCTTRRLL--XX CCTTRRLL--XX,, CCOOMMMMAA,, CCTTRRLL--KK RREETTUURRNN,, GGOOLLDD
+              PPEERRIIOODD
+              Set a mark on the current line but return to previ-
+              ous mark.  This allows the user to toggle back  and
+              forth between two positions in the file.
+
+       ll, LL   Toggle  locking  for  this  window.   The window is
+              locked if there is a `*' at the left  edge  of  the
+              status   line.   Windows  locked  together,  scroll
+              together.
+
+       CCTTRRLL--XX 22, CCTTRRLL--WW 22, GGOOLLDD XX
+              Split this window in half.
+
+       CCTTRRLL--XX oo, CCTTRRLL--WW oo, oo, GGOOLLDDUP,, GOLDDDOOWWNN
+              Move to other window.
+
+       CCTTRRLL--XX 00, CCTTRRLL--WW 00, GGOOLLDD VV
+              Delete this window.
+
+       CCTTRRLL--XX 11, CCTTRRLL--WW 11, GGOOLLDD OO
+              Delete all other windows, leaving only one  window.
+
+       EE, ee   Edit this file.
+
+
+
+                             May 1999                           4
+
+
+
+
+
+MOST(1)                                                   MOST(1)
+
+
+       $$, EESSCC $$
+              This is system dependent.  On VMS, this causes _m_o_s_t
+              to spawn a subprocess.  When  the  user  exits  the
+              process,  _m_o_s_t  is  resumed.  On UNIX systems, _m_o_s_t
+              simply suspends itself.
+
+       ::nn     Skip to the next  filename  given  in  the  command
+              line.   Use  the  arrow  keys  to scroll forward or
+              backward through the file list.  `QQ' quits _m_o_s_t and
+              any other key selects the given file.
+
+       ::cc     Toggle case sensitive search.
+
+       ::DD     Delete current file.  This command is only meaning-
+              ful with the ++dd switch.
+
+       ::oo, ::OO Toggle various options.  With  this  key  sequence,
+              _m_o_s_t  displays  a prompt asking the user to hit one
+              of: bbddttvvww.  The `bb', `tt', `vv', and `ww' options have
+              the same meaning as the command line switches.  For
+              example, the `ww' option will toggle wrapping on and
+              off for the current window.
+
+              The  `dd'  option must be used with a prefix integer
+              _i.  All lines indented beyond _i columns will not be
+              displayed.  For example, consider the fragment:
+
+                   int main(int argc, char **argv)
+                   {
+                        int i;
+
+                        for (i = 0; i < argc, i++)
+                        {
+                             fprintf(stdout,"%i: %s\n",i,argv[i]);
+                        }
+                        return 0;
+                   }
+
+              The  key sequence `11::oodd' will cause _m_o_s_t to display
+              the file ignoring all  lines  indented  beyond  the
+              first column.  So for the example above, _m_o_s_t would
+              display:
+
+                   int main(int argc, char **argv)...
+                   }
+
+              where the `...' indicates lines follow are not dis-
+              played.
+
+HHIINNTTSS
+       CCTTRRLL--GG  aborts  the  commands  requiring  the user to type
+       something in at a prompt.  The backquote key has a special
+       meaning  here.   It  is  used to quote certain characters.
+       This is useful when search for the occurrence of a  string
+
+
+
+                             May 1999                           5
+
+
+
+
+
+MOST(1)                                                   MOST(1)
+
+
+       with a control character or a string at the beginning of a
+       line.  In the latter case, to find the occurrence of `The'
+       at  the  beginning  of a line, enter ``^^JJTThhee where `` quotes
+       the CCTTRRLL--JJ.
+
+EENNVVIIRROONNMMEENNTT
+       _m_o_s_t uses the following environment variables:
+
+       MMOOSSTT__SSWWIITTCCHHEESS
+              This variable sets  commonly  used  switches.   For
+              example, some people prefer to use _m_o_s_t with the --ss
+              option so that excess  blank  lines  are  not  dis-
+              played.   On  VMS this is normally done done in the
+              login.com through the line:
+
+                   $ define MOST_SWITCHES "-s"
+
+       MMOOSSTT__EEDDIITTOORR, SSLLAANNGG__EEDDIITTOORR
+              Either of these environment  variables  specify  an
+              editor for _m_o_s_t to invoke to edit a file. The value
+              can contain %s and %d formatting  descriptors  that
+              represent  the  file  name and line number, respec-
+              tively.  For example, if JED is your  editor,  then
+              set MMOOSSTT__EEDDIITTOORR to 'jed %s -g %d'.
+
+       MMOOSSTT__HHEELLPP
+              This  variable  may be used to specify an alternate
+              help file.
+
+       MMOOSSTT__IINNIITTFFIILLEE
+              Set this variable  to  specify  the  initialization
+              file to load during startup.  The default action is
+              to load the system configuration file  and  then  a
+              personal configuration file called _._m_o_s_t_r_c on Unix,
+              and _m_o_s_t_._r_c on other systems.
+
+CCOONNFFIIGGUURRAATTIIOONN FFIILLEE SSYYNNTTAAXX
+       When most starts up, it tries to read a  system  confiura-
+       tion  file  and then a personal configuration file.  These
+       files may be used to specify keybindings and colors.
+
+       To bind a key to a particular function use the syntax:
+
+       sseettkkeeyy ffuunnccttiioonn--nnaammee kkeeyy--sseeqquueennccee
+
+       The _s_e_t_k_e_y command requires two arguments.  The  _f_u_n_c_t_i_o_n_-
+       _n_a_m_e  argument  specifies  the function that is to be exe-
+       cuted as a response to the  keys  specified  by  the  _k_e_y_-
+       _s_e_q_u_e_n_c_e argument are pressed.  For example,
+
+             setkey   "up"     "^P"
+
+       indicates that when _C_t_r_l_-_P is pressed then the function _u_p
+       is to be executed.
+
+
+
+                             May 1999                           6
+
+
+
+
+
+MOST(1)                                                   MOST(1)
+
+
+       Sometimes, it is necessary to first unbind a  key-sequence
+       before rebinding it in order via the _u_n_s_e_t_k_e_y function:
+
+              unsetkey "^F"
+
+       Colors may be defined through the use of the _c_o_l_o_r keyword
+       in the the configuration file using the syntax:
+
+       ccoolloorr OOBBJJEECCTT--NNAAMMEE FFOORREEGGRROOUUNNDD--CCOOLLOORR BBAACCKKGGRROOUUNNDD--CCOOLLOORR
+
+       Here, OBJECT-NAME can be any one of the following items:
+
+           status           -- the status line
+           underline        -- underlined text
+           overstrike       -- overstriked text
+           normal           -- anything else
+
+       See the sample configuration files for more information.
+
+BBUUGGSS
+       Almost all of the known bugs or limitations  of  _m_o_s_t  are
+       due  to  a desire to read and interpret control characters
+       in files.  One problem concerns the use of backspace char-
+       acters to underscore or overstrike other characters.  _m_o_s_t
+       makes an attempt to use terminal escape sequences to simu-
+       late  this  behavior.  One side effect is the one does not
+       always get what one expects when scrolling right and  left
+       through  a file.  When in doubt, use the --vv and --bb options
+       of _m_o_s_t.
+
+
+AAUUTTHHOORR
+       John E. Davis
+       davis@space.mit.edu
+
+AACCKKNNOOWWLLEEDDGGEEMMEENNTTSS
+       I would like to thank the users of _m_o_s_t for valuable  com-
+       ments  and  criticisms.   I would especially like to thank
+       those individuals who have contributed code to _m_o_s_t_.
+
+       Mats Akerberg, Henk D. Davids, Rex O. Livingston, and Mark
+       Pizzolato  contributed  to the early VMS versions of _m_o_s_t_.
+       In particular, Mark worked on  it  to  get  it  ready  for
+       DECUS.
+
+       Foteos  Macrides  <MACRIDES@SCI.WFEB.EDU> adapted _m_o_s_t for
+       use in _c_s_w_i_n_g and _g_o_p_h_e_r_.  A few features of  the  present
+       version of _m_o_s_t was inspired from his work.
+
+       I  am grateful to Robert Mills <robert@jna.com.au> for re-
+       writing the search routines to use regular expressions.
+
+       Sven Oliver Moll <smol0075@rz.uni-hildesheim.de>  came  up
+       with the idea of automatic detection of zipped files.
+
+
+
+                             May 1999                           7
+
+
+
+
+
+MOST(1)                                                   MOST(1)
+
+
+       I  would also like to thank Shinichi Hama for his valuable
+       criticisms of _m_o_s_t_.
+
+       Thanks to David W. Sanderson (dws@cs.wisc.edu) for  adapt-
+       ing the documentation to nroff man page source format.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                             May 1999                           8
+
+

@@ -1,0 +1,90 @@
+# DJGPP and MINGW32 Makefile for most                               -*- sh -*-
+#---------------------------------------------------------------------------
+# 1. Choose a C compiler.  It must understand prototypes.
+#-----------------------------------------------------------------------------
+CC = gcc
+CFLAGS = -Wall -W -O2 -fno-strength-reduce
+LDFLAGS =
+
+# If using DJGPP, set ARCH to djg.  Use gw32 for MINGW32
+#ARCH=djg
+ARCH=gw32
+
+SLANGINC = ../../slang/src#               Location of slang.h
+SLANGLIB = $(SLANGINC)/$(ARCH)objs#       Location of libslang.a
+
+
+#-----------------------------------------------------------------------------
+# 4. Location where object files are placed 
+#-----------------------------------------------------------------------------
+OBJDIR = $(ARCH)objs
+SRCDIR = .
+
+#----------------------------------------------------------------------------
+# Nothing below here should require changing.
+#----------------------------------------------------------------------------
+OBJS =  $(OBJDIR)/buffer.o $(OBJDIR)/cmd.o $(OBJDIR)/display.o $(OBJDIR)/edit.o $(OBJDIR)/file.o $(OBJDIR)/help.o $(OBJDIR)/keym.o $(OBJDIR)/keyparse.o $(OBJDIR)/line.o $(OBJDIR)/main.o $(OBJDIR)/most.o $(OBJDIR)/search.o $(OBJDIR)/sysdep.o $(OBJDIR)/window.o
+OFILES =  buffer.o cmd.o display.o edit.o file.o help.o keym.o keyparse.o line.o main.o most.o search.o sysdep.o window.o
+
+EXEC = most
+CONFIG_H = config.h
+ALL_CFLAGS = $(CFLAGS) -I$(SLANGINC)
+EXECLIBS = -L../$(SLANGLIB) -lslang
+#
+COMPILE_CMD = $(CC) -c $(ALL_CFLAGS)
+#
+all: $(EXEC)
+$(EXEC): $(OBJDIR) $(CONFIG_H) $(OBJDIR)/$(EXEC)
+	@echo $(EXEC) created in $(OBJDIR)
+$(OBJDIR)/$(EXEC): $(OBJS)
+	cd $(OBJDIR); $(CC) *.o -o $(EXEC) $(LDFLAGS) $(EXECLIBS)
+#
+$(OBJDIR):
+	-mkdir $(OBJDIR)
+#
+$(CONFIG_H) : $(SRCDIR)/w32conf.h
+	cp $(SRCDIR)/w32conf.h $(CONFIG_H)
+clean:
+	rm -f $(OBJDIR)/* *~
+
+$(OBJDIR)/buffer.o : $(SRCDIR)/buffer.c $(DOT_O_DEPS) $(buffer_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/buffer.c -o $(OBJDIR)/buffer.o
+
+$(OBJDIR)/cmd.o : $(SRCDIR)/cmd.c $(DOT_O_DEPS) $(cmd_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/cmd.c -o $(OBJDIR)/cmd.o
+
+$(OBJDIR)/display.o : $(SRCDIR)/display.c $(DOT_O_DEPS) $(display_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/display.c -o $(OBJDIR)/display.o
+
+$(OBJDIR)/edit.o : $(SRCDIR)/edit.c $(DOT_O_DEPS) $(edit_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/edit.c -o $(OBJDIR)/edit.o
+
+$(OBJDIR)/file.o : $(SRCDIR)/file.c $(DOT_O_DEPS) $(file_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/file.c -o $(OBJDIR)/file.o
+
+$(OBJDIR)/help.o : $(SRCDIR)/help.c $(DOT_O_DEPS) $(help_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/help.c -o $(OBJDIR)/help.o
+
+$(OBJDIR)/keym.o : $(SRCDIR)/keym.c $(DOT_O_DEPS) $(keym_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/keym.c -o $(OBJDIR)/keym.o
+
+$(OBJDIR)/keyparse.o : $(SRCDIR)/keyparse.c $(DOT_O_DEPS) $(keyparse_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/keyparse.c -o $(OBJDIR)/keyparse.o
+
+$(OBJDIR)/line.o : $(SRCDIR)/line.c $(DOT_O_DEPS) $(line_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/line.c -o $(OBJDIR)/line.o
+
+$(OBJDIR)/main.o : $(SRCDIR)/main.c $(DOT_O_DEPS) $(main_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/main.c -o $(OBJDIR)/main.o
+
+$(OBJDIR)/most.o : $(SRCDIR)/most.c $(DOT_O_DEPS) $(most_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/most.c -o $(OBJDIR)/most.o
+
+$(OBJDIR)/search.o : $(SRCDIR)/search.c $(DOT_O_DEPS) $(search_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/search.c -o $(OBJDIR)/search.o
+
+$(OBJDIR)/sysdep.o : $(SRCDIR)/sysdep.c $(DOT_O_DEPS) $(sysdep_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/sysdep.c -o $(OBJDIR)/sysdep.o
+
+$(OBJDIR)/window.o : $(SRCDIR)/window.c $(DOT_O_DEPS) $(window_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/window.c -o $(OBJDIR)/window.o

@@ -1,0 +1,25 @@
+# -*- sh -*-
+
+#This is a UNIX-only makefile.
+
+@SET_MAKE@
+SHELL = /bin/sh
+
+all:
+	cd src; $(MAKE) all
+clean:
+	/bin/rm -f *~
+	cd src; $(MAKE) clean
+#
+distclean:
+	/bin/rm -f *~ Makefile config.status config.log config.cache files.pck
+	cd src; $(MAKE) distclean
+#
+install:
+	cd src; $(MAKE) install
+#
+
+# The symlinks target is for my own private use.  It simply creates the object
+# directory as a symbolic link to a local disk instead of an NFS mounted one.
+symlinks:
+	cd src; $(MAKE) symlinks

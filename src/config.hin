@@ -1,0 +1,69 @@
+/* -*- C -*- */
+
+/* Note: this is for authentic unix systems only.  
+ * See mostconf.h for other systems.
+ */
+
+#ifndef MOST_CONFIG_H
+#define MOST_CONFIG_H
+
+/* Define if you want the experimental MMAP support */
+#undef USE_MMAP
+
+/* define if you have stdlib.h */
+#undef HAVE_STDLIB_H
+
+/* define if you have unistd.h */
+#undef HAVE_UNISTD_H
+
+/* define if you have memory.h */
+#undef HAVE_MEMORY_H
+
+/* define if you have malloc.h */
+#undef HAVE_MALLOC_H
+
+/* define if you have memset */
+#undef HAVE_MEMSET
+
+/* define if you have memcpy */
+#undef HAVE_MEMCPY
+
+/* define if you have this. */
+#undef HAVE_GETCWD
+
+#undef HAVE_MMAP
+
+#undef HAVE_DIRENT_H
+#undef HAVE_SYS_NDIR_H
+#undef HAVE_SYS_DIR_H
+#undef HAVE_NDIR_H
+
+#undef HAVE_SNPRINTF
+#undef HAVE_SYS_MMAN_H
+
+#undef mode_t
+#undef pid_t
+#undef uid_t
+#undef pid_t
+
+
+#ifdef _AIX
+# ifndef _POSIX_SOURCE
+#  define _POSIX_SOURCE
+# endif
+# ifndef _ALL_SOURCE
+#  define _ALL_SOURCE
+# endif
+/* This may generate warnings but the fact is that without it, xlc will 
+ * INCORRECTLY inline many str* functions. */
+# undef __STR__
+#endif
+
+#define MAX_PATHLEN 1024
+#if defined(USE_MMAP) && defined(HAVE_MMAP) && defined(HAVE_SYS_MMAN_H)
+# define MOST_HAS_MMAP	1
+#else
+# define MOST_HAS_MMAP	0
+#endif
+
+#endif /* MOST_CONFIG_H */

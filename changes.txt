@@ -1,0 +1,116 @@
+Changes since 4.10.1
+1. src/window.c:most_read_from_minibuffer: An variable was not being
+   initialized. (Kevin Oberman, oberman at es, net).
+2. configure: mmap is enabled by default.  Use the --disable-mmap
+   configure option of you do not want it.
+
+Changes since 4.10.0
+1. src/most.h: Prototype for SLang_set_error inconsistent with the
+   function in most.c.
+2. src/most.h: If compiled against slang2 without an snprintf
+   function, use _pSLsnprintf.
+
+Changes since 4.9.5
+0. src/*.c: Various changes to support slang 2.  Version bumped to
+   4.10.0.  UTF-8 support not yet available.
+1. src/keym.c: Ignore mouse events under DOS/Windows (Gisle Vanem,
+   giva at bgnett, no).
+
+Changes since 4.9.4
+1. src/line.c: A "length" variable was declared as unsigned char
+   instead of unsigned int, causing a SEGV for columns larger than 255.
+2. src/file.c: fixed a buffer overflow caused by a long file name on
+   the command line.
+
+Changes since 4.9.3
+
+1. src/buffer.c: SLtt_Screen_Rows and SLtt_Screen_Cols were swapped
+   causing a file to be improperly displayed in wrap mode.  Adrian P.
+   van Bloois (adrian at accu.uu.nlhas) has my thanks for find this bug.
+2. src/most.c: when run without arguments, S-Lang library version also
+   printed.
+
+Changes since 4.9.2
+
+1. src/keym.c: added support for \xE0 type arrow keys (Win9X).
+2. src/file.c: When resyncing mmaped buffer, make sure to preserve the
+   current line number.
+3. src/sysdep.c: SLang_getkey_intr_hook is unix
+   specific and should not be used on VMS.
+4. src/file.c: Make arrow-keys for next_file_cmd work on win32 systems.
+5. src/file.h: be sure to quote filename argument (Mako Hill
+   <mako@debian.org>)
+6. src/file.c: added support for bzip2 files
+7. src/*.c: replace calls to sprintf with _SLsnprintf (Steve Kemp
+   <skx@tardis.ed.ac.uk>).
+
+Changes since 4.9.1
+0. Added support for using mmap to read files.  Use configure
+   --enable-mmap to enable this experimental feature.
+1. Wrapping bug fixed.  Also some optimizations were made to speed up
+   the display of wrapped files.
+2. File default.rc renamed to most.rc.
+3. A^H_ interpreted as underline.  Previously, _^HA was recognized.
+4. Jerome Lauret <JLAURET@mail.chem.sunysb.edu> provided most.hlp, as
+   well as a few VMS patches.
+5. src/Makefile.in: patch to make most's Makefile respect DESTDIR as
+   well as removing the hardcoded use of $(prefix)/etc for the
+   location of most's config file. <brad@comstyle.com>
+6. src/line.c: some simplifications and cleanups designed to avoid
+   nasty problems with extremely long lines.
+
+Changes since 4.9.0
+1. MOST_SWITCHES env variable can now contain extended switches.
+2. If most is reading from stdin, it will reinit the terminal when it
+   encounters an EOF on stdin.  This is to work around a problem under
+   linux where for some reason, some other process resets the terminal.
+Changes since 4.8.1
+1. Apparantly, the binary flag +b is not valid with POSIX popen.
+2. Screen resize code modified so that most works in a SunOS cmdtool.
+3. Color support added.  Use `most -C' to disable.
+4. Ported to Mingw32 (GNU C)
+
+Changes since 4.7
+1. Added tail -f type mode.  Use F to activate.
+2. OS/2 port provided by j.burnell@irl.cri.nz (John Burnell).
+3. Left/Right arrow scroll 1 column.  Use <, > to scroll in larger
+   chunks.
+
+Changes since 4.6
+0. Various cleanups and other improvements
+1. Binary mode displays byte offset
+2. Ported to DJGPP
+
+Changes since 4.5
+1. Many changes to enable MOST use the S-Lang screen management routines.
+
+Features in 4.5
+1. More cleanup/bug fixes
+2. Regular expression searches 
+3. Automatic detection of compressed files.
+
+Features in 4.41:
+1. Modified to read raw directry file in BINARY mode.
+
+New features in MOST 4.4:
+
+1. User definable keymaps
+2. ISO Latin1 8 bit clean
+3. Edit and recall previous search strings
+4. Much friendlier, lots of messages and help
+5. VMS ``Gopher ready''
+6. Cleaned up alot and small bugs fixed
+7. Most now re-reads the file after editing.
+
+New Features since MOST version 3.x (Sept 25, 1994)
+
+1.  Terminfo/termcap under Unix supported
+2.  -1 flag specifies terminal is a VT100 and not anything better, e.g.,
+     VT102. (VMS only)
+3.  MOST will only read in what it has to.  This means it starts up alot
+    faster on large files.
+4.  Cleaned up alot.
+
+John E. Davis
+davis@space.mit.edu
+

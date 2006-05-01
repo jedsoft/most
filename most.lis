@@ -1,0 +1,58 @@
+@configure 0755
+@most.lis
+@README
+@COPYRIGHT
+@COPYING
+@lesskeys.rc
+@most.rc
+@most-fun.txt
+@most.1
+@most.doc
+@most.hlp
+@changes.txt
+
+@autoconf/Makefile.in
+@autoconf/aclocal.m4
+@autoconf/configure.ac
+@autoconf/mkinsdir.sh 0755
+@autoconf/install.sh 0755
+@autoconf/config.guess 0755
+@autoconf/config.sub 0755
+
+@src/DESCRIP.MMS
+@src/VMSMAKE.COM
+@src/RTL.OPT
+@src/Makefile.in
+@src/Makefile.w32
+@src/sysconf.h
+@src/config.hin
+@src/mostconf.h
+@src/modules.lis
+@src/w32conf.h
+@src/jdmacros.h
+@src/main.c
+@src/buffer.c
+@src/file.c
+@src/window.c
+@src/line.c
+@src/display.c
+@src/sysdep.c
+@src/keym.c
+@src/most.c
+@src/search.c
+@src/help.c
+@src/cmd.c
+@src/edit.c
+@src/edit.h
+@src/buffer.h
+@src/file.h
+@src/window.h
+@src/line.h
+@src/display.h
+@src/sysdep.h
+@src/keym.h
+@src/most.h
+@src/search.h
+@src/keyparse.c
+@src/keyparse.h
+@src/chkslang.c

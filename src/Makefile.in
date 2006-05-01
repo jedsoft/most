@@ -1,0 +1,94 @@
+CC		= @CC@
+CFLAGS		= @CFLAGS@
+LDFLAGS		= @LDFLAGS@
+SLANG_INC	= @SLANG_INC@
+SLANG_LIB	= @SLANG_LIB@ -lslang
+MISCLIBS	= @TERMCAP@
+RPATH		= @RPATH@
+
+#-----------------------------------------------------------------------------
+# Location where object files are placed (Absolute path)
+#-----------------------------------------------------------------------------
+SRCDIR = @CONFIG_DIR@/src
+OBJDIR = @CONFIG_DIR@/src/$(ARCH)objs
+
+#----------------------------------------------------------------------------
+# 5. Install location
+#----------------------------------------------------------------------------
+INSTALL		= @INSTALL@
+INSTALL_DATA	= @INSTALL_DATA@
+DESTDIR		=
+prefix		= @prefix@
+BIN_DIR		= $(prefix)/bin
+MAN_DIR		= $(prefix)/man
+DOC_DIR		= $(prefix)/doc/most
+SYS_INITFILE	= @sysconfdir@/most.conf
+MKINSDIR	= ../autoconf/mkinsdir.sh
+
+DOC_FILES = most.doc README most-fun.txt lesskeys.rc most.rc changes.txt
+
+#----------------------------------------------------------------------------
+# Nothing below here should require changing.
+#----------------------------------------------------------------------------
+DEST_DOCDIR	= $(DESTDIR)$(DOC_DIR)
+DEST_MANDIR	= $(DESTDIR)$(MAN_DIR)
+DEST_BINDIR	= $(DESTDIR)$(BIN_DIR)
+#
+SHELL = /bin/sh
+OBJS = @PROGRAM_OBJECTS@
+OFILES = @PROGRAM_OFILES@
+
+EXEC = most
+CONFIG_H = config.h
+INCS = $(SLANG_INC)
+ALL_CFLAGS = $(CFLAGS) -Dunix $(INCS)
+EXECLIBS = $(RPATH) $(SLANG_LIB) $(MISCLIBS) -lm
+#
+COMPILE_CMD = $(CC) -c $(ALL_CFLAGS) -DMOST_SYSTEM_INITFILE='"$(SYS_INITFILE)"'
+#
+all: $(EXEC)
+$(EXEC): $(OBJDIR) $(CONFIG_H) slangversion $(OBJDIR)/$(EXEC)
+	@echo $(EXEC) created in $(OBJDIR)
+$(OBJDIR)/$(EXEC): $(OBJS)
+	cd $(OBJDIR); $(CC) $(OFILES) -o $(EXEC) $(LDFLAGS) $(EXECLIBS)
+#
+$(OBJDIR):
+	-mkdir $(OBJDIR)
+#
+$(CONFIG_H) : $(SRCDIR)/sysconf.h
+	/bin/cp $(SRCDIR)/sysconf.h $(CONFIG_H)
+#
+slangversion: $(OBJDIR)/chkslang
+	$(OBJDIR)/chkslang $(EXEC) 10000
+#
+$(OBJDIR)/chkslang: $(OBJDIR)/chkslang.o
+	$(CC) $(OBJDIR)/chkslang.o -o $(OBJDIR)/chkslang
+clean:
+	/bin/rm -f $(OBJDIR)/* *~
+distclean: clean
+	/bin/rm -rf $(OBJDIR) Makefile sysconf.h
+installdirs:
+	$(MKINSDIR) $(DEST_DOCDIR)
+	$(MKINSDIR) $(DEST_MANDIR)/man1
+	$(MKINSDIR) $(DEST_BINDIR)
+install: all installdirs
+	$(INSTALL) -s $(OBJDIR)/most $(DEST_BINDIR)
+	$(INSTALL_DATA) ../most.1 $(DEST_MANDIR)/man1
+	@for i in $(DOC_FILES); \
+	do \
+		i=../$$i; \
+		echo $(INSTALL_DATA) $$i $(DEST_DOCDIR); \
+		$(INSTALL_DATA) $$i $(DEST_DOCDIR); \
+		if [ "$$?" != "0" ]; then \
+		  exit 1; \
+		fi; \
+	done
+# The symlinks target is for my own private use.  It simply creates the object
+# directory as a symbolic link to a local disk instead of an NFS mounted one.
+symlinks:
+	-/bin/rm -f $(ARCH)objs
+	mkdir -p $(HOME)/sys/$(ARCH)/objs/most/src
+	ln -s $(HOME)/sys/$(ARCH)/objs/most/src $(ARCH)objs
+#---------------------------------------------------------------------------
+# Rules (automatically generated)
+#---------------------------------------------------------------------------

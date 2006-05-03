@@ -1,3 +1,20 @@
+Changes since 4.10.2
+0. src/most.c: version bumped to 5.0.0-x
+1. src/line.c: Added support for embedded ANSI escape sequences that
+   seem to be more common in man pages.
+2. When switching searching directions, and no search string was
+   entered at the search prompt, use the previous string.
+3. Added patches for UTF-8 support kindly provided by Javier Koehn.
+4. src/most.c: Removed references to Kanji from the usage message.
+   Kanji is not supported by slang-2.  Use Unicode.
+5. src/file.c: Most will automatically start up in binary mode if the
+   file contains a nul-byte in the first 512 characters.  Previously,
+   it would switch into binary mode when the file contained any
+   characters with the most significant bit set.
+6. autoconf/config.sub,config.guess: Updated to more recent versions.
+7. src/most.c: Add +u/-u switches to force UTF-8 on/off.  The default
+   behavior depends upon the locale.
+
 Changes since 4.10.1
 1. src/window.c:most_read_from_minibuffer: An variable was not being
    initialized. (Kevin Oberman, oberman at es, net).

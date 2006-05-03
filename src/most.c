@@ -17,8 +17,6 @@
  with this program; if not, write to the Free Software Foundation, Inc., 675
  Mass Ave, Cambridge, MA 02139, USA. 
 */
-#define MOST_VERSION "4.10.2"
-
 #include "config.h"
 
 #include <stdio.h>
@@ -40,6 +38,8 @@
 #include <stdarg.h>
 
 #include <slang.h>
+#include "version.h"
+
 #include "jdmacros.h"
 
 #include "most.h"
@@ -64,12 +64,13 @@ int Most_Captive_Mode;
 #if MOST_HAS_MMAP
 int Most_Disable_MMap	= 0;
 #endif
-int Most_UTF8_Mode = 0;
+
+int Most_UTF8_Mode = -1;	       /* -1:auto, 0:off, 1:on */
 
 static int  Most_Starting_Line;
 char *Most_Program;	/* Program Name (argv[0]) */
 
-char *Most_Version = MOST_VERSION;
+static char *Most_Version = MOST_VERSION_STR;
 
 #ifdef VMS
 # ifndef isalpha
@@ -91,13 +92,14 @@ void most_usage (void)
    fputs("        -b:  Startup in binary mode.\n", stderr);
    fputs("        -C:  disable color support\n", stderr);
    fputs("        -c:  Make searches case sensitive.\n", stderr);
-   fputs("        -k:  Kanji mode.\n", stderr);
+   /* fputs("        -k:  Kanji mode.\n", stderr); */
 #if MOST_HAS_MMAP
    fputs("        -M:  Do not attempt to mmap files.\n", stderr);
 #endif
    fputs("        -s:  Squeeze out excess blank lines.\n", stderr);
    fputs("        -t:  Display tabs as ^I.  If this option is immediately followed\n", stderr);
    fputs("               by an integer, the integer sets the tab width.\n", stderr);
+   fputs("        -u:  Disable UTF-8 mode\n", stderr);
    fputs("        -v:  Do not interpret backspace formatting characters.\n", stderr);
    fputs("        -w:  Wrap lines.\n", stderr);
    fputs("        -z:  No gunzip-on-the-fly.\n", stderr);
@@ -108,6 +110,7 @@ void most_usage (void)
    fputs("        +d:  Allow file deletion.\n", stderr);
    fputs("        +s:  Secure Mode-- no edit, cd, shell, and reading files not\n", stderr);
    fputs("               already listed on the command line.\n", stderr);
+   fputs("        +u:  Enable UTF-8 mode.\n", stderr);
    fprintf(stderr, "\nExample: most -ct4 +82 keymap.c\n");
    fputs(" makes searches case sensitive, sets tabwidth to 4, and displays the file\n", stderr);
    fputs(" keymap.c starting at line 82.\n", stderr);
@@ -165,6 +168,12 @@ static void do_extended_switches(char *str)
 		case 's':
 		  Most_Secure_Mode = 1;
 		  break;
+		  
+		case 'U':
+		case 'u':
+		  Most_UTF8_Mode = 1;  /* +u */
+		  break;
+
 		default:
 		  fprintf(stderr,"%s invalid extended option %c ignored.\n",
 			  Most_Program, ch);
@@ -212,7 +221,8 @@ static void do_switches(char *str)
 
 	   case 'K':		       /* Kanji option */
 	   case 'k':
-	     Most_K_Opt = 1; break;
+	     /* Most_K_Opt = 1; break; */
+	     break;
 
 	   case 'B':
 	   case 'b':
@@ -248,6 +258,11 @@ static void do_switches(char *str)
 	   case '1': assume_vt100 = 1;
 	     break;
 	     
+	   case 'u':
+	   case 'U':
+	     Most_UTF8_Mode = 0;       /* -u */
+	     break;
+
 	     /* Allow MOST_SWITCHES environment variable to contain + forms,
 	      * e.g., "-sn+d" or "-s -n +d"
 	      */
@@ -329,7 +344,8 @@ void most_initialize_most (void)
 
 static void do_most (char *file, int start)
 {
-   int piped, row, col;
+   int piped;
+   MOST_INT row, col;
 
    most_get_cdir(Most_C_Dir);
 
@@ -379,6 +395,22 @@ void most_exit_most (void)
 #ifdef MALLOC_DEBUG
    SLmalloc_dump_statistics ();
 #endif
+}
+
+static void utf8_config (void)
+{
+   int utf8_mode = Most_UTF8_Mode;
+
+   utf8_mode = SLutf8_enable (-1);     /* returns 0 or 1 */
+   if (Most_UTF8_Mode == -1)
+     Most_UTF8_Mode = utf8_mode;
+   else if (utf8_mode != Most_UTF8_Mode)
+     {
+	if (utf8_mode == 1)
+	  (void) SLsmg_utf8_enable (0);   /* locale is UTF-8, but -u passed */
+	else
+	  (void) SLsmg_utf8_enable (1);   /* locale not UTF-8, but +u passed */
+     }
 }
 
 int most (int argc, char **argv)
@@ -454,15 +486,7 @@ int most (int argc, char **argv)
    context = 0;
 
    SLtt_get_terminfo();
-#if SLANG_VERSION >= 20000
-#if 0
-   Most_UTF8_Mode = SLutf8_enable (1);
-   if (Most_UTF8_Mode)
-     {
-	fprintf (stderr, "UTF-8 Mode is in effect\n");
-     }
-#endif
-#endif
+   utf8_config ();
    SLtt_Ignore_Beep = 1;
    if (No_Colors) 
      SLtt_Use_Ansi_Colors = 0;

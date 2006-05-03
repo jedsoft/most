@@ -34,8 +34,14 @@
 int Most_Tab_Width = 8;
 
 int Most_Selective_Display = 0;
+
+#define IS_BYTE_PRINTABLE(b) \
+   ((((b) >= ' ') && ((b) < 0x7F)) \
+       || ((Most_UTF8_Mode == 0) && ((b) >= SLsmg_Display_Eight_Bit)))
+
+
 /* take 16 binary characters and put them in displayable form */
-static void ascii_format_line (unsigned char *beg, unsigned char *end,
+static void binary_format_line (unsigned char *beg, unsigned char *end,
 			       char *buf)
 {
    unsigned char *b;
@@ -87,8 +93,7 @@ static void ascii_format_line (unsigned char *beg, unsigned char *end,
    while (b < end)
      {
         ch = *b++;
-	if (((ch >= ' ') && (ch < 0x7F))
-	    || (ch >= SLsmg_Display_Eight_Bit))
+	if (IS_BYTE_PRINTABLE(ch))
 	  {
 	     *s++ = ch;
 	     continue;
@@ -108,140 +113,226 @@ static void output_binary_formatted_line (void)
 
    if (end > Most_Eob) end = Most_Eob;
 
-   sprintf (buf, "0x%08X: ", Most_C_Offset);
-   ascii_format_line (beg, end, buf + 12);
+   sprintf (buf, "0x%08lX: ", (unsigned long) Most_C_Offset);
+   binary_format_line (beg, end, buf + 12);
    SLsmg_write_string (buf);
    SLsmg_erase_eol ();
 }
 
-static int most_analyse_line(unsigned char *begg, unsigned char *endd, 
-			     char *out, char *attributes)
+/* Here *begp points to the char after \e. */
+static int parse_escape (unsigned char **begp, unsigned char *end, int *colorp)
+{
+   unsigned char *beg = *begp;
+   int color;
+
+   if ((beg >= end) || (*beg != '['))
+     return -1;
+
+   beg++; /* skip [ */
+   color = 0;
+   while ((beg < end) && isdigit (*beg))
+     {
+	color = color*10 + (*beg - '0');
+	beg++;
+     }
+   if ((beg < end) && ((*beg == 'm') || (*beg == ']')))
+     {
+	*begp = beg + 1;
+	if (colorp != NULL)
+	  *colorp = color;
+	return 0;
+     }
+   
+   return -1;
+}
+
+typedef struct
+{
+   unsigned char *bytes;
+   unsigned char byte;		       /* used if bytes is NULL */
+   unsigned int len;
+   int color;
+}
+Multibyte_Cell_Type;
+
+static int most_analyse_line (unsigned char *begg, unsigned char *endd, 
+			      Multibyte_Cell_Type *cells, unsigned int num_cols)
 {
    unsigned char *beg, *end;
    unsigned int min_col, max_col;
-   unsigned int i, i_max;
+   unsigned int col, max_col_reached;
+   int default_attr;
+   Multibyte_Cell_Type *cell, *max_cell;
 
    beg = begg;
    end = endd;
-   i = i_max = 0;
+   col = max_col_reached = 0;
+   cell = cells;
+   max_cell = cell;
    min_col = Most_Column - 1;
-   max_col = min_col + SLtt_Screen_Cols;
-
+   max_col = min_col + num_cols;
+   
+   default_attr = 0;
    while (beg < end)
      {
-	char attr = ' ';
+	int attr = default_attr;
 	unsigned char ch;
+	unsigned char *pch = beg++;
+	char buf[16];
 
-	if ('\n' == (ch = *beg++))
+	if ('\n' == (ch = *pch))
 	  break;
-	
+
 	if ((ch == '\r') && (Most_V_Opt == 0))
 	  {
-	     if (i > i_max) i_max = i;
-	     i = 0;
+	     if (col > max_col_reached) max_col_reached = col;
+	     col = 0;
 	     continue;
 	  }
 	
 	if ((ch == '\b') && (Most_V_Opt == 0))
 	  {
-	     if (i > i_max) i_max = i;
-	     if (i > 0)
-	       i--;
+	     if (col > max_col_reached) max_col_reached = col;
+	     /* FIXME: This does not account for double-width characters */
+	     if (col > 0)
+	       col--;
 	     continue;
 	  }
 	
-	if (i < i_max)		       /* overstrike */
+	if (col < max_col_reached)		       /* overstrike */
 	  {
-	     attr = 'b';
-	     if ((i >= min_col) && (i < max_col))
+	     attr = MOST_BOLD_COLOR;
+	     if ((col >= min_col) && (col < max_col))
 	       {
-		  if (out[i-min_col] == '_')
-		    attr = 'u';
+		  cell = cells + (col-min_col);
+		  if (cell->bytes[0] == '_')
+		    attr = MOST_ULINE_COLOR;
 		  else if (ch == '_')
 		    {
-		       attr = 'u';
-		       ch = out[i - min_col];
+		       cell->color = MOST_ULINE_COLOR;
+		       col++;
+		       continue;
 		    }
-	       }
-	     if (ch == ' ')
-	       {
-		  i++;
-		  continue;
 	       }
 	     /* drop */
 	  }
-	
-	if ((ch >= ' ') && (ch < 0x7F))
-	  {
-	     if ((i >= min_col) && (i < max_col))
-	       {
-		  out[i-min_col] = ch;
-		  attributes[i-min_col] = attr;
-	       }
-	     i++;
-	     continue;
-	  }
-	
-	if (ch >= SLsmg_Display_Eight_Bit)
-	  {
-	     if ((i >= min_col) && (i < max_col))
-	       {
-		  out[i-min_col] = ch;
-		  attributes[i-min_col] = attr;
-	       }
-	     i++;
-	     continue;
-	  }
 
+	if (IS_BYTE_PRINTABLE(ch))
+	  {
+	     if ((col >= min_col) && (col < max_col))
+	       {
+		  cell = cells + (col-min_col);
+		  cell->bytes = pch;
+		  cell->len = 1;
+		  cell->color = attr;
+		  if (cell >= max_cell)
+		    max_cell = cell + 1;
+	       }
+	     col++;
+	     continue;
+	  }
+	
 	if ((ch == '\t') && (Most_T_Opt == 0) && (Most_Tab_Width))
 	  {
-
-	     int nspaces = Most_Tab_Width * (i/Most_Tab_Width + 1) - i;
+	     int nspaces = Most_Tab_Width * (col/Most_Tab_Width + 1) - col;
 	     while (nspaces > 0)
 	       {
-		  if ((i >= min_col) && (i < max_col))
+		  if ((col >= min_col) && (col < max_col))
 		    {
-		       out[i-min_col] = ' ';
-		       attributes[i-min_col] = attr;
+		       cell = cells + (col-min_col);
+		       cell->bytes = &cell->byte;
+		       cell->byte = ' ';
+		       cell->color = attr;
+		       cell->len = 1;
+		       if (cell >= max_cell)
+			 max_cell = cell + 1;
 		    }
-		  i++;
+		  col++;
 		  nspaces--;
 	       }
 	     continue;
 	  }
+#if 1
+	if ((ch == 033) && (Most_V_Opt == 0))
+	  {
+	     int color;
+	     if (0 == parse_escape (&beg, end, &color))
+	       {
+		  default_attr = color;
+		  continue;
+	       }
+	     /* drop */
+	  }
+#endif	
 
 	if (ch & 0x80)
 	  {
-	     if ((i >= min_col) && (i < max_col))
+	     SLwchar_Type wch;
+	     if ((Most_UTF8_Mode)
+		 && (NULL != SLutf8_decode (pch, end, &wch, NULL)))
 	       {
-		  out[i-min_col] = '~';
-		  attributes[i-min_col] = attr;
+		  beg = SLutf8_skip_chars (pch, end, 1, NULL, 1);
+		  if ((col >= min_col) && (col < max_col))
+		    {
+		       cell = cells + (col-min_col);
+		       cell->bytes = pch;
+		       cell->color = attr;
+		       cell->len = beg - pch;
+		       if (cell >= max_cell)
+			 max_cell = cell + 1;
+		    }
+		  col++;
+		  if (SLwchar_wcwidth (wch) > 1)
+		    {
+		       if ((col >= min_col) && (col < max_col))
+			 {
+			    cell = cells + (col-min_col);
+			    cell->bytes = pch;
+			    cell->color = attr;
+			    cell->len = 0;
+			    if (cell >= max_cell)
+			      max_cell = cell + 1;
+			 }
+		       col++;
+		    }
+		  continue;
 	       }
-	     i++;
-	     ch &= 0x7F;
+	     
+	     /* Otherwise, this displays as <XX> and takes up 4 character cells */
+	     sprintf (buf, "<%02X>", (unsigned int) ch);
 	     /* drop */
 	  }
-	
-	if ((i >= min_col) && (i < max_col))
+	else
 	  {
-	     out[i-min_col] = '^';
-	     attributes[i-min_col] = attr;
+	     /* Otherwise we have a Ctrl-char displayed as ^X */
+	     if (ch == 0x7F) ch = '?';
+	     else ch += '@';
+
+	     sprintf (buf, "^%c", ch);
 	  }
-	i++;
 	
-	if (ch == 0x7F) ch = '?';
-	else ch += '@';
-	
-	if ((i >= min_col) && (i < max_col))
+	pch = (unsigned char *)buf;
+	while (*pch)
 	  {
-	     out[i-min_col] = ch;
-	     attributes[i-min_col] = attr;
+	     if ((col >= min_col) && (col < max_col))
+	       {
+		  cell = cells + (col-min_col);
+		  cell->bytes = &cell->byte;
+		  cell->byte = *pch;
+		  cell->color = attr;
+		  cell->len = 1;
+		  if (cell >= max_cell)
+		    max_cell = cell + 1;
+	       }
+	     col++;
+	     pch++;
 	  }
-	i++;
      }
 
-   if (i < i_max) 
-     i = i_max;
+   if (col < max_col_reached) 
+     col = max_col_reached;
+   else 
+     max_col_reached = col;
 
    /* Now add "..." if selective display.  To do that, the next line needs to 
     * be dealt with to determine whether or not it will be hidden.
@@ -249,7 +340,7 @@ static int most_analyse_line(unsigned char *begg, unsigned char *endd,
    if (Most_Selective_Display 
        && (Most_W_Opt == 0)
        && (beg < Most_Eob)
-       && ((i >= min_col) && (i < max_col)))
+       && ((col >= min_col) && (col < max_col)))
      {
 	if (*beg == '\n') beg++;
 
@@ -260,116 +351,83 @@ static int most_analyse_line(unsigned char *begg, unsigned char *endd,
 	if ((beg >= Most_Eob) || (*beg == '\n') 
 	    || (most_apparant_distance(beg) >= Most_Selective_Display))
 	  {
-	     i_max = i + 3;
-	     while (i < i_max)
+	     max_col_reached = col + 3;
+	     while (col < max_col_reached)
 	       {
-		  if (i < max_col)
+		  if (col < max_col)
 		    {
-		       out[i] = '.';
-		       attributes[i] = ' ';
+		       cell = cells + (col-min_col);
+		       cell->bytes = &cell->byte;
+		       cell->byte = '.';
+		       cell->color = 0;
+		       cell->len = 1;
+		       if (cell >= max_cell)
+			 max_cell = cell + 1;
 		    }
-		  i++;
+		  col++;
 	       }
 	  }
      }
-   
-   i_max = i;
-
-   if (i < min_col)
-     i = min_col;
-   else if (i >= max_col)
-     i = max_col;
-
-   i -= min_col;
-
-   out[i] = 0;
-   attributes[i] = 0;
-   return i_max;
+   return max_cell - cells;
 }
 
-static void output_with_attr (unsigned char *out, unsigned char *attr)
+static void display_cells (Multibyte_Cell_Type *cell, unsigned int n, char dollar)
 {
-   unsigned char at, ch, lat;
-   unsigned char *p = out;
+   Multibyte_Cell_Type *cell_max;
+   int last_color;
 
-   if (Most_V_Opt) 
+   last_color = -1;
+   cell_max = cell + n;
+   while (cell < cell_max)
      {
-	SLsmg_write_string ((char *) out);
-	return;
-     }
-
-   lat = ' ';
-   while ((ch = *p) != 0)
-     {
-	if (lat != *attr)
+	if (last_color != cell->color)
 	  {
-	     if (p != out)
-	       {
-		  SLsmg_write_nchars ((char *) out, (unsigned int) (p - out));
-		  out = p;
-	       }
-
-	     at = *attr;
-	     if (at == 'u')
-	       {
-		  most_tt_underline_video ();
-	       }
-	     else if (at == 'b')
-	       {
-		  most_tt_bold_video ();
-	       }
-	     else most_tt_normal_video ();
-	     lat = at;
+	     last_color = cell->color;
+	     SLsmg_set_color (last_color);
 	  }
-	p++;
-	attr++;
+	SLsmg_write_chars (cell->bytes, cell->bytes + cell->len);
+	cell++;
      }
 
-   SLsmg_write_nchars ((char *) out, (unsigned int) (p - out));
-   if (lat != ' ') most_tt_normal_video ();
+   if (last_color != 0)
+     SLsmg_set_color (0);
+   
+   SLsmg_erase_eol ();
+   if (dollar)
+     {
+	SLsmg_gotorc (SLsmg_get_row (), SLtt_Screen_Cols-1);
+	SLsmg_write_nchars (&dollar, 1);
+     }
 }
 
-#if 0
-static void most_output(unsigned char *line, unsigned int len, unsigned char *attr, char unsigned d_char)
-{
-   if (len > (unsigned int) SLtt_Screen_Cols + (Most_Column - 1))
-     line[SLtt_Screen_Cols-1] = d_char;
-   output_with_attr (line, attr);
-}
-#endif
 void most_display_line (void)
 {
    unsigned char *beg, *end;
-   unsigned int len;
    unsigned char dollar;
-   static unsigned char *line;
-   static unsigned char *attr;
-   static unsigned int line_len;
+   static Multibyte_Cell_Type *cells;
+   static unsigned int num_cells;
+   unsigned int screen_cols;
+   unsigned int num_cells_set;
 
    if (Most_B_Opt)
      {
 	output_binary_formatted_line ();
 	return;
      }
-#if SLANG_VERSION < 20000
-# define SLUTF8_MAX_MBLEN	1
-#endif
-   if (line_len < (unsigned int)(SLtt_Screen_Cols + 1) * SLUTF8_MAX_MBLEN)
+   
+   screen_cols = SLtt_Screen_Cols;
+   if (num_cells != screen_cols + 1)
      {
-	SLfree ((char *) line);
-	SLfree ((char *) attr);
-	
-	line_len = (SLtt_Screen_Cols + 1) * SLUTF8_MAX_MBLEN;
-	
-	if ((NULL == (line = (unsigned char *) SLmalloc (line_len)))
-	    || (NULL == (attr = (unsigned char *) SLmalloc (line_len))))
+	num_cells = screen_cols + 1;
+
+	SLfree ((char *) cells);
+	if (NULL == (cells = (Multibyte_Cell_Type *)SLmalloc (num_cells * sizeof (Multibyte_Cell_Type))))
 	  most_exit_error ("Out of memory");
      }
 
    (void) most_extract_line (&beg, &end);
-
-   len = most_analyse_line(beg, end, (char *) line, (char *) attr);
-
+   num_cells_set = most_analyse_line (beg, end, cells, num_cells);
+   
    dollar = 0;
    if (Most_W_Opt)
      {
@@ -377,19 +435,10 @@ void most_display_line (void)
 	    && (*end != '\n'))
 	  dollar = '\\';
      }
-   else if (len > (unsigned int) SLtt_Screen_Cols + (Most_Column - 1))
+   else if (num_cells_set > screen_cols)
      dollar = '$';
-   
-   if (dollar)
-     {
-	line[SLtt_Screen_Cols-1] = dollar;
-	attr[SLtt_Screen_Cols-1] = ' ';
-	line[SLtt_Screen_Cols] = 0;
-	attr[SLtt_Screen_Cols] = 0;
-     }
-   
-   output_with_attr (line, attr);
-   SLsmg_erase_eol ();
+
+   display_cells (cells, num_cells_set, dollar);
 }
 
 
@@ -411,31 +460,142 @@ int most_apparant_distance (unsigned char *pos)
    while (pos < save_pos)
      {
 	ch = *pos++;
-	if (((ch >= ' ') && (ch < 0x7F))
-	    || (ch >= SLsmg_Display_Eight_Bit))
+	if (IS_BYTE_PRINTABLE(ch))
 	  {
 	     i++;
 	     continue;
 	  }
 
-	if (!Most_V_Opt && (ch == '\b'))
+	if ((ch == '\b') && (Most_V_Opt == 0))
 	  {
 	     if (i > 0) i--;
+	     continue;
 	  }
-	else if (!Most_V_Opt && (ch == '\015')) /* ^M */
+	if ((ch == '\015') && (Most_V_Opt == 0))
 	  {
 	     if (i != 1) i = 0;
+	     continue;
 	  }
-	else if (!Most_T_Opt && (ch == '\t'))
+	if ((ch == '\t') && (Most_T_Opt == 0))
 	  {
 	     i = Most_Tab_Width * (i/Most_Tab_Width + 1);  /* Most_Tab_Width column tabs */
+	     continue;
 	  }
-	 /* else Control char */
-	else
+	
+	if ((ch == 033) && (Most_V_Opt == 0)
+	    && (0 == parse_escape (&pos, save_pos, NULL)))
+	  continue;
+
+	if (ch & 0x80)
 	  {
-	     if (ch & 0x80) i += 3;
-	     else i += 2;
+	     SLwchar_Type wch;
+	     if ((Most_UTF8_Mode)
+		 && (NULL != SLutf8_decode (pos-1, save_pos, &wch, NULL)))
+	       {
+		  pos = SLutf8_skip_chars (pos-1, save_pos, 1, NULL, 1);
+		  i++;
+		  continue;
+	       }
+	     i += 4;		       /* <XX> */
+	     continue;
 	  }
+
+	i += 2;			       /* ^X */
      }
    return i;
+}
+
+/*
+ * Returns a pointer to the num_cols'th character after the one
+ * pointed at b. Invisible character runs are not counted toward this
+ * limit, i.e. strings that represent attributes, such as "_\b" for
+ * underlines.
+ *
+ * If multi_column is non-zero, characters spanning more than one
+ * column will add their extra width to the column count.
+ *
+ * If there the end of the buffer is reached, as delimited by argument
+ * e, then e is returned.
+ */
+unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigned int num_cols)
+{
+   unsigned int col = 0;
+   unsigned int prev_width = 1;
+
+   while ((b < e)
+	  && (col < num_cols))
+     {
+	unsigned char ch = *b++;
+
+	if (IS_BYTE_PRINTABLE(ch))
+	  {
+	     col++;
+	     prev_width = 1;
+	     continue;
+	  }
+
+	if ((ch == '\b') || (ch == '\t') || (ch == '\r'))
+	  {
+	     switch (ch)
+	       {
+		case '\b':
+		  if (Most_V_Opt == 0)
+		    {
+		       if (col < prev_width)
+			 col = 0;
+		       else
+			 col -= prev_width;
+		    }
+		  else col += 2;	       /* ^H */
+		  break;
+		  
+		case '\r':
+		  if (Most_V_Opt == 0)
+		    {
+		       prev_width = 1;
+		       col = 0;
+		    }
+		  else col += 2;	       /* ^M */
+		  break;
+		  
+		case '\t':
+		  if (Most_T_Opt == 0)
+		    {
+		       prev_width = Most_Tab_Width * (col/Most_Tab_Width + 1) - col;
+		       col += prev_width;
+		    }
+		  else
+		    col += 2;	       /* ^I */
+		  break;
+	       }
+	     continue;
+	  }
+	
+	if (ch & 0x80)
+	  {
+	     SLwchar_Type wch;
+
+	     if ((Most_UTF8_Mode)
+		 && (NULL != SLutf8_decode (b-1, e, &wch, NULL)))
+	       {
+		  b = SLutf8_skip_chars (b-1, e, 1, NULL, 1);
+		  prev_width = SLwchar_wcwidth (wch);
+		  col += prev_width;
+		  continue;
+	       }
+	     prev_width = 4;
+	     col += prev_width;	       /* <XX> */
+	     continue;
+	  }
+	
+	if ((ch == 033) && (Most_V_Opt == 0)
+	    && (0 == parse_escape (&b, e, NULL)))
+	  continue;
+	
+	
+	/* Ctrl-char ^X */
+	prev_width = 2;
+	col += prev_width;
+     }
+   return b;
 }

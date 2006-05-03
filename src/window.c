@@ -227,7 +227,10 @@ static SLang_RLine_Info_Type  *init_readline (void)
 {
    SLang_RLine_Info_Type *rli;
    unsigned int flags = SL_RLINE_BLINK_MATCH;
-   
+
+   if (Most_UTF8_Mode)
+     flags |= SL_RLINE_UTF8_MODE;
+
    if (NULL == (rli = SLrline_open (SLtt_Screen_Cols, flags)))
      return NULL;
 
@@ -236,7 +239,7 @@ static SLang_RLine_Info_Type  *init_readline (void)
 }
 #endif
 
-int most_read_from_minibuffer(char *prompt, char *what, unsigned int buflen)
+int most_read_from_minibuffer(char *prompt, char *stuff, char *what, unsigned int buflen)
 {
    int i = 0;
    char *buf;
@@ -257,13 +260,12 @@ int most_read_from_minibuffer(char *prompt, char *what, unsigned int buflen)
    most_select_minibuffer();
 
    /* do not use default.  The up arrow can always get it back. */
-   if ((what != NULL) 
-       && (*what) && (what != Most_Search_Str))
+   if (stuff != NULL)
      {
-	if (-1 == SLrline_set_line (Most_RLI, what))
+	if (-1 == SLrline_set_line (Most_RLI, stuff))
 	  return -1;
 
-	SLrline_set_point (Most_RLI, strlen (what));
+	SLrline_set_point (Most_RLI, strlen (stuff));
      }
 
    buf = SLrline_read_line (Most_RLI, prompt, &len);
@@ -284,7 +286,7 @@ int most_read_from_minibuffer(char *prompt, char *what, unsigned int buflen)
 
    if (i == -1) most_message ("Aborted!", 1);
 
-   return(i);
+   return i;
 }
 
 void most_clear_minibuffer()
@@ -593,7 +595,8 @@ static void update_status1 (void)
    unsigned int num_chars;
    unsigned int field_width, info_len;
    unsigned char *eob;
-   int r, x;
+   int r;
+   MOST_INT x;
 
    eob = Most_Eob;
 #if MOST_HAS_MMAP
@@ -614,8 +617,9 @@ static void update_status1 (void)
    /* for files with end of file above the bottom row (due to window manipulations) */
    if (x > 100) x = 100;
 
-   sprintf (info, "(%d,%d) %d%%", Most_C_Line, Most_Column, x);
-
+   sprintf (info, "(" MOST_INT_D_FMT ",%d) " MOST_INT_D_FMT "%%",
+	    Most_C_Line, Most_Column, x);
+   
    r = Most_Win->bot + 1;
    most_goto_rc (r,1);
 

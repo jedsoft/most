@@ -24,11 +24,12 @@
 most \- browse or page through a text file
 .SH SYNOPSIS
 .B most
-.RB [ \-1bCckMstvwz ]
+.RB [ \-1bCcMstuvwz ]
 .RB [ +\fIlineno\fB ]
 .RB [ +c ]
 .RB [ +d ]
 .RB [ +s ]
+.RB [ +u ]
 .RB [ +/\fIstring\fB ]
 .RI [ filename ...]
 .SH DESCRIPTION
@@ -134,7 +135,7 @@ Binary mode.
 Use this switch when you want to view files
 containing 8 bit characters.
 .I most
-will display the file 16 bytes per line in hexidecimal notation.
+will display the file 16 bytes per line in hexadecimal notation.
 A typical line looks like:
 .IP
 .Ds
@@ -148,18 +149,18 @@ option, the same line looks like:
 .Ds
 ^A^@^@^@  @^@^U u 9C #A0    @^@^V8D     ....@..u.#. @...
 .De
-.TP
-.B \-k
-`Kanji' option.
-Ordinarily,
-.I most
-will go into binary mode if the file consists of non-ascii characters.
-Sometimes this feature is not desirable since some
-terminals have a special interpretation for eight bit
-characters.
-The
-.B \-k
-option turns off the automatic sensing.
+.\".TP
+.\".B \-k
+.\"`Kanji' option.
+.\"Ordinarily,
+.\".I most
+.\"will go into binary mode if the file consists of non-ascii characters.
+.\"Sometimes this feature is not desirable since some
+.\"terminals have a special interpretation for eight bit
+.\"characters.
+.\"The
+.\".B \-k
+.\"option turns off the automatic sensing.
 .TP
 .B \-C
 Disable color support.
@@ -185,13 +186,25 @@ Display tabs as `^I'.
 This option is meaningful only when used with the
 .B \-v
 option.
+.TP
 .BI + lineno
 Start up at
 .IR lineno .
 .TP
-.B +c
-Make search case sensitive.
+.B \-c
+Make searches case sensitive.
 By default, they are not.
+.TP 
+.B \-u
+Disable UTF-8 mode even if the locale dictates it.
+.TP
+.B +u
+Force UTF-8 mode.  By default most will use the current locale to
+determine if UTF-8 mode shoul be used.  The
+.B +u
+and
+.B \-u
+switches allow the behavior to be overridden.
 .TP
 .B +d
 This switch should only be used if you want the option to
@@ -496,7 +509,7 @@ on Unix, and
 .I most.rc
 on other systems.
 .SH CONFIGURATION FILE SYNTAX
-When most starts up, it tries to read a system confiuration file and
+When most starts up, it tries to read a system configuration file and
 then a personal configuration file.  These files may be used to
 specify keybindings and colors.
 .PP
@@ -598,6 +611,8 @@ automatic detection of zipped files.
 .PP
 I would also like to thank Shinichi Hama for his valuable criticisms of
 .IR most.
+.PP
+Javier Koehn was instrumental in the support for UTF-8.
 .PP
 Thanks to David W. Sanderson (dws@cs.wisc.edu) for adapting the
 documentation to nroff man page source format.

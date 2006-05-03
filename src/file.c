@@ -181,7 +181,7 @@ static int unmmap_buffer (Most_Buffer_Type *b)
 static int resync_mmap (void)
 {   
    struct stat st;
-   int line;
+   int line = Most_C_Line;
 
    if (Most_Buf->fd == -1)
      return 0;
@@ -297,13 +297,17 @@ static void examine_file_contents (void)
      return;
    
    pos = Most_Beg;
-   pos_max = pos + 32;
+   pos_max = pos + 512;
    if (pos_max > Most_Eob)
      pos_max = Most_Eob;
 	
    while (pos < pos_max)
      {
-	if (0 == (*pos & 0x7F)) Most_B_Opt = 1;
+	if (0 == *pos)
+	  {
+	     Most_B_Opt = 1;
+	     break;
+	  }
 	pos++;
      }
 	
@@ -775,7 +779,7 @@ void most_user_get_file()
    if (!most_head(Most_Win->buf->file,file))
      strcpy(file,Most_C_Dir);
 
-   if (most_read_from_minibuffer("Find File: ",file, sizeof(file)) == -1)
+   if (most_read_from_minibuffer("Find File: ", file, file, sizeof(file)) == -1)
      return;
 
    if (most_head(file,path))

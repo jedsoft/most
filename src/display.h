@@ -3,10 +3,12 @@
  *  All Rights Reserved.
  */
 
-#define MOST_STATUS_COLOR	1
-#define MOST_ULINE_COLOR	2
-#define MOST_BOLD_COLOR		3
+/* These numbers match ANSI escape sequences of form ESC [ x m */
+#define MOST_BOLD_COLOR		1
+#define MOST_ULINE_COLOR	4
+#define MOST_STATUS_COLOR	7
 
+extern void most_tt_set_color (int color);
 extern void most_tt_reverse_video(void);
 extern void most_tt_bold_video(void);
 extern void most_tt_underline_video(void);

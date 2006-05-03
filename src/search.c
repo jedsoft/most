@@ -670,13 +670,14 @@ static unsigned char *back_search_region(unsigned char *beg,
 #endif	/* HAVE_V8_REGCOMP || SLANG_REGEXP */
 }
 
-int most_search(unsigned char *from, int repeat, int *col)
+int most_search(unsigned char *from, int repeat, MOST_INT *col)
 {
     /* return the line match was found as well as line number,
      * search from i on; assume that line_array match the i so we need
      * no initial lookup */
 
-   int test, save_line, the_col, row, s_len;
+   int test;
+   MOST_INT save_line, the_col, row, s_len;
    char string[300];
    unsigned char *pos;
    unsigned int save_ofs;
@@ -757,7 +758,7 @@ int most_search(unsigned char *from, int repeat, int *col)
      }
    else /* if ( !Most_T_Opt && !Most_B_Opt) */   /* expand tabs to get col correct */
      {
-	most_find_row_column(Most_Beg + found_ofs,&row,&the_col);
+	most_find_row_column(Most_Beg + found_ofs, &row, &the_col);
 	if (Most_B_Opt) *col = the_col + 52;
 	else
 	  *col = 1 + most_apparant_distance(Most_Beg + found_ofs);

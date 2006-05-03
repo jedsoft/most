@@ -23,3 +23,12 @@ install:
 # directory as a symbolic link to a local disk instead of an NFS mounted one.
 symlinks:
 	cd src; $(MAKE) symlinks
+configure: autoconf/aclocal.m4 autoconf/configure.ac
+	cd autoconf && autoconf && mv ./configure ..
+update: autoconf/config.sub autoconf/config.guess
+autoconf/config.guess: /usr/share/misc/config.guess
+	/bin/cp -f /usr/share/misc/config.guess autoconf/config.guess
+autoconf/config.sub: /usr/share/misc/config.sub
+	/bin/cp -f /usr/share/misc/config.sub autoconf/config.sub
+
+.PHONY: all clean distclean install symlinks update

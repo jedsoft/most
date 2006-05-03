@@ -56,7 +56,7 @@ extern void most_check_minibuffer(void);
 extern void most_free_window_buffer(void);
 extern void most_select_minibuffer(void);
 extern void most_exit_minibuffer(void);
-extern int most_read_from_minibuffer(char *, char *, unsigned int);
+extern int most_read_from_minibuffer(char *, char *, char *, unsigned int);
 extern void most_redraw_display(void);
 extern void most_one_window(void);
 extern void most_two_windows(void);

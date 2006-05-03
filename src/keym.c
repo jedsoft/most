@@ -195,16 +195,18 @@ static void redraw_cmd(void)
    most_redraw_display();
 }
 
-static int read_integer (char *prompt, int *n)
+static int read_integer (char *prompt, MOST_INT *n)
 {
+   int status;
    Most_Mini_Buf[0] = 0;
-
-   if (!most_read_from_minibuffer(prompt, (char *) Most_Mini_Buf, MOST_MINI_BUF_LEN))
+   
+   status = most_read_from_minibuffer(prompt, NULL, (char *) Most_Mini_Buf, MOST_MINI_BUF_LEN);
+   if (status < 0)
      return -1;
 
-   if (1 != sscanf((char *) Most_Mini_Buf, "%d", n))
+   if (1 != sscanf((char *) Most_Mini_Buf, MOST_INT_D_FMT, n))
      {
-	most_message ("Expecting integer.", 1);
+	most_message ("Expecting an integer", 1);
 	return -1;
      }
 
@@ -214,7 +216,7 @@ static int read_integer (char *prompt, int *n)
 
 static void goto_line_cmd(void)
 {
-   int n;
+   MOST_INT n;
 
    if (Most_Digit_Arg != (int *) NULL) n = *Most_Digit_Arg;
    else
@@ -222,15 +224,15 @@ static void goto_line_cmd(void)
 	if (-1 == read_integer ("Goto Line: ", &n))
 	  return;
      }
-   most_update_windows (n);
+   most_update_windows ((int)n);
 }
 
 static void goto_percent_cmd(void)
 {
    unsigned char *pos;
-   int n;
+   MOST_INT n;
 
-   if (Most_Digit_Arg != (int *) NULL) n = *Most_Digit_Arg;
+   if (Most_Digit_Arg != NULL) n = *Most_Digit_Arg;
    else
      {
 	if (-1 == read_integer ("Goto Percent: ", &n))
@@ -282,7 +284,7 @@ static void other_window_cmd(void)
 
 static void find_next_cmd(void)
 {
-   int col, line, n = 1;
+   MOST_INT col, line, n = 1;
    unsigned long ofs;
 
    if (Most_Digit_Arg != NULL) n = *Most_Digit_Arg;
@@ -300,34 +302,40 @@ static void find_next_cmd(void)
    Most_Curs_Col = col;
 }
 
-static void search_cmd(void)
+static void search_cmd_dir (char *prompt, int dir)
 {
-   Most_Search_Dir = 1;
-   if (most_read_from_minibuffer(
-#ifdef SLANG_REGEXP
-				 "Regexp Search: ",
-#else
-				 "Search: ",
-#endif
-				 Most_Search_Str,
-				 MOST_SEARCH_BUF_LEN
-				 ) == -1) return;
+   char buf[MOST_SEARCH_BUF_LEN];
+
+   if (-1 == most_read_from_minibuffer(prompt, NULL, buf, MOST_SEARCH_BUF_LEN))
+     return;
+
+   Most_Search_Dir = dir;
+   if (*buf)
+     strcpy (Most_Search_Str, buf);    /* no buffer overflow here */
    Most_Curs_Offset = Most_C_Offset;
    find_next_cmd ();
 }
 
+static void search_cmd(void)
+{
+   search_cmd_dir (
+#ifdef SLANG_REGEXP
+		   "Regexp Search: ",
+#else
+		   "Search: ",
+#endif
+		   1);
+}
+
 static void search_back_cmd(void)
 {
-   Most_Search_Dir = -1;
-   if (most_read_from_minibuffer(
+   search_cmd_dir (
 #ifdef SLANG_REGEXP
-				 "Regexp Search Backwards: ",
+		   "Regexp Search Backwards: ",
 #else
-				 "Search Backwards: ",
+		   "Search Backwards: ",
 #endif
-				 Most_Search_Str,
-				 MOST_SEARCH_BUF_LEN) == -1) return;
-   find_next_cmd();
+		   -1);
 }
 
 static void help_cmd(void)

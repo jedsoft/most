@@ -271,7 +271,14 @@ static int mono_fun (int argc, SLcmd_Cmd_Table_Type *table)
 void most_setup_colors (void)
 {
    Color_Handle_Type *h;
+   int i;
    
+   for (i = 1; i < 128; i++)
+     {
+	SLtt_set_color (i, NULL, "default", "default");
+	SLtt_set_mono (i, NULL, 0);
+     }
+
    h = Color_Handles;
    while (h->name != NULL)
      {

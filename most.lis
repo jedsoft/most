@@ -56,3 +56,4 @@
 @src/keyparse.c
 @src/keyparse.h
 @src/chkslang.c
+@src/version.h

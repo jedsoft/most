@@ -35,6 +35,11 @@ void most_wide_width(void)
    SLtt_write_string ("\033[?3h");
 }
 
+void most_tt_set_color (int color)
+{
+   SLsmg_set_color (color);
+}
+
 void most_tt_bold_video (void)
 {
    SLsmg_set_color (MOST_BOLD_COLOR);

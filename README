@@ -1,6 +1,7 @@
 Compiling MOST requires an ANSI C compiler.  In addition you MUST have
-a copy of the S-Lang library.  This library is available from
-ftp://space.mit.edu/pub/davis/slang.
+a copy of the S-Lang library version 2.X.  Version 1 is nolonger
+supported.  This library is available from
+<http://www.jedsoft.org/slang/>.
 
                           INSTALLATION INSTRUCTIONS
 			  

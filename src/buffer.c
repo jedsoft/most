@@ -44,10 +44,17 @@ unsigned char *Most_Eob;             /* end of current buffer */
 
 Most_Buffer_Type *Most_Buf;
 
-int Most_Num_Lines;
+MOST_INT Most_Num_Lines;
 
-unsigned int Most_C_Offset;
-int Most_C_Line;
+MOST_UINT Most_C_Offset;
+MOST_INT Most_C_Line;
+
+/* p>p0 assumed */
+#define BSKIP_CHAR(p,p0) \
+   (((Most_UTF8_Mode == 0) || (0 == ((*(p-1)) & 0x80))) \
+     ? ((p)--) \
+     : ((p) = SLutf8_bskip_char ((p0), (p))))
+
 
 static unsigned char *beg_of_line1(void)
 {
@@ -61,7 +68,7 @@ static unsigned char *beg_of_line1(void)
      {
 	if (*pos == '\n')
 	  {
-	     pos--;
+	     pos--;/* Skip back over the new-line. */
 	     while ((pos > Most_Beg)
 		    && (*pos != '\n'))
 	       pos--;
@@ -71,7 +78,7 @@ static unsigned char *beg_of_line1(void)
 	       return pos + 1;
 	  }
      }
-   else pos--;
+   else BSKIP_CHAR (pos, Most_Beg);
 
    if (*pos != '\n')
      {
@@ -91,55 +98,6 @@ static unsigned char *beg_of_line1(void)
    pos += 2;
    if (pos > cpos) pos = cpos;
    return pos;
-}
-
-
-static unsigned char *forward_columns (unsigned char *b, unsigned char *e, unsigned int num_cols)
-{
-   unsigned int col = 0;
-
-   while ((b < e)
-	  && (col < num_cols))
-     {
-	unsigned char ch = *b++;
-	if (((ch >= ' ') && (ch < 0x7F))
-	    || (ch >= SLsmg_Display_Eight_Bit))
-	  {
-	     col++;
-	     continue;
-	  }
-	
-	if ((ch == '\b') || (ch == '\t') || (ch == '\r'))
-	  switch (ch)
-	    {
-	     case '\b':
-	       if (Most_V_Opt == 0)
-		 {
-		    if (col > 0) col--;
-		 }
-	       else col += 2;
-	       break;
-	       
-	     case '\r':
-	       if (Most_V_Opt == 0)
-		 col = 0;
-	       else 
-		 col += 2;
-	       break;
-	       
-	     case '\t':
-	       if (Most_T_Opt == 0)
-		 col = Most_Tab_Width * (col/Most_Tab_Width + 1);
-	       else
-		 col += 2;
-	       break;
-	    }
-	else if (ch & 0x80)
-	  col += 3;
-	else
-	  col += 2;
-     }
-   return b;
 }
 
 /* does not move point */
@@ -164,6 +122,9 @@ static unsigned char *end_of_line1(void)
 
    if (*pos != '\n')
      {
+	/* This block is UTF-8 safe, because it only scans the buffer
+	 * for a new-line, and doesn't count characters. 
+	 */
 	n = pmax - pos;
 	n2 = n % 8;
 	pmax = pos + (n - 8);
@@ -215,7 +176,7 @@ unsigned char *most_beg_of_line(void)
    ncols = SLtt_Screen_Cols-1;
    while (1)
      {
-	unsigned char *next_b = forward_columns (b, e, ncols);
+	unsigned char *next_b = most_forward_columns (b, e, ncols);
 	if ((next_b == e) || (next_b == b))
 	  break;
 	
@@ -230,33 +191,38 @@ unsigned char *most_beg_of_line(void)
 
 static unsigned char *end_of_line (unsigned char *b)
 {
-   unsigned char *e;
+   unsigned char *e, *b1;
 
    e = end_of_line1();
    if (Most_W_Opt == 0)
      return e;
 
    if (b == NULL) b = most_beg_of_line ();
-   b = forward_columns (b, e, SLtt_Screen_Cols-1);
+   b = most_forward_columns (b, e, SLtt_Screen_Cols-1);
    
    /* Do not wrap the line if the last character falls on the last column 
     * of the display.
     */
-   if ((b + 1 <= e) 
-       && (b + 1 < Most_Eob) 
-       && (b[1] == '\n'))
-     b++;
+   if (Most_UTF8_Mode == 0)
+     b1 = b + 1;
+   else
+     b1 = SLutf8_bskip_char (b, Most_Eob);
+
+   if ((b1 <= e)
+       && (b1 < Most_Eob)
+       && (*b1 == '\n'))
+     b = b1;
 
    return b;
 }
 
-int most_forward_line(int save)
+MOST_INT most_forward_line (MOST_INT save)
 {
-   int m;
-   register int n = save;
+   MOST_INT m, n;
    unsigned char *p;
    unsigned char *pmax;
 
+   n = save;
    pmax = Most_Eob;
 
    if (n > 0)
@@ -346,14 +312,14 @@ int most_forward_line(int save)
 }
 
 /* Count lines in the region.  A half line counts as 1 */
-int most_count_lines(unsigned char *beg, unsigned char *end)
+MOST_INT most_count_lines(unsigned char *beg, unsigned char *end)
 {
-   int save_line, n;
+   MOST_INT save_line, n;
    unsigned char *save_beg, *save_eob;
-   unsigned int save_pos;
+   MOST_UINT save_pos;
    int dn = 1000;
 
-   if (Most_B_Opt) return(1 + (int)(end - beg) / 16);
+   if (Most_B_Opt) return(1 + (MOST_INT)(end - beg) / 16);
 
    save_line = Most_C_Line; save_beg = Most_Beg; save_eob = Most_Eob;
    save_pos = Most_C_Offset;
@@ -371,9 +337,9 @@ int most_count_lines(unsigned char *beg, unsigned char *end)
    return(n);
 }
 
-void most_goto_line(int line)
+void most_goto_line (MOST_INT line)
 {
-   int dif_c, dif_b,dif_t;
+   MOST_INT dif_c, dif_b, dif_t;
 
    if (line < 1) line = 1;
    most_read_to_line(line);
@@ -428,11 +394,11 @@ int most_extract_line(unsigned char **beg, unsigned char **end)
    return 0;
 }
 
-int most_what_line(unsigned char *pos)
+MOST_INT most_what_line(unsigned char *pos)
 {
    unsigned int save_pos;
-   int save_line, dir;
-   register int dif_c, dif_b,dif_t;
+   MOST_INT save_line, dir;
+   MOST_INT dif_c, dif_b,dif_t;
    int ret;
 
    if (Most_B_Opt)
@@ -517,11 +483,11 @@ int most_what_line(unsigned char *pos)
 }
 
 /* given a buffer position, find the line and column */
-void most_find_row_column(unsigned char *pos, int *r, int *c)
+void most_find_row_column(unsigned char *pos, MOST_INT *r, MOST_INT *c)
 {
    unsigned char *beg;
    unsigned int save_offset;
-   int save_line;
+   MOST_INT save_line;
 
    if (pos <= Most_Beg)
      {
@@ -542,10 +508,20 @@ void most_find_row_column(unsigned char *pos, int *r, int *c)
    Most_C_Line = *r;
    Most_C_Offset = pos - Most_Beg;
 
-    /* Now we have found the line it is on so.... */
+   /* Now we have found the line it is on so.... */
    beg = most_beg_of_line();
    *c = 1;
-   while (beg++ < pos) *c = *c + 1;
+   if (Most_UTF8_Mode)
+     {
+	/* FIXME: This should take into account the printable representation
+	 * of the characters.
+	 */
+	while ((beg = SLutf8_skip_chars (beg, pos, 1, NULL, 1)) < pos)
+	  *c += 1;
+     }
+   else 
+     while (beg++ < pos) *c = *c + 1;
+
    Most_C_Line = save_line;
    Most_C_Offset = save_offset;
 }

@@ -44,6 +44,9 @@ INCS = $(SLANG_INC)
 ALL_CFLAGS = $(CFLAGS) -Dunix $(INCS)
 EXECLIBS = $(RPATH) $(SLANG_LIB) $(MISCLIBS) -lm
 #
+most_O_DEP = $(SRCDIR)/version.h
+UPDATE_VERSION_SCRIPT = $(HOME)/bin/update_changes_version
+
 COMPILE_CMD = $(CC) -c $(ALL_CFLAGS) -DMOST_SYSTEM_INITFILE='"$(SYS_INITFILE)"'
 #
 all: $(EXEC)
@@ -59,10 +62,16 @@ $(CONFIG_H) : $(SRCDIR)/sysconf.h
 	/bin/cp $(SRCDIR)/sysconf.h $(CONFIG_H)
 #
 slangversion: $(OBJDIR)/chkslang
-	$(OBJDIR)/chkslang $(EXEC) 10000
+	$(OBJDIR)/chkslang $(EXEC) 20000
 #
 $(OBJDIR)/chkslang: $(OBJDIR)/chkslang.o
 	$(CC) $(OBJDIR)/chkslang.o -o $(OBJDIR)/chkslang
+#
+$(SRCDIR)/version.h: $(SRCDIR)/../changes.txt
+	if [ -x $(UPDATE_VERSION_SCRIPT) ]; then \
+	  $(UPDATE_VERSION_SCRIPT) $(SRCDIR)/../changes.txt $(SRCDIR)/version.h; \
+	fi
+#
 clean:
 	/bin/rm -f $(OBJDIR)/* *~
 distclean: clean

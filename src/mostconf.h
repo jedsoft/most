@@ -39,4 +39,8 @@
 
 #define MAX_PATHLEN 256
 
+#define MOST_INT long
+#define MOST_UINT unsigned long
+#define MOST_INT_D_FMT "%ld"
+
 #define MOST_HAS_MMAP	0

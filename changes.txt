@@ -4,7 +4,7 @@ Changes since 4.10.2
    seem to be more common in man pages.
 2. When switching searching directions, and no search string was
    entered at the search prompt, use the previous string.
-3. Added patches for UTF-8 support kindly provided by Javier Koehn.
+3. Added patches for UTF-8 support kindly provided by Javier Kohen.
 4. src/most.c: Removed references to Kanji from the usage message.
    Kanji is not supported by slang-2.  Use Unicode.
 5. src/file.c: Most will automatically start up in binary mode if the

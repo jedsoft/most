@@ -14,6 +14,8 @@ Changes since 4.10.2
 6. autoconf/config.sub,config.guess: Updated to more recent versions.
 7. src/most.c: Add +u/-u switches to force UTF-8 on/off.  The default
    behavior depends upon the locale.
+8. src/sysdep.c: In most_getkey, if SLang_getkey returns an error,
+   then just exit.
 
 Changes since 4.10.1
 1. src/window.c:most_read_from_minibuffer: An variable was not being

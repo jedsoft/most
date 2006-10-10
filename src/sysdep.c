@@ -479,13 +479,16 @@ int most_reinit_terminal (void)
 }
 
 
-char most_getkey()
+int most_getkey()
 {
-   char ch;
-   ch = (char) SLang_getkey ();
+   unsigned int ch;
+   ch = SLang_getkey ();
+   if (ch == SLANG_GETKEY_ERROR)
+     most_exit_error ("most: getkey error.");
+
    SLKeyBoard_Quit = 0;
    SLang_set_error (0);
-   return ch;
+   return (int) ch;
 }
 
 /*

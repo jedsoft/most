@@ -42,6 +42,8 @@ int Most_Search_Dir = 1;
 
 #include "jdmacros.h"
 
+#define SLANG_REGEXP 0
+
 #define UPCASE(ch) ((!Most_Case_Sensitive && (ch <= 'z') && (ch >= 'a')) ? (ch - 32) : ch)
 
 #if	defined(HAVE_V8_REGCOMP) || defined(SLANG_REGEXP)

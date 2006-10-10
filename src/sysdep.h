@@ -21,7 +21,7 @@ extern char *most_unix2vms(char *);
 extern int most_reinit_terminal (void);
 extern void most_init_tty(void);
 extern void most_reset_tty(void);
-extern char most_getkey(void);
+extern int most_getkey(void);
 extern void most_get_term_dimensions(int *, int *);
 extern int most_delete_file(char *);
 extern void most_set_width(int, int);

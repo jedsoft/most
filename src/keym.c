@@ -659,7 +659,7 @@ static void sldo_key (void)
 {
    SLang_Key_Type *key;
 
-   key = SLang_do_key (Most_Keymap, (int (*)(void)) SLang_getkey);
+   key = SLang_do_key (Most_Keymap, most_getkey);
    SLKeyBoard_Quit = 0;
    SLang_set_error (0);
    Last_Char = SLang_Last_Key_Char;

@@ -128,6 +128,7 @@ static int parse_escape (unsigned char **begp, unsigned char *end, int *colorp)
    if ((beg >= end) || (*beg != '['))
      return -1;
 
+   /* FIXME: Add support for ESC [ fg ; bg m */
    beg++; /* skip [ */
    color = 0;
    while ((beg < end) && isdigit (*beg))

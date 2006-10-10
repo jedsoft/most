@@ -112,7 +112,7 @@ void most_put_message ()
 	/* wait half a second */
 	if (SLang_input_pending (5))
 	  {
-	     (void) SLang_getkey ();
+	     (void) most_getkey ();
 	     SLKeyBoard_Quit = 0;
 	     SLang_set_error (0);
 	  }
@@ -182,7 +182,7 @@ static SLang_RLine_Info_Type  *init_readline (void)
    rli->buf_len = 255;
    rli->tab = 8;
    rli->dhscroll = 20;
-   rli->getkey = SLang_getkey;
+   rli->getkey = most_getkey;
    rli->tt_goto_column = NULL;
    rli->update_hook = rline_update;
 

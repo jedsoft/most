@@ -33,7 +33,7 @@
 
 /* Note!!!  The regular expression searches may not work.  I have not
  * tested them.
- * FIXME!!!
+ * FIXME!!!  This whole thing needs to be rewritten.  It is a mess.
  */
 
 int Most_Case_Sensitive = 0;
@@ -42,7 +42,8 @@ int Most_Search_Dir = 1;
 
 #include "jdmacros.h"
 
-#define SLANG_REGEXP 0
+#undef SLANG_REGEXP
+#undef HAVE_V8_REGCOMP
 
 #define UPCASE(ch) ((!Most_Case_Sensitive && (ch <= 'z') && (ch >= 'a')) ? (ch - 32) : ch)
 
@@ -189,7 +190,7 @@ static int do_regcomp(unsigned char *key)
  * Call the appropriate regular expression execute function
  */
 
-static unsigned char *do_regexec(unsigned char *string)
+static unsigned char *do_regexec(unsigned char *string, unsigned int len)
 {
 # ifdef	HAVE_V8_REGCOMP
    if ( regexec(regpattern, (char *)string) )
@@ -198,9 +199,9 @@ static unsigned char *do_regexec(unsigned char *string)
      return( NULL );
 # else
 #  if SLANG_VERSION < 20000
-   return ( SLang_regexp_match(string, strlen((char *)string), &regdata) );
+   return ( SLang_regexp_match(string, len, &regdata) );
 #  else
-   return (unsigned char *)SLregexp_match (Regexp, (char *)string, strlen ((char *)string));
+   return (unsigned char *)SLregexp_match (Regexp, (char *)string, len));
 #  endif
 # endif	/* HAVE_V8_REGCOMP */
 }
@@ -299,24 +300,17 @@ static unsigned char *GetOrigPtr(unsigned char *original, int offset)
 /* We should try to optimize this routine */
 /* searches from beg up to but not including end */
 
-static unsigned char *forw_search_region(unsigned char *beg,
-					 unsigned char *end,
-					 unsigned char *key)
+#if defined(SLANG_REGEXP)
+static unsigned char *
+  forw_search_region_regexp (unsigned char *beg, unsigned char *end,
+			     unsigned char *key)
 {
-#if	defined(HAVE_V8_REGCOMP) || defined(SLANG_REGEXP)
-    /*
-     *	A big chunk of text with embedded newlines is passed in.  This needs
-     *	to be broken into lines.
-     *
-     */
-   unsigned char	*p;		/* temp pointer */
-   unsigned char	*linebeg;	/* beginning of working line */
-   unsigned char	*copy;		/* ptr to upper case copy */
-   unsigned char	*match;		/* ptr to matching string */
+   if (Regexp != NULL)
+     SLregexp_free (Regexp);
 
-    /*
-     *	Compile "key" into an executable regular expression
-     */
+   if (NULL == (Regexp = SLregexp_compile ((char *)key, Most_Case_Sensitive ? 0 : SLREGEXP_CASELESS)))
+     return NULL;
+
    if ( do_regcomp(key) == 0 )
      return(Most_Eob);
 
@@ -324,6 +318,8 @@ static unsigned char *forw_search_region(unsigned char *beg,
      *	For regular expression searches we need to do a line by line
      *	search, so it is necessary to temporarily replace '\n' with '\0'
      *	characters.
+     * 
+     * ***** THIS IS NOT ALLOWED FOR MMAPPED FILES!!!!!!!!! *****
      */
    p = beg;
    linebeg = beg;
@@ -332,7 +328,7 @@ static unsigned char *forw_search_region(unsigned char *beg,
      {
 	while ((p < end) && (*p != '\n')) p++;
 	if (p == end) break;
-	*p = 0;
+	/* *p = 0; -- not allow for mmapped files */
 
 	if ( Most_Case_Sensitive == 0 )	/* i.e. case insensitive */
 	  {
@@ -355,7 +351,7 @@ static unsigned char *forw_search_region(unsigned char *beg,
 #endif
 	     (match = do_regexec(Most_Case_Sensitive ? linebeg : copy)))
 	  {
-	     *p = '\n';
+	     /* *p = '\n'; --- NOT ALLOWED */
 	     if ( Most_Case_Sensitive == 0 )
 	       {
 		/*
@@ -370,11 +366,20 @@ static unsigned char *forw_search_region(unsigned char *beg,
 	       }
 	  }
 
-	*p++ = '\n';
+	/* *p++ = '\n'; */
 	linebeg = p;
      }
 
    return(Most_Eob);
+}
+
+#endif
+static unsigned char *forw_search_region(unsigned char *beg,
+					 unsigned char *end,
+					 unsigned char *key)
+{
+#if defined(HAVE_V8_REGCOMP) || defined(SLANG_REGEXP)
+   return forw_search_region_regexp (beg, end, key);
 #else
    char ch, char1, work[256];
    unsigned char *pos;

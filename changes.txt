@@ -16,6 +16,8 @@ Changes since 4.10.2
    behavior depends upon the locale.
 8. src/sysdep.c: In most_getkey, if SLang_getkey returns an error,
    then just exit.
+9. src/search.c: Added `#undef SLANG_REGEXP' and `#undef
+   HAVE_V8_REGCOMP' until the regexp searches are rewritten.
 
 Changes since 4.10.1
 1. src/window.c:most_read_from_minibuffer: An variable was not being

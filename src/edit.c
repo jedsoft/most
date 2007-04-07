@@ -46,17 +46,94 @@
 #include "file.h"
 #include "sysdep.h"
 
-static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd)
+
+/* quote_char is one of: 0, ", or '.  It represents the character
+ * that will be used to quote the filename.
+ */
+static char *escape_filename (char *file, char quote_char)
+{
+   char *efile, *e;
+   
+   if (NULL == (efile = SLmalloc (5 + 2*strlen(file))))
+     return NULL;
+
+   e = efile;
+
+#ifndef VMS
+   if (quote_char == 0)
+     {
+	/* No quote char was used for the filename command.  Add it here. */
+	*e++ = '"';
+     }
+   else if (quote_char == '\'')
+     {
+	/* Suppose the file is Bob's Notes.  With ' as the quote, when passed
+	 * to the shell, it would look like 'Bob's Notes'.  Unfortunately, this
+	 * would produce an unmatched single quote when processed by the shell.
+	 * So, the following escaped form will be used:
+	 *    ''"Bob's Notes"''
+	 */
+	*e++ = '\'';
+	*e++ = '"';
+     }
+#endif
+
+   while (1)
+     {
+	char ch = *file++;
+	switch (ch)
+	  {
+	   case 0:
+#ifndef VMS
+	     if (quote_char == 0)
+	       *e++ = '"';
+	     else if (quote_char == '\'')
+	       {
+		  *e++ = '"';
+		  *e++ = '\'';
+	       }
+#endif
+	     *e = 0;
+	     return efile;
+#ifndef VMS
+	     /* For a double-quoted string, only the following characters
+	      * may be escaped with a backslash.  Unfortuinately, escaping 
+	      * others such as &, *, |, etc will not work.
+	      */
+	   case '\\': case '$': case '"': case '`': case '\n':
+	     *e++ = '\\';
+	     *e++ = ch;
+	     break;
+#endif
+	   default:
+	     *e++ = ch;
+	  }
+     }
+}
+
+static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, char *file)
 {
    int d, s;
    char ch, *p = edit;
+   char *efile;
+   char quote_char = '"';
    /* Look for %d and %s */
 
    d = s = 0;
 
    while (0 != (ch = *p++))
      {
+	char q = 0;
+
+	if (((ch == '\'') || (ch == '"'))
+	    && (*p == '%'))
+	  {
+	     q = ch;
+	     ch = '%';
+	     p++;
+	  }
 	if (ch != '%') continue;
+
 	ch = *p++;
 	if (!d && (ch == 'd'))
 	  {
@@ -65,44 +142,57 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd)
 	else if (!s && (ch == 's'))
 	  {
 	     if (d == 0) s = 1; else s = 2;
+	     if (q && (q != *p))
+	       {
+		  most_message ("Unmatched quote character in editor definition", 1);
+		  return -1;
+	       }
+	     quote_char = q;
 	  }
 	else
 	  {
-	     most_message ("Invalid Editor definition.", 1);
+	     most_message ("Invalid editor definition.", 1);
 	     return -1;
 	  }
      }
 
-   /* No %d, %s */
+   if (NULL == (efile = escape_filename (file, quote_char)))
+     return -1;
+
 
    if ((d == 0) && (s == 0))
      {
-	_pSLsnprintf (cmd, sizeof_cmd, "%s %s", edit, Most_Buf->file);
+	/* No %d, %s */
+	_pSLsnprintf (cmd, sizeof_cmd, "%s \"%s\"", edit, efile);
+	SLfree (efile);
 	return 0;
      }
    
    if (d == 0)
      {
-	_pSLsnprintf (cmd, sizeof_cmd, edit, Most_Buf->file);
+	_pSLsnprintf (cmd, sizeof_cmd, edit, efile);
+	SLfree (efile);
 	return 0;
      }
 
    if (d && s)
      {
 	if (d == 1)
-	  _pSLsnprintf (cmd, sizeof_cmd, edit, Most_C_Line, Most_Buf->file);
+	  _pSLsnprintf (cmd, sizeof_cmd, edit, Most_C_Line, efile);
 	else 
-	  _pSLsnprintf (cmd, sizeof_cmd, edit, Most_Buf->file, Most_C_Line);
+	  _pSLsnprintf (cmd, sizeof_cmd, edit, efile, Most_C_Line);
 	
+	SLfree (efile);
 	return 0;
      }
 
    most_message ("Unsupported Editor definition", 1);
+   SLfree (efile);
    return -1;
 }
 
 #ifdef VMS
-int call_edt_tpu(int tpu)
+int call_edt_tpu(int tpu, char *file)
 {
    char the_file[MAX_PATHLEN], *strp;
    extern void edt$edit();
@@ -114,7 +204,7 @@ int call_edt_tpu(int tpu)
    else
      the_file[0] = '\0';
 
-   strcat(the_file, Most_Buf->file);
+   strcat(the_file, file);
 
    /*  lose the version number */
    strp = the_file;
@@ -142,8 +232,12 @@ void most_edit_cmd(void)
 #ifdef VMS
    int tpu = -1;
 #endif
+   char *file;
+   
+   file = Most_Buf->file;
 
-   if ((0 == *Most_Buf->file) || ('*' == *Most_Buf->file)) return;
+   if ((0 == *file) || ('*' == *file))
+     return;
 
    if (Most_Secure_Mode)
      {
@@ -165,14 +259,14 @@ void most_edit_cmd(void)
    else if (!strcmp(editor,"TPU")) tpu = 1;
    else
 #endif
-     if (-1 == create_edit_command(editor, cmd, sizeof(cmd))) 
+     if (-1 == create_edit_command(editor, cmd, sizeof(cmd), file))
        return;
 
    most_reset_tty ();
    most_reset_display ();
 
 #ifdef VMS
-   if (tpu != -1) (void) call_edt_tpu(tpu);
+   if (tpu != -1) (void) call_edt_tpu(tpu, file);
    else
 #endif
      SLsystem (cmd);

@@ -18,6 +18,8 @@ Changes since 4.10.2
    then just exit.
 9. src/search.c: Added `#undef SLANG_REGEXP' and `#undef
    HAVE_V8_REGCOMP' until the regexp searches are rewritten.
+10. src/edit.c: Filenames are quoted before being passed to the shell
+    for editing.
 
 Changes since 4.10.1
 1. src/window.c:most_read_from_minibuffer: An variable was not being

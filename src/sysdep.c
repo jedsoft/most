@@ -374,6 +374,7 @@ static int init_tty (void)
 #if defined(REAL_UNIX_SYSTEM)
    SLsig_block_signals ();
 #endif
+
    if (-1 == SLang_init_tty (7, 0, 1))
      {
 	fprintf (stderr, "most: failed to init terminal.\n");

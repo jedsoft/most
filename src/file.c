@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -53,6 +53,7 @@
 #include "buffer.h"
 #include "display.h"
 #include "sysdep.h"
+#include "edit.h"
 
 char *Most_File_Ring[MOST_MAX_FILES];
 char Most_C_Dir[MAX_PATHLEN];                 /* current working dir */
@@ -60,10 +61,23 @@ int Most_Num_Files;
 int Most_Tail_Mode = 1;
 
 #if !defined(VMS)
+
+static int create_gunzip_cmd (char *cmd, char *file, char *buf, unsigned int sizeof_buf)
+{
+   char *efile;
+   
+   if (NULL == (efile = most_escape_filename (file, '"')))
+     return -1;
+
+   _pSLsnprintf (buf, sizeof_buf, cmd, efile);
+   SLfree (efile);
+   return 0;
+}
+
 static int open_compressed_file(char *file, int mode, int *size)
 {
    int fd;
-   char buf[4], cmdbuf[512 + MAX_PATHLEN];
+   char buf[4], cmdbuf[2*MAX_PATHLEN];
    struct stat st;
 
 # ifdef O_BINARY
@@ -107,7 +121,8 @@ static int open_compressed_file(char *file, int mode, int *size)
 	     close (fd);
 	     most_flush_message ("Uncompressing file...");
 
-	     sprintf (cmdbuf, cmd, file);
+	     if (-1 == create_gunzip_cmd (cmd, file, cmdbuf, sizeof(cmdbuf)))
+	       return -1;
 	     fp = popen (cmdbuf, "r"); /* GLIBC doe not support "rb" */
 	     if (fp == NULL)
 	       return -1;

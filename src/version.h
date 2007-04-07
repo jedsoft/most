@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 2006 John E. Davis
+ Copyright (c) 2006, 2007 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -20,5 +20,5 @@
 #ifndef MOST_VERSION
 #define MOST_VERSION	50000
 
-#define MOST_VERSION_STR "pre5.0.0-10"
+#define MOST_VERSION_STR "pre5.0.0-11"
 #endif				       /* MOST_VERSION */

@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -50,7 +50,7 @@
 /* quote_char is one of: 0, ", or '.  It represents the character
  * that will be used to quote the filename.
  */
-static char *escape_filename (char *file, char quote_char)
+char *most_escape_filename (char *file, char quote_char)
 {
    char *efile, *e;
    
@@ -156,7 +156,7 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, 
 	  }
      }
 
-   if (NULL == (efile = escape_filename (file, quote_char)))
+   if (NULL == (efile = most_escape_filename (file, quote_char)))
      return -1;
 
 

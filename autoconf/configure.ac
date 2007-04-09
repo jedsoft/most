@@ -56,6 +56,7 @@ putenv \
 getcwd \
 mmap \
 snprintf \
+getpgrp tcgetpgrp \
 )
 
 JD_SET_OBJ_SRC_DIR

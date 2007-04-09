@@ -8847,6 +8847,8 @@ _ACEOF
 
 
 
+
+
 for ac_func in \
 memset \
 memcpy \
@@ -8854,6 +8856,7 @@ putenv \
 getcwd \
 mmap \
 snprintf \
+getpgrp tcgetpgrp \
 
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`

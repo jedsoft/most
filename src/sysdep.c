@@ -311,6 +311,7 @@ static void unix_hangup(int sig)
 #endif /* unix */
 
 static int Want_Window_Size_Change;
+static int Most_TTY_Inited = 0;
 
 #ifdef REAL_UNIX_SYSTEM
 static int handle_interrupts (void)
@@ -367,7 +368,6 @@ void most_resize_display (void)
    most_redraw_display ();
 }
 
-int Most_TTY_Inited;
 
 static int init_tty (void)
 {
@@ -394,7 +394,7 @@ void most_init_tty (void)
 {
    int i;
    if (Most_TTY_Inited) return;
-   
+
    (void) init_tty ();
 #if !defined(IBMPC_SYSTEM)
    SLsig_block_signals ();
@@ -480,13 +480,55 @@ int most_reinit_terminal (void)
 }
 
 
+/* slang uses select to wait for terminal input.  If SIGINT is
+ * generated, then slang returns ^G and sets SLKeyBoard_Quit
+ * to 1 bypassing the read altogether.  If most was used in
+ * conjunction with xargs (find . -print | xargs most) and ^G
+ * is pressed, a SIGINT will be generated killing xargs and
+ * leaving most an orphan unable to access the terminal.
+ * Unfortunately, the select call will continue to time-out
+ * causing most continue running in the background.  To
+ * workaround this problem, exit if the terminal is not in the
+ * same process group as most.
+ */
+static void check_if_foreground (void)
+{
+#if defined(HAVE_GETPGRP) && defined(HAVE_TCGETPGRP)
+   pid_t pgid = getpgrp ();
+
+   if ((SLang_TT_Read_FD != -1)
+       && (pgid != tcgetpgrp (SLang_TT_Read_FD)))
+     {
+	most_exit_error ("\007Fatal Error: Most is not in the terminal's process group.");
+     }
+#endif
+}
+
 int most_getkey()
 {
    unsigned int ch;
+   static int last_was_sigint;
+
+   /* This non-sense involving last_was_sigint is to handle a race condition.
+    * The shell may not have had time to change the pgids, so sleep a bit
+    * here.  Yea, its ugly and does not really solve the problem...
+    */
+   if (last_was_sigint)
+     {
+	sleep (1);
+	check_if_foreground ();
+	last_was_sigint = 0;
+     }
+
    ch = SLang_getkey ();
    if (ch == SLANG_GETKEY_ERROR)
      most_exit_error ("most: getkey error.");
 
+   if (SLKeyBoard_Quit)
+     {
+	check_if_foreground ();
+	last_was_sigint = 1;
+     }
    SLKeyBoard_Quit = 0;
    SLang_set_error (0);
    return (int) ch;

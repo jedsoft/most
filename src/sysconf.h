@@ -52,6 +52,9 @@
 
 #define HAVE_MMAP 1
 
+#define HAVE_TCGETPGRP 1
+#define HAVE_GETPGRP 1
+
 #define HAVE_DIRENT_H 1
 /* #undef HAVE_SYS_NDIR_H */
 /* #undef HAVE_SYS_DIR_H */

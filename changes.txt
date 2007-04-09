@@ -20,6 +20,10 @@ Changes since 4.10.2
    HAVE_V8_REGCOMP' until the regexp searches are rewritten.
 10. src/edit.c: Filenames are quoted before being passed to the shell
     for editing.
+11. src/file.c: Filenames are quoted before being passed to the unzip
+    program.
+12. src/sysdep.c: Check the process group id of the terminal and
+    if it does not match that of most, then exit.
 
 Changes since 4.10.1
 1. src/window.c:most_read_from_minibuffer: An variable was not being

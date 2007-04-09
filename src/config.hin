@@ -51,6 +51,9 @@
 
 #undef HAVE_MMAP
 
+#undef HAVE_TCGETPGRP
+#undef HAVE_GETPGRP
+
 #undef HAVE_DIRENT_H
 #undef HAVE_SYS_NDIR_H
 #undef HAVE_SYS_DIR_H

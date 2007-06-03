@@ -302,6 +302,13 @@ static void find_next_cmd(void)
    Most_Curs_Col = col;
 }
 
+static void find_next_opposite_dir_cmd (void)
+{
+   Most_Search_Dir = -Most_Search_Dir;
+   find_next_cmd ();
+   Most_Search_Dir = -Most_Search_Dir;
+}
+
 static void search_cmd_dir (char *prompt, int dir)
 {
    char buf[MOST_SEARCH_BUF_LEN];
@@ -451,6 +458,7 @@ SLKeymap_Function_Type Most_Functions [] =
    A_KEY("exit", most_exit_most),
    A_KEY("find_file", find_file_cmd),
    A_KEY("find_next", find_next_cmd),
+   A_KEY("find_next_other_dir", find_next_opposite_dir_cmd),
    A_KEY("goto_line", goto_line_cmd),
    A_KEY("goto_mark", goto_mark_cmd),
    A_KEY("goto_percent", goto_percent_cmd),
@@ -532,7 +540,8 @@ void most_init_keymaps (void)
    SLkm_define_key ("J", (FVOID_STAR) goto_line_cmd, Most_Keymap);
    SLkm_define_key ("L", (FVOID_STAR) most_toggle_lock, Most_Keymap);
    SLkm_define_key ("M", (FVOID_STAR) set_mark_cmd, Most_Keymap);
-   SLkm_define_key ("N", (FVOID_STAR) find_next_cmd, Most_Keymap);
+   SLkm_define_key ("n", (FVOID_STAR) find_next_cmd, Most_Keymap);
+   SLkm_define_key ("N", (FVOID_STAR) find_next_opposite_dir_cmd, Most_Keymap);
    SLkm_define_key ("O", (FVOID_STAR) other_window_cmd, Most_Keymap);
    SLkm_define_key ("Q", (FVOID_STAR) most_exit_most, Most_Keymap);
    SLkm_define_key ("R", (FVOID_STAR) redraw_cmd, Most_Keymap);

@@ -24,6 +24,9 @@ Changes since 4.10.2
     program.
 12. src/sysdep.c: Check the process group id of the terminal and
     if it does not match that of most, then exit.
+13. src/keym.c: Added "find_next_other_dir" function and bound it to N.
+14. src/most.c: New commandline switch: "-d".  This switch disables
+    the display of the \ character used to denote a wrapped line.
 
 Changes since 4.10.1
 1. src/window.c:most_read_from_minibuffer: An variable was not being

@@ -49,6 +49,7 @@
 #include "sysdep.h"
 #include "keym.h"
 #include "display.h"
+#include "line.h"
 
 int Most_S_Opt = 0;		       /* squeeze liness */
 int Most_A_Opt = 1;		       /* automatically choose -b if necessary */
@@ -87,11 +88,12 @@ void most_usage (void)
      fprintf (stderr, " *Note: This executable was compiled against S-Lang %s\n", SLANG_VERSION_STRING);
      
    fprintf (stderr, "Usage:\n");
-   fprintf(stderr, "most [-1Cbckstvw] [+/string] [+line number] [+s] [+d] file...\n");
+   fprintf(stderr, "most [-1Cbcdkstvw] [+/string] [+line number] [+s] [+d] file...\n");
    fputs(" where: -1:  assume VT100 terminal. (VMS only)\n", stderr);
    fputs("        -b:  Startup in binary mode.\n", stderr);
    fputs("        -C:  disable color support\n", stderr);
    fputs("        -c:  Make searches case sensitive.\n", stderr);
+   fputs("        -d:  Do not display the \\ wrap marker when wrapping lines.\n", stderr);
    /* fputs("        -k:  Kanji mode.\n", stderr); */
 #if MOST_HAS_MMAP
    fputs("        -M:  Do not attempt to mmap files.\n", stderr);
@@ -209,6 +211,9 @@ static void do_switches(char *str)
 	   case 'c':
 	     Most_Case_Sensitive = 1;
 	     break;
+	   case 'd':
+	   case 'D':
+	     Most_Show_Wrap_Marker = 0;
 	   case 's':
 	   case 'S':
 	     Most_S_Opt = 1; break;

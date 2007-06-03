@@ -34,6 +34,7 @@
 int Most_Tab_Width = 8;
 
 int Most_Selective_Display = 0;
+int Most_Show_Wrap_Marker = 1;
 
 #define IS_BYTE_PRINTABLE(b) \
    ((((b) >= ' ') && ((b) < 0x7F)) \
@@ -432,7 +433,8 @@ void most_display_line (void)
    dollar = 0;
    if (Most_W_Opt)
      {
-	if ((end < Most_Eob)
+	if (Most_Show_Wrap_Marker
+	    && (end < Most_Eob)
 	    && (*end != '\n'))
 	  dollar = '\\';
      }

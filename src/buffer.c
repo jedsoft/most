@@ -173,7 +173,9 @@ unsigned char *most_beg_of_line(void)
 
    b = beg_of_line1 ();
    e = end_of_line1 ();
-   ncols = SLtt_Screen_Cols-1;
+   ncols = SLtt_Screen_Cols;
+   if (Most_Show_Wrap_Marker)
+     ncols--;
    while (1)
      {
 	unsigned char *next_b = most_forward_columns (b, e, ncols);
@@ -192,26 +194,35 @@ unsigned char *most_beg_of_line(void)
 static unsigned char *end_of_line (unsigned char *b)
 {
    unsigned char *e, *b1;
+   int ncols;
 
    e = end_of_line1();
    if (Most_W_Opt == 0)
      return e;
 
    if (b == NULL) b = most_beg_of_line ();
-   b = most_forward_columns (b, e, SLtt_Screen_Cols-1);
+
+   ncols = SLtt_Screen_Cols;
+   if (Most_Show_Wrap_Marker)
+     ncols--;
+
+   b = most_forward_columns (b, e, ncols);
    
    /* Do not wrap the line if the last character falls on the last column 
     * of the display.
     */
-   if (Most_UTF8_Mode == 0)
-     b1 = b + 1;
-   else
-     b1 = SLutf8_bskip_char (b, Most_Eob);
-
-   if ((b1 <= e)
-       && (b1 < Most_Eob)
-       && (*b1 == '\n'))
-     b = b1;
+   if (Most_Show_Wrap_Marker)
+     {
+	if (Most_UTF8_Mode == 0)
+	  b1 = b + 1;
+	else
+	  b1 = SLutf8_skip_char (b, Most_Eob);
+	
+	if ((b1 <= e)
+	    && (b1 < Most_Eob)
+	    && (*b1 == '\n'))
+	  b = b1;
+     }
 
    return b;
 }

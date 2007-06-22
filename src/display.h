@@ -23,6 +23,8 @@
 #define MOST_ULINE_COLOR	4
 #define MOST_STATUS_COLOR	7
 
+#define MOST_EMBEDDED_COLOR_OFFSET 32
+
 extern void most_tt_set_color (int color);
 extern void most_tt_reverse_video(void);
 extern void most_tt_bold_video(void);

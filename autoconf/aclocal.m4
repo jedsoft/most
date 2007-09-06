@@ -1,4 +1,10 @@
 dnl# -*- mode: sh; mode: fold -*-
+dnl# 0.2.1:  Add .dll.a to list of extensions to when searching for libs (cygwin)
+dnl# 0.2.0:  Added install target name and more fixes for cygwin
+dnl# 0.1.12: Improved support for cygwin
+dnl# 0.1.11: Fixed elf linking on freebsd (Renato Botelho (garga at freebsd, org)
+dnl# Version 0.1.10: rpath support for netbsd
+dnl# Version 0.1.9: When searching for libs, use dylib on darwin
 dnl# Version 0.1.8: Add rpath support for OpenBSD
 dnl# Version 0.1.7: removed "-K pic" from IRIX compiler lines
 dnl# Version 0.1.6: Added cygwin module support
@@ -118,6 +124,12 @@ case "$host_os" in
       RPATH="-Wl,-rpath,"
     else
       RPATH="-rpath "
+    fi
+  ;;
+  *netbsd*)
+    if test "X$GCC" = Xyes
+    then
+      RPATH="-Wl,-R"
     fi
   ;;
 esac
@@ -536,9 +548,6 @@ AC_CHECK_HEADER(dlfcn.h,[
    ])])
 AC_SUBST(DYNAMIC_LINK_LIB)
 
-ELFLIB="lib\$(THIS_LIB).so"
-ELFLIB_MAJOR="\$(ELFLIB).\$(ELF_MAJOR_VERSION)"
-ELFLIB_MAJOR_MINOR="\$(ELFLIB).\$(ELF_MAJOR_VERSION).\$(ELF_MINOR_VERSION)"
 
 if test "$GCC" = yes
 then
@@ -548,7 +557,17 @@ then
   fi
 fi
 
+dnl #Some defaults
+ELFLIB="lib\$(THIS_LIB).so"
+ELFLIB_MAJOR="\$(ELFLIB).\$(ELF_MAJOR_VERSION)"
+ELFLIB_MAJOR_MINOR="\$(ELFLIB_MAJOR).\$(ELF_MINOR_VERSION)"
+ELFLIB_MAJOR_MINOR_MICRO="\$(ELFLIB_MAJOR_MINOR).\$(ELF_MICRO_VERSION)"
+
+dnl# This specifies the target to use in the makefile to install the shared library
+INSTALL_ELFLIB_TARGET="install-elf-and-links"
+ELFLIB_BUILD_NAME="\$(ELFLIB_MAJOR_MINOR_MICRO)"
 INSTALL_MODULE="\$(INSTALL_DATA)"
+SLANG_DLL_CFLAGS=""
 
 case "$host_os" in
   *linux*|*gnu*|k*bsd*-gnu )
@@ -628,30 +647,39 @@ case "$host_os" in
      ELFLIB="lib\$(THIS_LIB).dylib"
      ELFLIB_MAJOR="lib\$(THIS_LIB).\$(ELF_MAJOR_VERSION).dylib"
      ELFLIB_MAJOR_MINOR="lib\$(THIS_LIB).\$(ELF_MAJOR_VERSION).\$(ELF_MINOR_VERSION).dylib"
+     ELFLIB_MAJOR_MINOR_MICRO="lib\$(THIS_LIB).\$(ELF_MAJOR_VERSION).\$(ELF_MINOR_VERSION).\$(ELF_MICRO_VERSION).dylib"
      ;;
   *freebsd* )
-    ELFLIB_MAJOR_MINOR="\$(ELFLIB).\$(ELF_MAJOR_VERSION)"
     ELF_CC="\$(CC)"
     ELF_CFLAGS="\$(CFLAGS) -fPIC"
-    if test "X$PORTOBJFORMAT" = "Xelf" ; then
-      ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-soname,\$(ELFLIB_MAJOR)"
-    else
-      ELF_LINK="ld -Bshareable -x"
-    fi
+    #if test "X$PORTOBJFORMAT" = "Xelf" ; then
+    #  ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-soname,\$(ELFLIB_MAJOR)"
+    #else
+    #  ELF_LINK="ld -Bshareable -x"
+    #fi
+    ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-soname,\$(ELFLIB_MAJOR)"
     ELF_DEP_LIBS="\$(DL_LIB) -lm"
     CC_SHARED="\$(CC) \$(CFLAGS) -shared -fPIC"
     ;;
   *cygwin* )
     DYNAMIC_LINK_FLAGS=""
     ELF_CC="\$(CC)"
-    ELF_CFLAGS="\$(CFLAGS) "
+    SLANG_DLL_CFLAGS="-DSLANG_DLL=1"
+    ELF_CFLAGS="\$(CFLAGS) -DBUILD_DLL=1"
     DLL_IMPLIB_NAME="lib\$(THIS_LIB)\$(ELFLIB_MAJOR_VERSION).dll.a"
-    ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-O1 -Wl,--version-script,\$(VERSION_SCRIPT) -Wl,-soname,\$(ELFLIB_MAJOR) -Wl,--out-implib=\$(DLL_IMPLIB_NAME) -Wl,-export-all-symbols -Wl,-enable-auto-import"
+    #ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-O1 -Wl,--version-script,\$(VERSION_SCRIPT) -Wl,-soname,\$(ELFLIB_MAJOR) -Wl,--out-implib=\$(DLL_IMPLIB_NAME) -Wl,-export-all-symbols -Wl,-enable-auto-import"
+    ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-O1 -Wl,--version-script,\$(VERSION_SCRIPT) -Wl,-soname,\$(ELFLIB_MAJOR) -Wl,--out-implib=\$(DLL_IMPLIB_NAME)"
     ELF_DEP_LIBS="\$(DL_LIB) -lm"
-    CC_SHARED="\$(CC) \$(CFLAGS) -shared"
+    CC_SHARED="\$(CC) \$(CFLAGS) -shared -DSLANG_DLL=1"
     dnl# CYGWIN prohibits undefined symbols when linking shared libs
     SLANG_LIB_FOR_MODULES="-L\$(ELFDIR) -lslang"
     INSTALL_MODULE="\$(INSTALL)"
+    INSTALL_ELFLIB_TARGET="install-elf-cygwin"
+    ELFLIB="lib\$(THIS_LIB).dll"
+    ELFLIB_MAJOR="lib\$(THIS_LIB)\$(ELF_MAJOR_VERSION).dll"
+    ELFLIB_MAJOR_MINOR="lib\$(THIS_LIB)\$(ELF_MAJOR_VERSION)_\$(ELF_MINOR_VERSION).dll"
+    ELFLIB_MAJOR_MINOR_MICRO="lib\$(THIS_LIB)\$(ELF_MAJOR_VERSION)_\$(ELF_MINOR_VERSION)_\$(ELF_MICRO_VERSION).dll"
+    ELFLIB_BUILD_NAME="\$(ELFLIB_MAJOR)"
     ;;
   * )
     echo "Note: ELF compiler for host_os=$host_os may be wrong"
@@ -672,11 +700,14 @@ AC_SUBST(CC_SHARED)
 AC_SUBST(ELFLIB)
 AC_SUBST(ELFLIB_MAJOR)
 AC_SUBST(ELFLIB_MAJOR_MINOR)
+AC_SUBST(ELFLIB_MAJOR_MINOR_MICRO)
 AC_SUBST(SLANG_LIB_FOR_MODULES)
 AC_SUBST(DLL_IMPLIB_NAME)
 AC_SUBST(INSTALL_MODULE)
+AC_SUBST(INSTALL_ELFLIB_TARGET)
+AC_SUBST(ELFLIB_BUILD_NAME)
+AC_SUBST(SLANG_DLL_CFLAGS)
 ])
-
 
 dnl#}}}
 
@@ -836,14 +867,34 @@ AC_DEFUN(JD_CHECK_FOR_LIBRARY, dnl#{{{
   	  /opt/lib \
   	  /opt/lib/$1 \
   	  /opt/$1/lib"
-  
+
+       case "$host_os" in
+         *darwin* )
+	   exts="dylib so a"
+	   ;;
+	 *cygwin* )
+	   exts="dll.a so a"
+	   ;;
+	 * )
+	   exts="so a"
+       esac
+   
+       found=0
        for X in $lib_library_dirs
        do
-        if test -r "$X/lib$1.so" -o -r "$X/lib$1.a"
-  	then
-  	  jd_$1_library_dir="$X"
-	  break
-        fi
+         for E in $exts
+	 do
+           if test -r "$X/lib$1.$E"
+	   then
+  	     jd_$1_library_dir="$X"
+	     found=1
+	     break
+           fi
+         done
+	 if test $found -eq 1
+	 then
+	   break
+	 fi
        done
        if test X"$jd_$1_library_dir" = X
        then

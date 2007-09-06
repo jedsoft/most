@@ -28,7 +28,9 @@ Changes since 4.10.2
 14. src/most.c: New commandline switch: "-d".  This switch disables
     the display of the \ character used to denote a wrapped line.
 15. src/line.c: Added support for embedded ansi-color escape
-    sequences, e.g., `ls --color | most` 
+    sequences, e.g., `ls --color | most`
+16. src/window.c: Added an error hook to prevent slang from writing to
+    stderr.
 
 Changes since 4.10.1
 1. src/window.c:most_read_from_minibuffer: An variable was not being

@@ -549,6 +549,11 @@ static Most_Window_Type *make_window(int r1,int r2)
 
 int Most_Display_Inited = 0;
 
+static void error_hook (char *msg)
+{
+   most_message (msg, 1);
+}
+
 void most_init_display ()
 {
    int h = SLtt_Screen_Rows;
@@ -567,6 +572,8 @@ void most_init_display ()
    else Most_Top_Win->prev->bot = SLtt_Screen_Rows - 2;
 
    SLsmg_init_smg ();
+   SLang_Error_Hook = error_hook;
+
    most_goto_rc (Most_Win->top,1);
    Most_Display_Inited = 1;
    /* SLsmg_refresh (); */

@@ -20,5 +20,5 @@
 #ifndef MOST_VERSION
 #define MOST_VERSION	50000
 
-#define MOST_VERSION_STR "pre5.0.0-15"
+#define MOST_VERSION_STR "pre5.0.0-16"
 #endif				       /* MOST_VERSION */

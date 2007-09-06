@@ -9,12 +9,9 @@ On Unix, you should be able to simply type:
 
     ./configure; make
 
-at the Unix prompt.  If you want to try the new support for memory
-mapping files, use:
-
-    ./configure --enable-mmap; make
-
-(Memory mapping a file has many performance advantages).
+at the Unix prompt.   If you are using CYGWIN, you will need to ensure
+that libslang.dll is on your PATH; otherwise the chkslang program will
+not run.
 
 If using DJGPP or MINGW32, do:
    

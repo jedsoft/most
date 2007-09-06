@@ -2,6 +2,7 @@ dnl -*- sh -*-
 AC_INIT(src/most.c)
 JD_INIT
 JD_ANSI_CC
+JD_ELF_COMPILER
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_PROG_MAKE_SET

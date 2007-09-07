@@ -31,6 +31,8 @@ Changes since 4.10.2
     sequences, e.g., `ls --color | most`
 16. src/window.c: Added an error hook to prevent slang from writing to
     stderr.
+17. src/line.c: An ascii character+combining character was not being
+    handled.
 
 Changes since 4.10.1
 1. src/window.c:most_read_from_minibuffer: An variable was not being

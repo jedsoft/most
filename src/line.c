@@ -306,7 +306,21 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	     if ((Most_UTF8_Mode)
 		 && (NULL != SLutf8_decode (pch, end, &wch, NULL)))
 	       {
+		  int width = SLwchar_wcwidth (wch);
 		  beg = SLutf8_skip_chars (pch, end, 1, NULL, 1);
+		  
+		  if (width == 0)
+		    {
+		       col--;
+		       if ((col >= min_col) && (col < max_col))
+			 {
+			    cell = cells + (col-min_col);
+			    cell->len += beg-pch;
+			 }
+		       col++;
+		       continue;
+		    }
+
 		  if ((col >= min_col) && (col < max_col))
 		    {
 		       cell = cells + (col-min_col);
@@ -317,7 +331,7 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 			 max_cell = cell + 1;
 		    }
 		  col++;
-		  if (SLwchar_wcwidth (wch) > 1)
+		  if (width > 1)
 		    {
 		       if ((col >= min_col) && (col < max_col))
 			 {

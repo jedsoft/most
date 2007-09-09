@@ -19,9 +19,11 @@ INSTALL		= @INSTALL@
 INSTALL_DATA	= @INSTALL_DATA@
 DESTDIR		=
 prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+datarootdir	= @datarootdir@
 BIN_DIR		= $(prefix)/bin
-MAN_DIR		= $(prefix)/man
-DOC_DIR		= $(prefix)/doc/most
+MAN_DIR		= $(datarootdir)/man
+DOC_DIR		= $(datarootdir)/doc/most
 SYS_INITFILE	= @sysconfdir@/most.conf
 MKINSDIR	= ../autoconf/mkinsdir.sh
 

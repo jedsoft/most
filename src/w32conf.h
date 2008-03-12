@@ -32,4 +32,8 @@
 
 # define MAX_PATHLEN 1024
 
+#define MOST_INT long
+#define MOST_UINT unsigned long
+#define MOST_INT_D_FMT "%ld"
+
 #endif /* MOST_CONFIG_H */

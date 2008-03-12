@@ -97,7 +97,7 @@ char *most_escape_filename (char *file, char quote_char)
 	     return efile;
 #ifndef VMS
 	     /* For a double-quoted string, only the following characters
-	      * may be escaped with a backslash.  Unfortuinately, escaping 
+	      * may be escaped with a backslash.  Unfortunately, escaping 
 	      * others such as &, *, |, etc will not work.
 	      */
 	   case '\\': case '$': case '"': case '`': case '\n':

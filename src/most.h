@@ -60,14 +60,15 @@ extern int Most_Tab_Width;
 # endif
 #endif
 
-/* FIXME: v2.x slang.h exports SLsnprintf */
 #ifdef HAVE_SNPRINTF
 # define _pSLsnprintf snprintf
 #else
 # if SLANG_VERSION < 20000
 #  define _pSLsnprintf _SLsnprintf
-# endif
 extern int _pSLsnprintf (char *, unsigned int, char *, ...);
+# else
+#  define _pSLsnprintf SLsnprintf
+# endif
 #endif
 
 #if SLANG_VERSION <= 10409

@@ -65,6 +65,19 @@
 # include <signal.h>
 #endif
 
+#ifdef __WIN32__
+#include <windows.h>
+/* Sleep is defined badly in MSVC... */
+# ifdef _MSC_VER
+#  define sleep(n) _sleep((n)*1000)
+# else
+#  ifdef sleep
+#   undef sleep
+#  endif
+#  define sleep(x) if(x)Sleep((x)*1000)
+# endif
+#endif
+
 #include <string.h>
 
 #include "sysdep.h"

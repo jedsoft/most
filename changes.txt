@@ -1,6 +1,7 @@
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc
 2. src/most.h,sysdep.c: win32-specific patches (Andrew Wu)
+3. most.1: Typo corrected (Stephane Blondon)
 
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

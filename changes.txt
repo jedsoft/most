@@ -2,6 +2,12 @@ Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc
 2. src/most.h,sysdep.c: win32-specific patches (Andrew Wu)
 3. most.1: Typo corrected (Stephane Blondon)
+4. src/line.c: removed redundant switch in the most_forward_columns
+   function.
+5. src/buffer.c: avoid call to SLutf8_skip_char if the character is
+   ascii.
+6. src/file.c: Added an option to most_read_file_dsc to skip the line
+   count and made use of it in search.c to speed up the searches a bit.
 
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

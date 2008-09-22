@@ -584,43 +584,6 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigne
 	     continue;
 	  }
 
-	if ((ch == '\b') || (ch == '\t') || (ch == '\r'))
-	  {
-	     switch (ch)
-	       {
-		case '\b':
-		  if (Most_V_Opt == 0)
-		    {
-		       if (col < prev_width)
-			 col = 0;
-		       else
-			 col -= prev_width;
-		    }
-		  else col += 2;	       /* ^H */
-		  break;
-		  
-		case '\r':
-		  if (Most_V_Opt == 0)
-		    {
-		       prev_width = 1;
-		       col = 0;
-		    }
-		  else col += 2;	       /* ^M */
-		  break;
-		  
-		case '\t':
-		  if (Most_T_Opt == 0)
-		    {
-		       prev_width = Most_Tab_Width * (col/Most_Tab_Width + 1) - col;
-		       col += prev_width;
-		    }
-		  else
-		    col += 2;	       /* ^I */
-		  break;
-	       }
-	     continue;
-	  }
-	
 	if (ch & 0x80)
 	  {
 	     SLwchar_Type wch;
@@ -637,11 +600,47 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigne
 	     col += prev_width;	       /* <XX> */
 	     continue;
 	  }
+
+	if (ch == '\b')
+	  {
+	     if (Most_V_Opt == 0)
+	       {
+		  if (col < prev_width)
+		    col = 0;
+		  else
+		    col -= prev_width;
+	       }
+	     else col += 2;	       /* ^H */
+	     continue;
+	  }
+		  
+	if (ch == '\r')
+	  {
+	     if (Most_V_Opt == 0)
+	       {
+		  prev_width = 1;
+		  col = 0;
+		    }
+	     else col += 2;	       /* ^M */
+	     continue;
+	  }
+		  
+	if (ch == '\t')
+	  {
+	     if (Most_T_Opt == 0)
+	       {
+		  prev_width = Most_Tab_Width * (col/Most_Tab_Width + 1) - col;
+		  col += prev_width;
+	       }
+	     else
+	       col += 2;	       /* ^I */
+	     continue;
+	  }
 	
 	if ((ch == 033) && (Most_V_Opt == 0)
 	    && (0 == parse_escape (&b, e, NULL)))
 	  continue;
-	
+
 	
 	/* Ctrl-char ^X */
 	prev_width = 2;

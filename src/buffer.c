@@ -213,7 +213,7 @@ static unsigned char *end_of_line (unsigned char *b)
     */
    if (Most_Show_Wrap_Marker)
      {
-	if (Most_UTF8_Mode == 0)
+	if ((Most_UTF8_Mode == 0) || ((*b & 0x80) == 0))
 	  b1 = b + 1;
 	else
 	  b1 = SLutf8_skip_char (b, Most_Eob);

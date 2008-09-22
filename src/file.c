@@ -270,7 +270,7 @@ static int insert_file(char *file)
 	fd = open_compressed_file(file, O_RDONLY, &size);
 # if MOST_HAS_MMAP
 	if (0 == try_mmap_buffer (fd))
-	  return most_read_file_dsc (1);
+	  return most_read_file_dsc (1, 1);
 # endif
 #endif
      }
@@ -287,7 +287,7 @@ static int insert_file(char *file)
    Most_Eob = Most_Beg = Most_Buf->beg = (unsigned char *) MOSTMALLOC(size);
    Most_Buf->size = size;
 
-   return most_read_file_dsc (1);
+   return most_read_file_dsc (1, 1);
 }
 
 static void update_buffer_windows (Most_Buffer_Type *b)
@@ -343,7 +343,7 @@ static void examine_file_contents (void)
 static int First_Time_Hack = 0;	       /* true if reading file for first time */
 
 #if MOST_HAS_MMAP
-static int read_mmap_file_dsc (int many)
+static int read_mmap_file_dsc (int many, int count_lines)
 {
    unsigned int size;
 
@@ -375,7 +375,9 @@ static int read_mmap_file_dsc (int many)
    if (First_Time_Hack)
      examine_file_contents ();
    
-   Most_Num_Lines = most_count_lines (Most_Beg, Most_Eob);
+   if (count_lines)
+     Most_Num_Lines = most_count_lines (Most_Beg, Most_Eob);
+
    most_message(Most_Global_Msg, 0);
    return 1;
 }
@@ -383,7 +385,7 @@ static int read_mmap_file_dsc (int many)
 #endif
 
 /* if read something, return non zero (1) */
-int most_read_file_dsc (int many)
+int most_read_file_dsc (int many, int count_lines)
 {
    int fd = Most_Buf->fd, n = 0, i;
    int dsize, size, passes = 0;
@@ -397,7 +399,7 @@ int most_read_file_dsc (int many)
 #if MOST_HAS_MMAP
    if (Most_Buf->is_mmaped)
      {
-	int ret = read_mmap_file_dsc (many);
+	int ret = read_mmap_file_dsc (many, count_lines);
 	if (-1 != ret)
 	  return ret;
 	
@@ -440,7 +442,7 @@ int most_read_file_dsc (int many)
 	     if (i == -1)
 	       {
 #ifdef EINTR
-		  if (errno == EINTR) continue;
+		  if ((errno == EINTR) && (SLKeyBoard_Quit == 0)) continue;
 #endif
 		  break;
 	       }
@@ -479,7 +481,8 @@ int most_read_file_dsc (int many)
    if (First_Time_Hack)
      examine_file_contents ();
 
-   if (n || First_Time_Hack)
+   if (count_lines
+       && (n || First_Time_Hack))
      Most_Num_Lines = most_count_lines (Most_Beg, Most_Eob);
 
    update_buffer_windows (Most_Buf);
@@ -511,7 +514,7 @@ void most_read_to_line(int n)
 
    while ((Most_Buf->fd != -1)
 	  && (n >= Most_Num_Lines)
-	  && (0 != most_read_file_dsc (nbytes / 0x3FFF))
+	  && (0 != most_read_file_dsc (nbytes / 0x3FFF, 1))
 	  && (SLKeyBoard_Quit == 0))
      {
 	nbytes = 0;

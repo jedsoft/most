@@ -700,6 +700,8 @@ int most_search(unsigned char *from, int repeat, MOST_INT *col)
 
    if (*Most_Search_Str)
      {
+	unsigned char *eob = Most_Eob;
+
 	test = repeat && (pos < Most_Eob) && (pos >= Most_Beg);
 	while(test)
 	  {
@@ -715,14 +717,14 @@ int most_search(unsigned char *from, int repeat, MOST_INT *col)
 		       if (pos < Most_Eob)
 			 break;
 
-		       if (0 == most_read_file_dsc (10))
+		       if (0 == most_read_file_dsc (10, 0))
 			 {
 			    /* Pointer may be invalid after this call */
 			    pos = Most_Beg + pos_ofs;
 			    break;
 			 }
 
-			    /* This might need an adjustment */
+		       /* This might need an adjustment */
 		       pos = Most_Beg + (pos_ofs - s_len);
 		       if (pos < Most_Beg) pos = Most_Beg;
 		    }
@@ -740,7 +742,14 @@ int most_search(unsigned char *from, int repeat, MOST_INT *col)
 		  else pos--;
 	       }
 	     test = repeat && (pos < Most_Eob) && (pos >= Most_Beg);
+	     if (SLKeyBoard_Quit)
+	       {
+		  most_message ("Search Interrupted.", 1);
+		  break;
+	       }
 	  }
+	if (eob != Most_Eob)
+	  Most_Num_Lines = most_count_lines (Most_Beg, Most_Eob);
      }
 
    if (repeat) /* not found */

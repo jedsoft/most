@@ -27,7 +27,7 @@ extern void most_reread_file (void);
 extern void most_read_to_line (int);
 extern Most_Window_Type *most_file_visible (char *);
 extern void most_user_get_file(void);
-extern int most_read_file_dsc(int);
+extern int most_read_file_dsc(int many, int count_lines);
 extern void most_get_cdir(char *);
 extern int most_get_dir(char *);
 extern void most_do_next_file(int *);

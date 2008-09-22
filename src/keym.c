@@ -116,7 +116,7 @@ static void tail_mode_cmd (void)
 
    do
      {
-	if (0 != most_read_file_dsc (-1))
+	if (0 != most_read_file_dsc (-1, 1))
 	  most_update_windows (-1);
 
 	most_message ("Most Tail Mode--  MOST keys are still active.", 0);
@@ -137,7 +137,7 @@ static void top_of_buffer_cmd(void)
 static void end_of_buffer_cmd(void)
 {
    while ((Most_Buf->fd != -1)
-	  && (0 != most_read_file_dsc(-1)))
+	  && (0 != most_read_file_dsc(-1, 1)))
      ;
    most_update_windows (-1);
 }
@@ -240,7 +240,7 @@ static void goto_percent_cmd(void)
      }
 
    if (n < 0) n = 0; else if (n > 100) n = 100;
-   if (Most_Buf->fd != -1) most_read_file_dsc(-1);
+   if (Most_Buf->fd != -1) most_read_file_dsc(-1, 1);
    pos = Most_Beg + (n * (Most_Eob - Most_Beg))/100;
    n = most_what_line(pos);
    most_update_windows (n);

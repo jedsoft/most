@@ -191,7 +191,7 @@ typedef struct
 Multibyte_Cell_Type;
 
 static int most_analyse_line (unsigned char *begg, unsigned char *endd,
-			      Multibyte_Cell_Type *cells, unsigned int num_cols, int start_color)
+			      Multibyte_Cell_Type *cells, unsigned int num_cols, int *start_colorp)
 {
    unsigned char *beg, *end;
    unsigned int min_col, max_col;
@@ -207,7 +207,7 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
    min_col = Most_Column - 1;
    max_col = min_col + num_cols;
    
-   default_attr = start_color;
+   default_attr = *start_colorp;
    while (beg < end)
      {
 	int attr = default_attr;
@@ -417,6 +417,7 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	       }
 	  }
      }
+   *start_colorp = default_attr;
    return max_cell - cells;
 }
 
@@ -456,7 +457,7 @@ void most_display_line (int reset)
    static unsigned int num_cells;
    unsigned int screen_cols;
    unsigned int num_cells_set;
-   static int last_color = -1;	       /* used for a line that wrapped */
+   static int last_color = 0;	       /* used for a line that wrapped */
 
    if (Most_B_Opt)
      {
@@ -479,11 +480,7 @@ void most_display_line (int reset)
 
    if (reset || (Most_W_Opt == 0))
      last_color = 0;
-   num_cells_set = most_analyse_line (beg, end, cells, num_cells, last_color);
-   if (num_cells_set > 1)
-     last_color = cells[num_cells_set-1].color;
-   else
-     last_color = -1;
+   num_cells_set = most_analyse_line (beg, end, cells, num_cells, &last_color);
 
    dollar = 0;
    if (Most_W_Opt)

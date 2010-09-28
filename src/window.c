@@ -466,7 +466,7 @@ void most_redraw_window (void)
    r = Most_Win->top;
    most_goto_rc (r, 1);
 
-   most_display_line ();
+   most_display_line (1);
 
    while (n--)
      {
@@ -474,7 +474,7 @@ void most_redraw_window (void)
 	most_goto_rc (r, 1);
 
 	if (most_forward_line(1))
-	  most_display_line();
+	  most_display_line(0);
 	else
 	  SLsmg_erase_eol ();
      }
@@ -1004,13 +1004,13 @@ void most_redraw_display (void)
 
 	t = Most_Win->top;
 	most_goto_rc(t, 1);
-	most_display_line();
+	most_display_line(1);
 
 	while (n--)
 	  {
 	     t++;
 	     most_goto_rc (t, 1);
-	     if (most_forward_line(1)) most_display_line();
+	     if (most_forward_line(1)) most_display_line(0);
 	  }
 	Most_C_Line = Most_Win->beg_line;
 	Most_C_Offset = Most_Win->top_offset;

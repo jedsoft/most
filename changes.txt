@@ -8,6 +8,7 @@ Changes since 5.0.0
    ascii.
 6. src/file.c: Added an option to most_read_file_dsc to skip the line
    count and made use of it in search.c to speed up the searches a bit.
+7. src/display.c: When wrapping a line, the color was not "wrapping".
 
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

@@ -190,8 +190,8 @@ typedef struct
 }
 Multibyte_Cell_Type;
 
-static int most_analyse_line (unsigned char *begg, unsigned char *endd, 
-			      Multibyte_Cell_Type *cells, unsigned int num_cols)
+static int most_analyse_line (unsigned char *begg, unsigned char *endd,
+			      Multibyte_Cell_Type *cells, unsigned int num_cols, int start_color)
 {
    unsigned char *beg, *end;
    unsigned int min_col, max_col;
@@ -207,7 +207,7 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
    min_col = Most_Column - 1;
    max_col = min_col + num_cols;
    
-   default_attr = 0;
+   default_attr = start_color;
    while (beg < end)
      {
 	int attr = default_attr;
@@ -423,9 +423,8 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 static void display_cells (Multibyte_Cell_Type *cell, unsigned int n, char dollar)
 {
    Multibyte_Cell_Type *cell_max;
-   int last_color;
+   int last_color = -1;
 
-   last_color = -1;
    cell_max = cell + n;
    while (cell < cell_max)
      {
@@ -449,7 +448,7 @@ static void display_cells (Multibyte_Cell_Type *cell, unsigned int n, char dolla
      }
 }
 
-void most_display_line (void)
+void most_display_line (int reset)
 {
    unsigned char *beg, *end;
    unsigned char dollar;
@@ -457,6 +456,7 @@ void most_display_line (void)
    static unsigned int num_cells;
    unsigned int screen_cols;
    unsigned int num_cells_set;
+   static int last_color = -1;	       /* used for a line that wrapped */
 
    if (Most_B_Opt)
      {
@@ -472,11 +472,19 @@ void most_display_line (void)
 	SLfree ((char *) cells);
 	if (NULL == (cells = (Multibyte_Cell_Type *)SLmalloc (num_cells * sizeof (Multibyte_Cell_Type))))
 	  most_exit_error ("Out of memory");
+	memset ((char *) cells, 0, sizeof (cells));
      }
 
    (void) most_extract_line (&beg, &end);
-   num_cells_set = most_analyse_line (beg, end, cells, num_cells);
-   
+
+   if (reset || (Most_W_Opt == 0))
+     last_color = 0;
+   num_cells_set = most_analyse_line (beg, end, cells, num_cells, last_color);
+   if (num_cells_set > 1)
+     last_color = cells[num_cells_set-1].color;
+   else
+     last_color = -1;
+
    dollar = 0;
    if (Most_W_Opt)
      {

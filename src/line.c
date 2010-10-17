@@ -464,20 +464,19 @@ void most_display_line (int reset)
 	output_binary_formatted_line ();
 	return;
      }
-   
+
    screen_cols = SLtt_Screen_Cols;
    if (num_cells != screen_cols + 1)
      {
 	num_cells = screen_cols + 1;
 
 	SLfree ((char *) cells);
-	if (NULL == (cells = (Multibyte_Cell_Type *)SLmalloc (num_cells * sizeof (Multibyte_Cell_Type))))
+	if (NULL == (cells = (Multibyte_Cell_Type *)SLcalloc (num_cells, sizeof (Multibyte_Cell_Type))))
 	  most_exit_error ("Out of memory");
-	memset ((char *) cells, 0, sizeof (cells));
      }
 
    (void) most_extract_line (&beg, &end);
-
+   
    if (reset || (Most_W_Opt == 0))
      last_color = 0;
    num_cells_set = most_analyse_line (beg, end, cells, num_cells, &last_color);
@@ -577,10 +576,22 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigne
    unsigned int col = 0;
    unsigned int prev_width = 1;
 
-   while ((b < e)
-	  && (col < num_cols))
+   while (b < e)
      {
 	unsigned char ch = *b++;
+
+	if (col >=num_cols)
+	  {
+	     if ((ch == 033) && (Most_V_Opt == 0))
+	       {
+		  while ((ch == 033)
+			 && (0 == parse_escape (&b, e, NULL))
+			 && (b < e))
+		    ch = *b++;
+	       }
+	     b--;
+	     break;
+	  }
 
 	if (IS_BYTE_PRINTABLE(ch))
 	  {

@@ -9,6 +9,8 @@ Changes since 5.0.0
 6. src/file.c: Added an option to most_read_file_dsc to skip the line
    count and made use of it in search.c to speed up the searches a bit.
 7. src/display.c: When wrapping a line, the color was not "wrapping".
+8. src/line.c: When moving forward n columns, skip over trailing 0
+   length color escape sequences.
 
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

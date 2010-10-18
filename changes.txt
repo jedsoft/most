@@ -14,6 +14,10 @@ Changes since 5.0.0
 9. src/buffer.c: If a color escape sequence occurs at the end of a
    line line whose display width is equal to the terminal width, do
    not wrap the line.
+10. src/keym.c: Limit the amount of loops when going to the end of the
+    buffer.  It is possible for a run-away process to write to a
+    logfile that most is viewing causing it to loop forever seeking the
+    end of the file, which may never come.
 
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

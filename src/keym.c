@@ -136,9 +136,12 @@ static void top_of_buffer_cmd(void)
 
 static void end_of_buffer_cmd(void)
 {
+   unsigned int count = 0;
+   /* This will loop forever if the file is changing too fast. */
    while ((Most_Buf->fd != -1)
+	  && (count < 5)
 	  && (0 != most_read_file_dsc(-1, 1)))
-     ;
+     count++;
    most_update_windows (-1);
 }
 #ifdef unix

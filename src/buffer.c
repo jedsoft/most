@@ -219,9 +219,22 @@ static unsigned char *end_of_line (unsigned char *b)
 	  b1 = SLutf8_skip_char (b, Most_Eob);
 	
 	if ((b1 <= e)
-	    && (b1 < Most_Eob)
-	    && (*b1 == '\n'))
-	  b = b1;
+	    && (b1 < Most_Eob))
+	  {
+	     if (*b1 == '\n')
+	       b = b1;
+	     else if ((*b1 == 033) && (Most_V_Opt == 0))
+	       {
+		  unsigned char ch = 033;
+		  b1++;
+		  while ((ch == 033) && (b1 < e) && (b1 < Most_Eob)
+			 && (0 == most_parse_color_escape (&b1, e, NULL)))
+		    {
+		       b = b1;
+		       ch = *b1++;
+		    }
+	       }
+	  }
      }
 
    return b;

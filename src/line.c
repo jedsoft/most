@@ -129,7 +129,7 @@ static void output_binary_formatted_line (void)
  * These numbers will be encoded as:
  *  offset + (FG-30 + 8*(BG-40 + 9*attribute))
  */
-static int parse_escape (unsigned char **begp, unsigned char *end, int *colorp)
+int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colorp)
 {
    unsigned char *beg = *begp;
    int fg = 38, bg = 48, at = 0;
@@ -291,7 +291,7 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	if ((ch == 033) && (Most_V_Opt == 0))
 	  {
 	     int color;
-	     if (0 == parse_escape (&beg, end, &color))
+	     if (0 == most_parse_color_escape (&beg, end, &color))
 	       {
 		  default_attr = color;
 		  continue;
@@ -537,7 +537,7 @@ int most_apparant_distance (unsigned char *pos)
 	  }
 	
 	if ((ch == 033) && (Most_V_Opt == 0)
-	    && (0 == parse_escape (&pos, save_pos, NULL)))
+	    && (0 == most_parse_color_escape (&pos, save_pos, NULL)))
 	  continue;
 
 	if (ch & 0x80)
@@ -585,7 +585,7 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigne
 	     if ((ch == 033) && (Most_V_Opt == 0))
 	       {
 		  while ((ch == 033)
-			 && (0 == parse_escape (&b, e, NULL))
+			 && (0 == most_parse_color_escape (&b, e, NULL))
 			 && (b < e))
 		    ch = *b++;
 	       }
@@ -654,7 +654,7 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigne
 	  }
 	
 	if ((ch == 033) && (Most_V_Opt == 0)
-	    && (0 == parse_escape (&b, e, NULL)))
+	    && (0 == most_parse_color_escape (&b, e, NULL)))
 	  continue;
 
 	

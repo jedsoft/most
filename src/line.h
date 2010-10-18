@@ -27,6 +27,8 @@ extern void most_output(unsigned char *, unsigned int, unsigned char *, unsigned
 extern void most_display_line(int);
 extern int most_apparant_distance(unsigned char *);
 extern unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigned int num_cols);
+extern int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colorp);
+
 
 extern int Most_Show_Wrap_Marker;
 

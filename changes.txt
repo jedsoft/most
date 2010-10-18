@@ -11,6 +11,9 @@ Changes since 5.0.0
 7. src/display.c: When wrapping a line, the color was not "wrapping".
 8. src/line.c: When moving forward n columns, skip over trailing 0
    length color escape sequences.
+9. src/buffer.c: If a color escape sequence occurs at the end of a
+   line line whose display width is equal to the terminal width, do
+   not wrap the line.
 
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

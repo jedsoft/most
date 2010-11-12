@@ -741,7 +741,7 @@ static int expand_path(char *path)
    else
      {
 	most_get_cdir(path);
-	chdir(Most_C_Dir);
+	(void) chdir(Most_C_Dir);
 #ifndef VMS
 	n = strlen(path);
 	if (path[n-1] == '/') return(1);
@@ -776,7 +776,7 @@ static void most_cd (void)
 	return;
      }
    strcpy(Most_C_Dir,tmp_dir);
-   chdir(Most_C_Dir);
+   (void) chdir(Most_C_Dir);
    most_message("Unable to change directory.",1);
 }
 #endif

@@ -18,6 +18,8 @@ Changes since 5.0.0
     buffer.  It is possible for a run-away process to write to a
     logfile that most is viewing causing it to loop forever seeking the
     end of the file, which may never come.
+11. src/help.c: Change DELETE to BACKSPACE.  file.c: Indicate that
+    chdir return value is being ignored.
 
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

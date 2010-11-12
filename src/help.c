@@ -53,7 +53,7 @@ static char *help[] =
    "                            (Use UP/DOWN arrow keys to select next file.)",
    "Movement:",
    "  SPACE, D              *Scroll down one Screen.",
-   "  U, DELETE             *Scroll Up one screen.",
+   "  U, BACKSPACE          *Scroll Up one screen.",
    "  RETURN, DOWN          *Move Down one line.",
    "  UP                    *Move Up one line.",
    "  T                      Goto Top of File.",

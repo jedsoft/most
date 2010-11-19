@@ -1,3 +1,4 @@
+-*- mode: text; mode: fold -*-
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc
 2. src/most.h,sysdep.c: win32-specific patches (Andrew Wu)
@@ -20,7 +21,9 @@ Changes since 5.0.0
     end of the file, which may never come.
 11. src/help.c: Change DELETE to BACKSPACE.  file.c: Indicate that
     chdir return value is being ignored.
+12. configure,autoconf/*: Updated configure script and related files.
 
+{{{ Previous Versions
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x
 1. src/line.c: Added support for embedded ANSI escape sequences that
@@ -173,3 +176,4 @@ New Features since MOST version 3.x (Sept 25, 1994)
 John E. Davis
 davis@space.mit.edu
 
+}}}

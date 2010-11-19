@@ -5,8 +5,17 @@
 @SET_MAKE@
 SHELL = /bin/sh
 
-all:
+all: makefiles
 	cd src; $(MAKE) all
+Makefile: configure autoconf/Makefile.in
+	@echo "Makefile is older than the configure script".
+	@echo "Please re-run the configure script."
+	@exit 1
+src/Makefile: configure src/Makefile.in src/config.hin
+	@echo "src/Makefile is older than its dependencies".
+	@echo "Please re-run the configure script."
+	@exit 1
+makefiles: Makefile src/Makefile
 clean:
 	/bin/rm -f *~
 	cd src; $(MAKE) clean
@@ -15,7 +24,7 @@ distclean:
 	/bin/rm -f *~ Makefile config.status config.log config.cache files.pck
 	cd src; $(MAKE) distclean
 #
-install:
+install: all
 	cd src; $(MAKE) install
 #
 
@@ -31,4 +40,4 @@ autoconf/config.guess: /usr/share/misc/config.guess
 autoconf/config.sub: /usr/share/misc/config.sub
 	/bin/cp -f /usr/share/misc/config.sub autoconf/config.sub
 
-.PHONY: all clean distclean install symlinks update
+.PHONY: all clean distclean install symlinks update makefiles

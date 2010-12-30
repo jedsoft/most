@@ -22,6 +22,8 @@ Changes since 5.0.0
 11. src/help.c: Change DELETE to BACKSPACE.  file.c: Indicate that
     chdir return value is being ignored.
 12. configure,autoconf/*: Updated configure script and related files.
+13. src/most.c: when acting as `cat`, a file pointer was not being
+    closed (George Danchev).
 
 {{{ Previous Versions
 Changes since 4.10.2

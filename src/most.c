@@ -321,9 +321,11 @@ static void play_cat(char *file)
 	  {
 	     fprintf (stderr, "fwrite returned %d, errno = %d\n",
 		      m, errno);
+	     (void) fclose (fp);
 	     exit (1);
 	  }
      }
+   (void) fclose (fp);
 }
 
 void most_initialize_most (void)

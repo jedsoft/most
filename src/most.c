@@ -351,13 +351,11 @@ void most_initialize_most (void)
 
 static void do_most (char *file, int start)
 {
-   int piped;
    MOST_INT row, col;
 
    most_get_cdir(Most_C_Dir);
 
    row = col = 0;
-   if (file[0] == '\0') piped = 1; else piped = 0;
 
    if ((-1 == most_find_file (file))
        && (Most_Num_Files == 1))
@@ -423,8 +421,7 @@ static void utf8_config (void)
 int most (int argc, char **argv)
 {
    char file[MAX_PATHLEN], *switches;
-   int file_i = 0, quit,i,piped,a_opt;
-   unsigned long context;
+   int file_i = 0, quit,i,piped;
    int status = 0;
 
 #ifdef VMS
@@ -490,7 +487,6 @@ int most (int argc, char **argv)
      }
 
    Most_Num_Files = 0;
-   context = 0;
 
    SLtt_get_terminfo();
    utf8_config ();
@@ -503,7 +499,6 @@ int most (int argc, char **argv)
    most_init_keymaps ();
 
    if (Most_B_Opt) Most_A_Opt = 0;   /* explicit b overrides a */
-   a_opt = Most_A_Opt;
 
    if (!piped)
      {

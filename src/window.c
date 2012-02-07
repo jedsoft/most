@@ -698,7 +698,7 @@ void most_update_status (void)
 /* splits window-- no screen update, does not affect scrolling region */
 int most_split_window (void)
 {
-   Most_Window_Type *new, *old;
+   Most_Window_Type *neew;
    int b2,t2,b1, line;
 
    b2 = Most_Win->bot;
@@ -708,20 +708,19 @@ int most_split_window (void)
 
     /* line is top line of new window. */
    line = Most_Win->beg_line + t2 - Most_Win->top;
-   old = Most_Win;
    Most_Win->bot = b1;
-   new = make_window(t2,b2);
+   neew = make_window(t2,b2);
     /* add to ring */
-   Most_Win->next->prev = new;
-   new->next = Most_Win->next;
-   new->prev = Most_Win;
-   Most_Win->next = new;
+   Most_Win->next->prev = neew;
+   neew->next = Most_Win->next;
+   neew->prev = Most_Win;
+   Most_Win->next = neew;
 
-   new->beg_line = line;
-   new->buf = Most_Buf;
+   neew->beg_line = line;
+   neew->buf = Most_Buf;
 #if 0
     /* new window status line is at same position as old */
-   strcpy(new->status,Most_Win->status);
+   strcpy(neew->status,Most_Win->status);
 #endif
    return(1);
 }
@@ -874,16 +873,13 @@ void most_other_window(int n)
 /* kills window by moving lower window up */
 static void delete_as_top_window (void)
 {
-   int t1,t2,b1,b2;
-   t1 = Most_Win->top;
-   t2 = Most_Win->next->top;
-   b1 = Most_Win->bot;
-   b2 = Most_Win->next->bot;
+   int t = Most_Win->top;
+
    Most_Win->prev->next = Most_Win->next;
    Most_Win->next->prev = Most_Win->prev;
 
    most_other_window(1);
-   Most_Win->top = t1;
+   Most_Win->top = t;
    most_redraw_window();
    most_update_status();
 }
@@ -935,7 +931,7 @@ void most_free_windows (void)
 
 void most_delete_window (void)
 {
-   int new_b, old_b;
+   int new_b;
    Most_Window_Type *w;
 
    w = Most_Win;
@@ -958,7 +954,6 @@ void most_delete_window (void)
 	return;
      }
 
-   old_b = Most_Win->top - 2;
    new_b = Most_Win->bot;
    most_other_window(-1);
    Most_Win->bot = new_b;

@@ -25,6 +25,7 @@ Changes since 5.0.0
 13. src/most.c: when acting as `cat`, a file pointer was not being
     closed (George Danchev).
 14. src/*.c: Removed some unused variables.
+15. configure: Use /etc/ld.so.conf to located system lib paths.
 
 {{{ Previous Versions
 Changes since 4.10.2

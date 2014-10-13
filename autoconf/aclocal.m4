@@ -1,4 +1,6 @@
 dnl# -*- mode: sh; mode: fold -*-
+dnl# 0.3.2-0: Add rpath support for freebsd
+dnl# 0.3.1-0: New output variable: CC_SHARED_FLAGS; CC_SHARED is deprecated
 dnl# 0.3.0-0: Added support for parsing /etc/ld.so.conf
 dnl# 0.2.7-3: Change ncurses5w-config to ncursesw5-config (Gilles Espinasse)
 dnl# 0.2.7-2: For the Makefile rules, use cd foo && bar instead of cd foo; bar
@@ -146,7 +148,7 @@ case "$host_os" in
       fi
     fi
   ;;
-  *osf*|*openbsd*)
+  *osf*|*openbsd*|*freebsd*)
     if test "X$GCC" = Xyes
     then
       RPATH="-Wl,-rpath,"
@@ -614,7 +616,8 @@ case "$host_os" in
     ELF_CFLAGS="\$(CFLAGS) -fPIC"
     ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-O1 -Wl,--version-script,\$(VERSION_SCRIPT) -Wl,-soname,\$(ELFLIB_MAJOR)"
     ELF_DEP_LIBS="\$(DL_LIB) -lm -lc"
-    CC_SHARED="\$(CC) \$(CFLAGS) -shared -fPIC"
+    CC_SHARED_FLAGS="-shared -fPIC"
+    CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
     ;;
   *solaris* )
     if test "$GCC" = yes
@@ -624,14 +627,16 @@ case "$host_os" in
       ELF_CFLAGS="\$(CFLAGS) -fPIC"
       ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-ztext -Wl,-h,\$(ELFLIB_MAJOR)"
       ELF_DEP_LIBS="\$(DL_LIB) -lm -lc"
-      CC_SHARED="\$(CC) \$(CFLAGS) -G -fPIC"
+      CC_SHARED_FLAGS="-G -fPIC"
+      CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
     else
       DYNAMIC_LINK_FLAGS=""
       ELF_CC="\$(CC)"
       ELF_CFLAGS="\$(CFLAGS) -K PIC"
       ELF_LINK="\$(CC) \$(LDFLAGS) -G -h\$(ELFLIB_MAJOR)"
       ELF_DEP_LIBS="\$(DL_LIB) -lm -lc"
-      CC_SHARED="\$(CC) \$(CFLAGS) -G -K PIC"
+      CC_SHARED_FLAGS="-G -K PIC"
+      CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
     fi
     ;;
    # osr5 or unixware7 with current or late autoconf
@@ -643,7 +648,8 @@ case "$host_os" in
        ELF_CFLAGS="\$(CFLAGS) -fPIC"
        ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-h,\$(ELFLIB_MAJOR)"
        ELF_DEP_LIBS=
-       CC_SHARED="\$(CC) \$(CFLAGS) -G -fPIC"
+       CC_SHARED_FLAGS="-G -fPIC"
+       CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
      else
        DYNAMIC_LINK_FLAGS=""
        ELF_CC="\$(CC)"
@@ -651,7 +657,8 @@ case "$host_os" in
        # ELF_LINK="ld -G -z text -h#"
        ELF_LINK="\$(CC) \$(LDFLAGS) -G -z text -h\$(ELFLIB_MAJOR)"
        ELF_DEP_LIBS=
-       CC_SHARED="\$(CC) \$(CFLAGS) -G -K pic"
+       CC_SHARED_FLAGS="-G -K pic"
+       CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
      fi
      ;;
   *irix6.5* )
@@ -665,14 +672,16 @@ case "$host_os" in
        ELF_CFLAGS="\$(CFLAGS) -fPIC"
        ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-h,\$(ELFLIB_MAJOR)"
        ELF_DEP_LIBS=
-       CC_SHARED="\$(CC) \$(CFLAGS) -shared -fPIC"
+       CC_SHARED_FLAGS="-shared -fPIC"
+       CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
      else
        DYNAMIC_LINK_FLAGS=""
        ELF_CC="\$(CC)"
        ELF_CFLAGS="\$(CFLAGS)"     # default anyhow
        ELF_LINK="\$(CC) \$(LDFLAGS) -shared -o \$(ELFLIB_MAJOR)"
        ELF_DEP_LIBS=
-       CC_SHARED="\$(CC) \$(CFLAGS) -shared"
+       CC_SHARED_FLAGS="-shared"
+       CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
      fi
      ;;
   *darwin* )
@@ -681,7 +690,8 @@ case "$host_os" in
      ELF_CFLAGS="\$(CFLAGS) -fno-common"
      ELF_LINK="\$(CC) \$(LDFLAGS) -dynamiclib -install_name \$(install_lib_dir)/\$(ELFLIB_MAJOR) -compatibility_version \$(ELF_MAJOR_VERSION) -current_version \$(ELF_MAJOR_VERSION).\$(ELF_MINOR_VERSION)"
      ELF_DEP_LIBS="\$(LDFLAGS) \$(DL_LIB)"
-     CC_SHARED="\$(CC) -bundle -flat_namespace -undefined suppress \$(CFLAGS) -fno-common"
+     CC_SHARED_FLAGS="-bundle -flat_namespace -undefined suppress -fno-common"
+     CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
      ELFLIB="lib\$(THIS_LIB).dylib"
      ELFLIB_MAJOR="lib\$(THIS_LIB).\$(ELF_MAJOR_VERSION).dylib"
      ELFLIB_MAJOR_MINOR="lib\$(THIS_LIB).\$(ELF_MAJOR_VERSION).\$(ELF_MINOR_VERSION).dylib"
@@ -697,7 +707,8 @@ case "$host_os" in
     #fi
     ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-soname,\$(ELFLIB_MAJOR)"
     ELF_DEP_LIBS="\$(DL_LIB) -lm"
-    CC_SHARED="\$(CC) \$(CFLAGS) -shared -fPIC"
+    CC_SHARED_FLAGS="-shared -fPIC"
+    CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
     ;;
   *cygwin* )
     DYNAMIC_LINK_FLAGS=""
@@ -708,7 +719,8 @@ case "$host_os" in
     #ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-O1 -Wl,--version-script,\$(VERSION_SCRIPT) -Wl,-soname,\$(ELFLIB_MAJOR) -Wl,--out-implib=\$(DLL_IMPLIB_NAME) -Wl,-export-all-symbols -Wl,-enable-auto-import"
     ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-O1 -Wl,--version-script,\$(VERSION_SCRIPT) -Wl,-soname,\$(ELFLIB_MAJOR) -Wl,--out-implib=\$(DLL_IMPLIB_NAME)"
     ELF_DEP_LIBS="\$(DL_LIB) -lm"
-    CC_SHARED="\$(CC) \$(CFLAGS) -shared -DSLANG_DLL=1"
+    CC_SHARED_FLAGS="-shared -DSLANG_DLL=1"
+    CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
     dnl# CYGWIN prohibits undefined symbols when linking shared libs
     SLANG_LIB_FOR_MODULES="-L\$(ELFDIR) -lslang"
     INSTALL_MODULE="\$(INSTALL)"
@@ -726,7 +738,8 @@ case "$host_os" in
     ELF_CFLAGS="\$(CFLAGS) -fPIC"
     ELF_LINK="\$(CC) \$(LDFLAGS) -shared -Wl,-O1 -Wl,--version-script,\$(VERSION_SCRIPT) -Wl,-soname,\$(ELFLIB_MAJOR)"
     ELF_DEP_LIBS="\$(DL_LIB)"
-    CC_SHARED="\$(CC) \$(CFLAGS) -shared -fPIC"
+    CC_SHARED_FLAGS="-shared -fPIC"
+    CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
     ;;
   * )
     echo "Note: ELF compiler for host_os=$host_os may be wrong"
@@ -734,7 +747,8 @@ case "$host_os" in
     ELF_CFLAGS="\$(CFLAGS) -fPIC"
     ELF_LINK="\$(CC) \$(LDFLAGS) -shared"
     ELF_DEP_LIBS="\$(DL_LIB) -lm -lc"
-    CC_SHARED="\$(CC) \$(CFLAGS) -shared -fPIC"
+    CC_SHARED_FLAGS="-shared -fPIC"
+    CC_SHARED="\$(CC) $CC_SHARED_FLAGS \$(CFLAGS)"
 esac
 
 AC_SUBST(ELF_CC)
@@ -743,6 +757,7 @@ AC_SUBST(ELF_LINK)
 AC_SUBST(ELF_LINK_CMD)
 AC_SUBST(ELF_DEP_LIBS)
 AC_SUBST(DYNAMIC_LINK_FLAGS)
+AC_SUBST(CC_SHARED_FLAGS)
 AC_SUBST(CC_SHARED)
 AC_SUBST(ELFLIB)
 AC_SUBST(ELFLIB_MAJOR)

@@ -26,6 +26,7 @@ Changes since 5.0.0
     closed (George Danchev).
 14. src/*.c: Removed some unused variables.
 15. configure: Use /etc/ld.so.conf to located system lib paths.
+16. autoconf/*: updates
 
 {{{ Previous Versions
 Changes since 4.10.2

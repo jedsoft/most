@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 
@@ -39,7 +39,6 @@ int Most_Show_Wrap_Marker = 1;
 #define IS_BYTE_PRINTABLE(b) \
    ((((b) >= ' ') && ((b) < 0x7F)) \
        || ((Most_UTF8_Mode == 0) && ((b) >= SLsmg_Display_Eight_Bit)))
-
 
 /* take 16 binary characters and put them in displayable form */
 static void binary_format_line (unsigned char *beg, unsigned char *end,
@@ -120,7 +119,7 @@ static void output_binary_formatted_line (void)
    SLsmg_erase_eol ();
 }
 
-/* Here *begp points to the char after \e. 
+/* Here *begp points to the char after \e.
  * The general escape sequence parsed here is assumed to look like:
  *   \e[ XX ; ... m
  * If 30 <= XX <= 37, then it specifies the foreground color
@@ -156,13 +155,13 @@ int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colo
 	else if ((xx >= 40) && (xx <= 47))
 	  bg = xx;
 	else return -1;
-   
+
 	if ((beg < end) && (*beg == ';'))
 	  {
 	     beg++;
 	     continue;
 	  }
-	
+
 	if ((beg < end) && ((*beg == 'm') || (*beg == ']')))
 	  {
 	     *begp = beg + 1;
@@ -194,7 +193,7 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 			      Multibyte_Cell_Type *cells, unsigned int num_cols, int *start_colorp)
 {
    unsigned char *beg, *end;
-   unsigned int min_col, max_col;
+   unsigned int min_col, max_col, prev_width;
    unsigned int col, max_col_reached;
    int default_attr;
    Multibyte_Cell_Type *cell, *max_cell;
@@ -206,8 +205,9 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
    max_cell = cell;
    min_col = Most_Column - 1;
    max_col = min_col + num_cols;
-   
+
    default_attr = *start_colorp;
+   prev_width = 1;
    while (beg < end)
      {
 	int attr = default_attr;
@@ -222,18 +222,20 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	  {
 	     if (col > max_col_reached) max_col_reached = col;
 	     col = 0;
+	     prev_width = 1;
 	     continue;
 	  }
-	
+
 	if ((ch == '\b') && (Most_V_Opt == 0))
 	  {
 	     if (col > max_col_reached) max_col_reached = col;
-	     /* FIXME: This does not account for double-width characters */
-	     if (col > 0)
-	       col--;
+	     if (col < prev_width)
+	       col = 0;
+	     else
+	       col -= prev_width;
 	     continue;
 	  }
-	
+
 	if (col < max_col_reached)		       /* overstrike */
 	  {
 	     attr = MOST_BOLD_COLOR;
@@ -264,12 +266,14 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 		    max_cell = cell + 1;
 	       }
 	     col++;
+	     prev_width = 1;
 	     continue;
 	  }
-	
+
 	if ((ch == '\t') && (Most_T_Opt == 0) && (Most_Tab_Width))
 	  {
 	     int nspaces = Most_Tab_Width * (col/Most_Tab_Width + 1) - col;
+	     prev_width = nspaces;
 	     while (nspaces > 0)
 	       {
 		  if ((col >= min_col) && (col < max_col))
@@ -298,7 +302,7 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	       }
 	     /* drop */
 	  }
-#endif	
+#endif
 
 	if (ch & 0x80)
 	  {
@@ -308,7 +312,8 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	       {
 		  int width = SLwchar_wcwidth (wch);
 		  beg = SLutf8_skip_chars (pch, end, 1, NULL, 1);
-		  
+
+		  prev_width = width;
 		  if (width == 0)
 		    {
 		       col--;
@@ -346,9 +351,10 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 		    }
 		  continue;
 	       }
-	     
+
 	     /* Otherwise, this displays as <XX> and takes up 4 character cells */
 	     sprintf (buf, "<%02X>", (unsigned int) ch);
+	     prev_width = 4;
 	     /* drop */
 	  }
 	else
@@ -358,8 +364,9 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	     else ch += '@';
 
 	     sprintf (buf, "^%c", ch);
+	     prev_width = 2;
 	  }
-	
+
 	pch = (unsigned char *)buf;
 	while (*pch)
 	  {
@@ -378,26 +385,26 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	  }
      }
 
-   if (col < max_col_reached) 
+   if (col < max_col_reached)
      col = max_col_reached;
-   else 
+   else
      max_col_reached = col;
 
-   /* Now add "..." if selective display.  To do that, the next line needs to 
+   /* Now add "..." if selective display.  To do that, the next line needs to
     * be dealt with to determine whether or not it will be hidden.
     */
-   if (Most_Selective_Display 
+   if (Most_Selective_Display
        && (Most_W_Opt == 0)
        && (beg < Most_Eob)
        && ((col >= min_col) && (col < max_col)))
      {
 	if (*beg == '\n') beg++;
 
-	while ((beg < Most_Eob) 
+	while ((beg < Most_Eob)
 	       && ((*beg == ' ') || (*beg == '\t') || (*beg == '\r')))
 	  beg++;
-	
-	if ((beg >= Most_Eob) || (*beg == '\n') 
+
+	if ((beg >= Most_Eob) || (*beg == '\n')
 	    || (most_apparant_distance(beg) >= Most_Selective_Display))
 	  {
 	     max_col_reached = col + 3;
@@ -440,7 +447,7 @@ static void display_cells (Multibyte_Cell_Type *cell, unsigned int n, char dolla
 
    if (last_color != 0)
      SLsmg_set_color (0);
-   
+
    SLsmg_erase_eol ();
    if (dollar)
      {
@@ -476,7 +483,7 @@ void most_display_line (int reset)
      }
 
    (void) most_extract_line (&beg, &end);
-   
+
    if (reset || (Most_W_Opt == 0))
      last_color = 0;
    num_cells_set = most_analyse_line (beg, end, cells, num_cells, &last_color);
@@ -495,12 +502,11 @@ void most_display_line (int reset)
    display_cells (cells, num_cells_set, dollar);
 }
 
-
-/* given a position in a line, return apparant distance from bol
+/* given a position in a line, return apparent distance from bol
    expanding tabs, etc... up to pos */
 int most_apparant_distance (unsigned char *pos)
 {
-   int i;
+   int i, prev_width;
    unsigned char *save_pos, ch;
    unsigned int save_offset;
 
@@ -511,31 +517,36 @@ int most_apparant_distance (unsigned char *pos)
    Most_C_Offset = save_offset;
 
    i = 0;
+   prev_width = 1;
    while (pos < save_pos)
      {
 	ch = *pos++;
 	if (IS_BYTE_PRINTABLE(ch))
 	  {
 	     i++;
+	     prev_width = 1;
 	     continue;
 	  }
 
 	if ((ch == '\b') && (Most_V_Opt == 0))
 	  {
-	     if (i > 0) i--;
+	     i -= prev_width;
+	     if (i < 0) i = 0;
 	     continue;
 	  }
-	if ((ch == '\015') && (Most_V_Opt == 0))
+	if ((ch == '\r') && (Most_V_Opt == 0))
 	  {
 	     if (i != 1) i = 0;
+	     prev_width = 1;
 	     continue;
 	  }
 	if ((ch == '\t') && (Most_T_Opt == 0))
 	  {
-	     i = Most_Tab_Width * (i/Most_Tab_Width + 1);  /* Most_Tab_Width column tabs */
+	     prev_width = Most_Tab_Width * (i/Most_Tab_Width + 1) - i;  /* Most_Tab_Width column tabs */
+	     i += prev_width;
 	     continue;
 	  }
-	
+
 	if ((ch == 033) && (Most_V_Opt == 0)
 	    && (0 == most_parse_color_escape (&pos, save_pos, NULL)))
 	  continue;
@@ -546,15 +557,18 @@ int most_apparant_distance (unsigned char *pos)
 	     if ((Most_UTF8_Mode)
 		 && (NULL != SLutf8_decode (pos-1, save_pos, &wch, NULL)))
 	       {
+		  prev_width = SLwchar_wcwidth (wch);
 		  pos = SLutf8_skip_chars (pos-1, save_pos, 1, NULL, 1);
-		  i++;
+		  i += prev_width;
 		  continue;
 	       }
-	     i += 4;		       /* <XX> */
+	     prev_width = 4;
+	     i += prev_width;	       /* <XX> */
 	     continue;
 	  }
 
-	i += 2;			       /* ^X */
+	prev_width = 2;
+	i += prev_width;	       /* ^X */
      }
    return i;
 }
@@ -629,18 +643,18 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigne
 	     else col += 2;	       /* ^H */
 	     continue;
 	  }
-		  
+
 	if (ch == '\r')
 	  {
 	     if (Most_V_Opt == 0)
 	       {
 		  prev_width = 1;
 		  col = 0;
-		    }
+	       }
 	     else col += 2;	       /* ^M */
 	     continue;
 	  }
-		  
+
 	if (ch == '\t')
 	  {
 	     if (Most_T_Opt == 0)
@@ -652,12 +666,11 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigne
 	       col += 2;	       /* ^I */
 	     continue;
 	  }
-	
+
 	if ((ch == 033) && (Most_V_Opt == 0)
 	    && (0 == most_parse_color_escape (&b, e, NULL)))
 	  continue;
 
-	
 	/* Ctrl-char ^X */
 	prev_width = 2;
 	col += prev_width;

@@ -27,6 +27,9 @@ Changes since 5.0.0
 14. src/*.c: Removed some unused variables.
 15. configure: Use /etc/ld.so.conf to located system lib paths.
 16. autoconf/*: updates
+17. src/line.c, buffer.c: Fixed an issue with the display of
+    double-width characters to address
+    <https://bugs.launchpad.net/ubuntu/+source/most/+bug/312454>.
 
 {{{ Previous Versions
 Changes since 4.10.2

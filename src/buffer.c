@@ -509,7 +509,6 @@ MOST_INT most_what_line(unsigned char *pos)
 /* given a buffer position, find the line and column */
 void most_find_row_column(unsigned char *pos, MOST_INT *r, MOST_INT *c)
 {
-   unsigned char *beg;
    unsigned int save_offset;
    MOST_INT save_line;
 
@@ -533,18 +532,8 @@ void most_find_row_column(unsigned char *pos, MOST_INT *r, MOST_INT *c)
    Most_C_Offset = pos - Most_Beg;
 
    /* Now we have found the line it is on so.... */
-   beg = most_beg_of_line();
-   *c = 1;
-   if (Most_UTF8_Mode)
-     {
-	/* FIXME: This should take into account the printable representation
-	 * of the characters.
-	 */
-	while ((beg = SLutf8_skip_chars (beg, pos, 1, NULL, 1)) < pos)
-	  *c += 1;
-     }
-   else 
-     while (beg++ < pos) *c = *c + 1;
+   (void) most_beg_of_line();
+   *c = 1 + most_apparant_distance (pos);
 
    Most_C_Line = save_line;
    Most_C_Offset = save_offset;

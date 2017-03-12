@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 #include <stdio.h>
@@ -57,7 +57,7 @@ static void page_up_cmd (void)
    if (Most_Digit_Arg != (int *) NULL) n = *Most_Digit_Arg;
    n = Most_C_Line - n * (Most_Win->bot - Most_Win->top + 1);
    if (n < 1) n = 1;
-			  
+
    most_update_windows (n);
 }
 
@@ -202,7 +202,7 @@ static int read_integer (char *prompt, MOST_INT *n)
 {
    int status;
    Most_Mini_Buf[0] = 0;
-   
+
    status = most_read_from_minibuffer(prompt, NULL, (char *) Most_Mini_Buf, MOST_MINI_BUF_LEN);
    if (status < 0)
      return -1;

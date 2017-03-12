@@ -2,7 +2,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -16,7 +16,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 
@@ -318,7 +318,7 @@ static unsigned char *
      *	For regular expression searches we need to do a line by line
      *	search, so it is necessary to temporarily replace '\n' with '\0'
      *	characters.
-     * 
+     *
      * ***** THIS IS NOT ALLOWED FOR MMAPPED FILES!!!!!!!!! *****
      */
    p = beg;
@@ -343,9 +343,9 @@ static unsigned char *
 	 * must be beyond the start of the window), must be a "\n",
 	 * otherwise do_regexec() isn't called.
 	 */
-	if ( 
+	if (
 # if 0
-	     ((*key != '^') 
+	     ((*key != '^')
 	      || (linebeg > Most_Win->beg_pos && linebeg[-1] == '\n'))
 	     &&
 #endif
@@ -441,8 +441,8 @@ static unsigned char *forw_search_region(unsigned char *beg,
 	       break;
 
 	     ch = *beg++;
-	     
-	     /* FIXME:  This only works for x^Hx but not x^Hx^Hx... 
+
+	     /* FIXME:  This only works for x^Hx but not x^Hx^Hx...
 	      * It is probably better to skip all the ^H characters
 	      * until the end.  That is, regard "a^Hb^Hc" as 'c'.
 	      */

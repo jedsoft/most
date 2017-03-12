@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 
@@ -86,7 +86,7 @@ void most_usage (void)
 	   Most_Version, SLang_Version_String);
    if (SLang_Version != SLANG_VERSION)
      fprintf (stderr, " *Note: This executable was compiled against S-Lang %s\n", SLANG_VERSION_STRING);
-     
+
    fprintf (stderr, "Usage:\n");
    fprintf(stderr, "most [-1Cbcdkstvw] [+/string] [+line number] [+s] [+d] file...\n");
    fputs(" where: -1:  assume VT100 terminal. (VMS only)\n", stderr);
@@ -170,7 +170,7 @@ static void do_extended_switches(char *str)
 		case 's':
 		  Most_Secure_Mode = 1;
 		  break;
-		  
+
 		case 'U':
 		case 'u':
 		  Most_UTF8_Mode = 1;  /* +u */
@@ -262,7 +262,7 @@ static void do_switches(char *str)
 	     break;
 	   case '1': assume_vt100 = 1;
 	     break;
-	     
+
 	   case 'u':
 	   case 'U':
 	     Most_UTF8_Mode = 0;       /* -u */
@@ -491,7 +491,7 @@ int most (int argc, char **argv)
    SLtt_get_terminfo();
    utf8_config ();
    SLtt_Ignore_Beep = 1;
-   if (No_Colors) 
+   if (No_Colors)
      SLtt_Use_Ansi_Colors = 0;
 
    most_setup_colors ();
@@ -516,7 +516,7 @@ int most (int argc, char **argv)
 	       }
 	     if (status == RMS$_NMF) status = RMS$_NORMAL; /* avoid spurious warning message */
 	  }
-	
+
 	if (Most_Num_Files) strcpy(file,Most_File_Ring[0]);
 	else fputs("%%MOST-W-NOFILES, no files found\n", stderr);
 #else

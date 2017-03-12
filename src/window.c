@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 
@@ -138,7 +138,7 @@ static void rline_update (unsigned char *buf, int len, int col)
    SLsmg_refresh ();
 }
 #else
-static void rline_update (SLrline_Type *rli, char *prompt, 
+static void rline_update (SLrline_Type *rli, char *prompt,
 			  char *buf, unsigned int len, unsigned int point,
 			  VOID_STAR client_data)
 {
@@ -146,7 +146,7 @@ static void rline_update (SLrline_Type *rli, char *prompt,
 
    (void) client_data;
    (void) rli;
-   
+
    while (1)
      {
 	SLsmg_gotorc (SLtt_Screen_Rows - 1, 0);
@@ -197,7 +197,7 @@ static SLang_RLine_Info_Type  *init_readline (void)
 static char *SLrline_read_line (SLrline_Type *rli, char *prompt, unsigned int *lenp)
 {
    int i;
-   
+
    rli->prompt = prompt;
    i = SLang_read_line (rli);
    if (i < 0)
@@ -374,7 +374,7 @@ static void check_dirty_flag (void)
    if (Most_Win->dirty_flag == 0) return;
 
    Most_Win->dirty_flag = 0;
-   /* 
+   /*
    Most_Num_Lines = most_count_lines (Most_Beg, Most_Eob);
     */
    Most_Win->n_lines = Most_Num_Lines;
@@ -610,7 +610,7 @@ static void update_status1 (void)
    if (Most_Buf->is_mmaped)
      eob = Most_Beg + Most_Buf->mmap_size;
 #endif
-   
+
    if (eob == Most_Beg) x = 100;
    else
      {
@@ -626,7 +626,7 @@ static void update_status1 (void)
 
    sprintf (info, "(" MOST_INT_D_FMT ",%d) " MOST_INT_D_FMT "%%",
 	    Most_C_Line, Most_Column, x);
-   
+
    r = Most_Win->bot + 1;
    most_goto_rc (r,1);
 
@@ -638,10 +638,10 @@ static void update_status1 (void)
 
    num_chars = strlen (buf);
    SLsmg_write_nchars (buf, num_chars);
-   
+
    /* So far num_chars have been written out.  We would like to put the
     * line number information about info_len charcters from the RHS of the
-    * screen.  This leaves a field width of 
+    * screen.  This leaves a field width of
     * SLtt_Screen_Cols - (16 + num_chars) for the filename.
     */
    info_len = strlen (info);
@@ -899,7 +899,7 @@ void most_free_window_buffer (void)
      }
    b = w->buf;
    if (b == NULL) return;
-   
+
    most_close_buffer_file (b);
    Most_Win->buf = NULL;
    SLFREE(b);

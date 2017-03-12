@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -28,7 +28,6 @@ extern void most_display_line(int);
 extern int most_apparant_distance(unsigned char *);
 extern unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigned int num_cols);
 extern int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colorp);
-
 
 extern int Most_Show_Wrap_Marker;
 

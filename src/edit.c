@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 
@@ -46,14 +46,13 @@
 #include "file.h"
 #include "sysdep.h"
 
-
 /* quote_char is one of: 0, ", or '.  It represents the character
  * that will be used to quote the filename.
  */
 char *most_escape_filename (char *file, char quote_char)
 {
    char *efile, *e;
-   
+
    if (NULL == (efile = SLmalloc (5 + 2*strlen(file))))
      return NULL;
 
@@ -97,7 +96,7 @@ char *most_escape_filename (char *file, char quote_char)
 	     return efile;
 #ifndef VMS
 	     /* For a double-quoted string, only the following characters
-	      * may be escaped with a backslash.  Unfortunately, escaping 
+	      * may be escaped with a backslash.  Unfortunately, escaping
 	      * others such as &, *, |, etc will not work.
 	      */
 	   case '\\': case '$': case '"': case '`': case '\n':
@@ -159,7 +158,6 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, 
    if (NULL == (efile = most_escape_filename (file, quote_char)))
      return -1;
 
-
    if ((d == 0) && (s == 0))
      {
 	/* No %d, %s */
@@ -167,7 +165,7 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, 
 	SLfree (efile);
 	return 0;
      }
-   
+
    if (d == 0)
      {
 	_pSLsnprintf (cmd, sizeof_cmd, edit, efile);
@@ -179,9 +177,9 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, 
      {
 	if (d == 1)
 	  _pSLsnprintf (cmd, sizeof_cmd, edit, Most_C_Line, efile);
-	else 
+	else
 	  _pSLsnprintf (cmd, sizeof_cmd, edit, efile, Most_C_Line);
-	
+
 	SLfree (efile);
 	return 0;
      }
@@ -220,7 +218,7 @@ int call_edt_tpu(int tpu, char *file)
      tpu$tpu(&file_desc);
    else
      edt$edit(&file_desc);
-   
+
    return 1;
 }
 #endif
@@ -233,7 +231,7 @@ void most_edit_cmd(void)
    int tpu = -1;
 #endif
    char *file;
-   
+
    file = Most_Buf->file;
 
    if ((0 == *file) || ('*' == *file))

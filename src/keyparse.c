@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 
@@ -31,7 +31,7 @@
 #  define MOST_SYSTEM_INITFILE "/etc/most.conf"
 # endif
 #endif
-  
+
 /* parses user key definition file */
 
 /* The file is assumed to have a simple format:
@@ -110,7 +110,7 @@ static int parse_file (char *file)
    char buf[512];
    FILE *fp;
 
-   if (NULL == (fp = fopen (file, "r"))) 
+   if (NULL == (fp = fopen (file, "r")))
      return 1;
 
    Cmd_Table.table = Startup_File_Cmds;
@@ -160,7 +160,7 @@ int most_load_user_keymaps (void)
 	file = getenv ("HOME");
 	if (file == NULL)
 	  return -1;
-	
+
 	len = strlen (file);
 	if (len + 8 >= sizeof (filebuf))   /* 8 for strlen("/.mostrc") */
 	  return -1;
@@ -168,7 +168,7 @@ int most_load_user_keymaps (void)
 	strcpy (filebuf, file);
 	file = filebuf;
 
-	if (len && (file[len - 1] == '/')) 
+	if (len && (file[len - 1] == '/'))
 	  len--;
 	strcpy (file + len, "/.mostrc");
 #endif
@@ -191,7 +191,7 @@ typedef struct /*{{{*/
 Color_Handle_Type;
 
 /* default colors -- suitable for a color xterm */
-   
+
 static Color_Handle_Type Color_Handles[] = /*{{{*/
 {
      {"normal",		0,			"default",	"default", 0},
@@ -201,7 +201,6 @@ static Color_Handle_Type Color_Handles[] = /*{{{*/
 
      {NULL, -1, NULL, NULL, 0}
 };
-
 
 static int set_object_color (char *name, char *fg, char *bg)
 {
@@ -216,7 +215,7 @@ static int set_object_color (char *name, char *fg, char *bg)
 	  }
 	ct++;
      }
-   
+
    parse_error ("Undefined color object");
    return -1;
 }
@@ -226,20 +225,19 @@ static int color_fun (int argc, SLcmd_Cmd_Table_Type *table)
    char *what = table->string_args[1];
    char *fg = table->string_args[2];
    char *bg = table->string_args[3];
-   
-   (void) argc;   
+
+   (void) argc;
    return set_object_color (what, fg, bg);
 }
-
 
 static int mono_fun (int argc, SLcmd_Cmd_Table_Type *table)
 {
    char *what = table->string_args[1];
    char *attr;
    int i;
-   
+
    Color_Handle_Type *ct = Color_Handles;
-   
+
    while (ct->name != NULL)
      {
 	if (!strcmp (ct->name, what))
@@ -277,7 +275,7 @@ static char *Ansi_Color_Map[9] =
    "blue",
    "magenta",
    "cyan",
-   "white", 
+   "white",
    "default"
 };
 
@@ -316,7 +314,7 @@ void most_setup_colors (void)
 	SLtt_set_color (h->value+MOST_EMBEDDED_COLOR_OFFSET, NULL, h->fg, h->bg);
 	SLtt_set_mono (h->value, NULL, h->mono);
 	SLtt_set_mono (h->value+MOST_EMBEDDED_COLOR_OFFSET, NULL, h->mono);
-	
+
 	h++;
      }
 }

@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 #include <stdio.h>
@@ -65,7 +65,7 @@ int Most_Tail_Mode = 1;
 static int create_gunzip_cmd (char *cmd, char *file, char *buf, unsigned int sizeof_buf)
 {
    char *efile;
-   
+
    if (NULL == (efile = most_escape_filename (file, '"')))
      return -1;
 
@@ -113,7 +113,7 @@ static int open_compressed_file(char *file, int mode, int *size)
 	  {
 	     cmd = MOST_BZIP2_POPEN_FORMAT;
 	  }
-	
+
 	if (cmd != NULL)
 	  {
 	     FILE *fp;
@@ -155,17 +155,17 @@ static int try_mmap_buffer (int fd)
    struct stat st;
 
    Most_Buf->is_mmaped = 0;
-   
+
    if (Most_Disable_MMap)
      return -1;
 
    if (-1 == fstat (fd, &st))
      return -1;
-   
+
    addr = (unsigned char *)mmap (NULL,st.st_size,PROT_READ,MAP_SHARED,fd,0);
    if (addr == (unsigned char *)MAP_FAILED)
      return -1;
-   
+
    Most_Buf->fd = fd;
    Most_Eob = Most_Beg = Most_Buf->end = Most_Buf->beg = addr;
    Most_Buf->size = 0;
@@ -179,10 +179,10 @@ static int unmmap_buffer (Most_Buffer_Type *b)
 {
    if (b->is_mmaped == 0)
      return 0;
-   
+
    if (b->beg != NULL)
      munmap ((char *)b->beg, b->size);
-   
+
    b->end = b->beg = NULL;
    if (b == Most_Buf)
      {
@@ -194,7 +194,7 @@ static int unmmap_buffer (Most_Buffer_Type *b)
 }
 
 static int resync_mmap (void)
-{   
+{
    struct stat st;
    int line = Most_C_Line;
 
@@ -202,18 +202,17 @@ static int resync_mmap (void)
      return 0;
    if (-1 == fstat (Most_Buf->fd, &st))
      return -1;
-   
+
    if ((unsigned int) st.st_size == Most_Buf->mmap_size)
      return 0;
 
    (void) unmmap_buffer (Most_Buf);
    if (-1 == try_mmap_buffer (Most_Buf->fd))
      return -1;
-   
+
    most_goto_line (line);
    return 0;
 }
-
 
 #endif				       /* MOST_HAS_MMAP */
 
@@ -222,7 +221,7 @@ int most_close_buffer_file (Most_Buffer_Type *b)
    if (b->fd != -1)
      {
 #if !defined(VMS)
-	if (b->fp != NULL) pclose (b->fp); 
+	if (b->fp != NULL) pclose (b->fp);
 	else
 #endif
 	  close(b->fd);
@@ -230,11 +229,11 @@ int most_close_buffer_file (Most_Buffer_Type *b)
 #if MOST_HAS_MMAP
    unmmap_buffer (b);
 #endif
-   if (b->beg != NULL) 
+   if (b->beg != NULL)
      SLFREE(b->beg);
    b->beg = NULL;
    b->fd = -1;
-   
+
    return 0;
 }
 
@@ -310,12 +309,12 @@ static void examine_file_contents (void)
 
    if (Most_B_Opt || Most_K_Opt)
      return;
-   
+
    pos = Most_Beg;
    pos_max = pos + 512;
    if (pos_max > Most_Eob)
      pos_max = Most_Eob;
-	
+
    while (pos < pos_max)
      {
 	if (0 == *pos)
@@ -325,7 +324,7 @@ static void examine_file_contents (void)
 	  }
 	pos++;
      }
-	
+
    /* Check for a FITS file.  The header looks like ASCII. */
    if (Most_B_Opt == 0)
      {
@@ -354,10 +353,10 @@ static int read_mmap_file_dsc (int many, int count_lines)
 	if (-1 == resync_mmap ())
 	  return -1;
      }
-       
+
    if (size == Most_Buf->mmap_size)
      return 0;
-   
+
    if (many < 0)
      size = Most_Buf->mmap_size;
    else
@@ -366,7 +365,7 @@ static int read_mmap_file_dsc (int many, int count_lines)
 	if (size > Most_Buf->mmap_size)
 	  size = Most_Buf->mmap_size;
      }
-   
+
    Most_Eob = Most_Buf->end = Most_Buf->beg + size;
    Most_Buf->size = size;
 
@@ -374,7 +373,7 @@ static int read_mmap_file_dsc (int many, int count_lines)
 
    if (First_Time_Hack)
      examine_file_contents ();
-   
+
    if (count_lines)
      Most_Num_Lines = most_count_lines (Most_Beg, Most_Eob);
 
@@ -402,7 +401,7 @@ int most_read_file_dsc (int many, int count_lines)
 	int ret = read_mmap_file_dsc (many, count_lines);
 	if (-1 != ret)
 	  return ret;
-	
+
 	if (Most_Buf->is_mmaped)
 	  return -1;
 	/* No longer mapped..... */
@@ -446,7 +445,7 @@ int most_read_file_dsc (int many, int count_lines)
 #endif
 		  break;
 	       }
-	     
+
 	     if (i == 0)
 	       {
 		  /* EOF */
@@ -510,7 +509,6 @@ void most_read_to_line(int n)
    if (Most_Num_Lines)
      nbytes = dn * ((Most_Eob - Most_Beg) / Most_Num_Lines);
    if (nbytes < 0x3FFF) nbytes = 0x3FFF;
-   
 
    while ((Most_Buf->fd != -1)
 	  && (n >= Most_Num_Lines)
@@ -523,8 +521,6 @@ void most_read_to_line(int n)
 	if (nbytes < 0x3FFF) nbytes = 0x3FFF;
      }
 }
-
-
 
 int most_find_file(char *file)
 {
@@ -664,10 +660,10 @@ void most_do_next_file(int *j)
 #else
 	if ((ch != 0) && (ch != 0xE0))
 	  break;
-	
+
 	ch = most_getkey ();
 	if (ch != 'H') ch = 'B'; else ch = 'A';
-	
+
 #endif
 	if (ch == 'B')
 	  {

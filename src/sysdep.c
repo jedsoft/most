@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 /*
@@ -253,7 +253,7 @@ int most_expand_file_name(char *file,char *expanded_file)
      }
    else
      expanded_file[0] = '\0';       /* so file comes back as zero width */
-   
+
    return status;
 }
 #endif /* VMS */
@@ -356,7 +356,7 @@ static void sigbus_handler (int sig)
    if ((Most_Buf != NULL)
        && Most_Buf->is_mmaped)
      fprintf (stderr, "This may be due to a modified memory mapped file\n");
-   
+
    exit (1);
 }
 #endif
@@ -365,7 +365,7 @@ void most_resize_display (void)
 {
    Want_Window_Size_Change = 0;
 
-   if (Most_Display_Inited == 0) 
+   if (Most_Display_Inited == 0)
      return;
 
    most_get_term_dimensions(&SLtt_Screen_Cols, &SLtt_Screen_Rows);
@@ -380,7 +380,6 @@ void most_resize_display (void)
 #endif
    most_redraw_display ();
 }
-
 
 static int init_tty (void)
 {
@@ -491,7 +490,6 @@ int most_reinit_terminal (void)
    Most_TTY_Inited = 1;
    return 0;
 }
-
 
 /* slang uses select to wait for terminal input.  If SIGINT is
  * generated, then slang returns ^G and sets SLKeyBoard_Quit

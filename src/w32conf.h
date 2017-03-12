@@ -1,6 +1,6 @@
 /* -*- C -*- */
 
-/* Note: this is for DJGPP and WIN32 systems only.  
+/* Note: this is for DJGPP and WIN32 systems only.
  * See mostconf.h for other systems, e.g., Unix.
  */
 

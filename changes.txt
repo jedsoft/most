@@ -30,6 +30,7 @@ Changes since 5.0.0
 17. src/line.c, buffer.c: Fixed an issue with the display of
     double-width characters to address
     <https://bugs.launchpad.net/ubuntu/+source/most/+bug/312454>.
+18. src/*.[ch]: Updated copyright year
 
 {{{ Previous Versions
 Changes since 4.10.2

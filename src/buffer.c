@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005, 2006, 2007 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -15,7 +15,7 @@
 
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc., 675
- Mass Ave, Cambridge, MA 02139, USA. 
+ Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "config.h"
 
@@ -54,7 +54,6 @@ MOST_INT Most_C_Line;
    (((Most_UTF8_Mode == 0) || (0 == ((*(p-1)) & 0x80))) \
      ? ((p)--) \
      : ((p) = SLutf8_bskip_char ((p0), (p))))
-
 
 static unsigned char *beg_of_line1(void)
 {
@@ -123,7 +122,7 @@ static unsigned char *end_of_line1(void)
    if (*pos != '\n')
      {
 	/* This block is UTF-8 safe, because it only scans the buffer
-	 * for a new-line, and doesn't count characters. 
+	 * for a new-line, and doesn't count characters.
 	 */
 	n = pmax - pos;
 	n2 = n % 8;
@@ -181,13 +180,13 @@ unsigned char *most_beg_of_line(void)
 	unsigned char *next_b = most_forward_columns (b, e, ncols);
 	if ((next_b == e) || (next_b == b))
 	  break;
-	
+
 	if (next_b >= Most_Beg + Most_C_Offset)
 	  break;
 
 	 b = next_b;
      }
-   
+
    return b;
 }
 
@@ -207,8 +206,8 @@ static unsigned char *end_of_line (unsigned char *b)
      ncols--;
 
    b = most_forward_columns (b, e, ncols);
-   
-   /* Do not wrap the line if the last character falls on the last column 
+
+   /* Do not wrap the line if the last character falls on the last column
     * of the display.
     */
    if (Most_Show_Wrap_Marker)
@@ -217,7 +216,7 @@ static unsigned char *end_of_line (unsigned char *b)
 	  b1 = b + 1;
 	else
 	  b1 = SLutf8_skip_char (b, Most_Eob);
-	
+
 	if ((b1 <= e)
 	    && (b1 < Most_Eob))
 	  {

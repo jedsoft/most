@@ -23,6 +23,7 @@
 # include <string.h>
 
 extern int Most_Case_Sensitive;
+extern int Most_Do_Regexp_Search;
 extern int Most_Search_Dir;
 #define MOST_SEARCH_BUF_LEN	256
 extern char Most_Search_Str[MOST_SEARCH_BUF_LEN];

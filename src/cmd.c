@@ -73,6 +73,20 @@ void most_toggle_case (void)
    most_message (msg, 0);
 }
 
+void most_toggle_research (void)
+{
+   char *msg;
+
+   Most_Do_Regexp_Search = !Most_Do_Regexp_Search;
+
+   if (Most_Do_Regexp_Search)
+     msg = "Regexp search enabled";
+   else
+     msg = "Regexp search disabled";
+
+   most_message (msg, 0);
+}
+
 void most_delete_file_cmd (void)
 {
    int bell = 0;
@@ -113,7 +127,7 @@ void most_toggle_options (void)
    unsigned int save;
 
    most_select_minibuffer();
-   SLsmg_write_string("Toggle option: b(binary) d(selective display) t(tab) v(verbose) w(wrap)");
+   SLsmg_write_string("Toggle: b(binary) t(tab) v(verbose) w(wrap) d(selective display) ");
    SLsmg_gotorc (SLtt_Screen_Rows - 1, 0);
    SLsmg_refresh ();
 
@@ -236,7 +250,7 @@ void most_extended_key_cmd (void)
    if (Most_Secure_Mode) Most_D_Opt = 0;
 
    most_select_minibuffer();
-   SLsmg_write_string ("Choose: N (next file), C (toggle case), O (toggle options)");
+   SLsmg_write_string ("Choose: N (next file), C(toggle case), R(toggle re-search) O(toggle options)");
    if (Most_D_Opt) SLsmg_write_string (" ,D (delete file)");
    SLsmg_gotorc (SLtt_Screen_Rows - 1, 0);
    SLsmg_refresh ();
@@ -252,6 +266,9 @@ void most_extended_key_cmd (void)
 	break;
       case 'C':
 	most_toggle_case ();
+	break;
+      case 'R':
+	most_toggle_research ();
 	break;
       case 'O':
 	most_toggle_options ();

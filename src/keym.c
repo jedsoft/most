@@ -143,6 +143,7 @@ static void end_of_buffer_cmd(void)
 	  && (0 != most_read_file_dsc(-1, 1)))
      count++;
    most_update_windows (-1);
+   Most_Curs_Offset = (Most_Eob - Most_Beg);
 }
 #ifdef unix
 # include <signal.h>
@@ -328,24 +329,18 @@ static void search_cmd_dir (char *prompt, int dir)
 
 static void search_cmd(void)
 {
-   search_cmd_dir (
-#ifdef SLANG_REGEXP
-		   "Regexp Search: ",
-#else
-		   "Search: ",
-#endif
-		   1);
+   char *prompt = "Regexp-Search: ";
+   if (Most_Do_Regexp_Search == 0)
+     prompt += 7;
+   search_cmd_dir (prompt,1);
 }
 
 static void search_back_cmd(void)
 {
-   search_cmd_dir (
-#ifdef SLANG_REGEXP
-		   "Regexp Search Backwards: ",
-#else
-		   "Search Backwards: ",
-#endif
-		   -1);
+   char *prompt = "Regexp-Search Backwards: ";
+   if (Most_Do_Regexp_Search == 0)
+     prompt += 7;
+   search_cmd_dir (prompt, -1);
 }
 
 static void help_cmd(void)

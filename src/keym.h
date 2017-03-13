@@ -28,6 +28,7 @@ extern void most_next_file (void);
 extern void most_toggle_case (void);
 extern void most_delete_file_cmd (void);
 extern void most_toggle_options (void);
+extern void most_toggle_research (void);
 
 #if 0
 extern void ctrl_x_map_cmd(void);

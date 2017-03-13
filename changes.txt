@@ -31,6 +31,9 @@ Changes since 5.0.0
     double-width characters to address
     <https://bugs.launchpad.net/ubuntu/+source/most/+bug/312454>.
 18. src/*.[ch]: Updated copyright year
+19. src/search.c: Rewrote the search functions from scratch.  Both
+    ordinary and regexp searches are now supported.  Use -r to startup
+    with regular-expression searches.
 
 {{{ Previous Versions
 Changes since 4.10.2

@@ -65,10 +65,11 @@ int Most_Captive_Mode;
 #if MOST_HAS_MMAP
 int Most_Disable_MMap	= 0;
 #endif
+int Most_Do_Regexp_Search = 0;
 
 int Most_UTF8_Mode = -1;	       /* -1:auto, 0:off, 1:on */
 
-static int  Most_Starting_Line;
+static int Most_Starting_Line;
 char *Most_Program;	/* Program Name (argv[0]) */
 
 static char *Most_Version = MOST_VERSION_STR;
@@ -88,7 +89,7 @@ void most_usage (void)
      fprintf (stderr, " *Note: This executable was compiled against S-Lang %s\n", SLANG_VERSION_STRING);
 
    fprintf (stderr, "Usage:\n");
-   fprintf(stderr, "most [-1Cbcdkstvw] [+/string] [+line number] [+s] [+d] file...\n");
+   fprintf(stderr, "most [-1Cbcdkrstvw] [+/string] [+line number] [+s] [+d] file...\n");
    fputs(" where: -1:  assume VT100 terminal. (VMS only)\n", stderr);
    fputs("        -b:  Startup in binary mode.\n", stderr);
    fputs("        -C:  disable color support\n", stderr);
@@ -98,6 +99,7 @@ void most_usage (void)
 #if MOST_HAS_MMAP
    fputs("        -M:  Do not attempt to mmap files.\n", stderr);
 #endif
+   fputs("        -r:  Default to regexp search\n", stderr);
    fputs("        -s:  Squeeze out excess blank lines.\n", stderr);
    fputs("        -t:  Display tabs as ^I.  If this option is immediately followed\n", stderr);
    fputs("               by an integer, the integer sets the tab width.\n", stderr);
@@ -214,6 +216,10 @@ static void do_switches(char *str)
 	   case 'd':
 	   case 'D':
 	     Most_Show_Wrap_Marker = 0;
+	     break;
+	   case 'r':
+	     Most_Do_Regexp_Search = 1;
+	     break;
 	   case 's':
 	   case 'S':
 	     Most_S_Opt = 1; break;

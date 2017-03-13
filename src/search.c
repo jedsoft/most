@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <slang.h>
 
 #include "most.h"
@@ -42,388 +43,150 @@ int Most_Search_Dir = 1;
 
 #include "jdmacros.h"
 
-#undef SLANG_REGEXP
-#undef HAVE_V8_REGCOMP
-
-#define UPCASE(ch) ((!Most_Case_Sensitive && (ch <= 'z') && (ch >= 'a')) ? (ch - 32) : ch)
-
-#if	defined(HAVE_V8_REGCOMP) || defined(SLANG_REGEXP)
-
-/*
- *  Regular expression stuff
- *  ************************
- */
-# ifdef	HAVE_V8_REGCOMP
-#  include "regexp.h"
-
-/* pointer to area malloced by regcomp() */
-static struct regexp	*regpattern = NULL;
-
-# else
-
-/* slang regular expression structure */
-#if SLANG_VERSION < 20000
-static SLRegexp_Type	regdata;
-/* buffer for compiled regular expression */
-static unsigned char regbuf[sizeof(Most_Search_Str) * 3];
-#else
-static SLRegexp_Type *Regexp;
-#endif
-# endif	/* HAVE_V8_REGCOMP */
-
-/* set if regexp compiled OK, 0 if regular expression error */
-static int		regcompOK = 1;
-
-/* uncompiled search pattern */
-static char		savepattern[sizeof(Most_Search_Str)];
-
-/*
- * This function is called by the V8 regcomp to report
- * errors in regular expressions.
- */
-static void regerror(char *s)
+typedef struct Search_Type_ Search_Type;
+struct Search_Type_
 {
-   char	string[256];
+   void *cd;
+   unsigned char *(*fsearch_method) (Search_Type *, unsigned char *, unsigned char *, unsigned char *);
+   unsigned char *(*bsearch_method) (Search_Type *, unsigned char *, unsigned char *, unsigned char *);
+   void (*close_method)(Search_Type *);
+};
 
-   regcompOK = 0;			/* clear flag, ie regexp error */
-   sprintf(string, "Regular expression error: %s", s);
-   most_message(string, 1);
+
+static unsigned char Ascii_Upper[256];
+
+static void bs_search_init (void)
+{
+   static int inited = 0;
+   unsigned int i;
+
+   if (inited) return;
+   for (i = 0; i < 256; i++) Ascii_Upper[i] = i;
+   for (i = 'a'; i <= 'z'; i++) Ascii_Upper[i] = (i - 32);
+   inited = 1;
 }
-
-/*
- *  Compiles the search pattern "key" into a regular expression for use by
- *  do_regexec()
- *
- *  Returns:  1	 success
- *	      0	 error
- *
- */
-static int do_regcomp(unsigned char *key)
-{
-   static int old_Most_Case_Sensitive;
-   unsigned char UpCaseKey[sizeof(savepattern)];
-# ifndef HAVE_V8_REGCOMP
-   int	posn;			/* reg exp error at this offset */
-# endif
 
-   /*
-    *	Only recompile search string if it has changed
+#define UPCASE(ch) (Ascii_Upper[(ch)])
+
+#define CHAR_EQS(a,b) \
+   (((a) == (b)) || (!Most_Case_Sensitive && (UPCASE(a) == UPCASE(b))))
+
+static int is_ansi_escape (unsigned char **begp, unsigned char *end)
+{
+   unsigned char *p, ch;
+
+   p = *begp;
+   if ((p == end) || (*p++ != '[')) return 0;
+
+   /* Look for "ESC X m", where X is one of:
+    *   X = ""
+    *   X = digit
+    *   X = digit ; digit ...
     */
-   if ((0 == strcmp ((char *)key, (char *) savepattern))
-       && (Most_Case_Sensitive == old_Most_Case_Sensitive))
-     return 1;
-
-# ifdef	HAVE_V8_REGCOMP
-   if (regpattern != NULL)
-     free(regpattern);
-# endif
-
-   if ( strlen((char *)key) >= sizeof(savepattern) )
+   ch = *p++;
+   while (isdigit (ch))
      {
-	regerror("Search string too long");
-	savepattern[0] = '\0';
-	return 0;
-     }
-
-   old_Most_Case_Sensitive = Most_Case_Sensitive;
-
-   if ( Most_Case_Sensitive == 0 )
-     {
-	register unsigned char	*p;		/* ptr to UpCaseKey */
-	register unsigned char	*keyp;		/* ptr to key */
-	register unsigned char	c;		/* source character */
-
-	    /*
-	     *	Make a upper case copy of every character from "key"
-	     *	into "UpCaseKey"
-	     */
-	p = UpCaseKey;
-	keyp = key;
-	while ( (c = *keyp++) != '\0' )
-	  *p++ = UPCASE(c);
-
-	*p = '\0';
-     }
-
-   strcpy((char *)savepattern, (char *)key);
-
-# ifdef	HAVE_V8_REGCOMP
-   regpattern = regcomp((char *)(Most_Case_Sensitive ? key : UpCaseKey));
-   if (regpattern == NULL)
-     {
-	regcompOK = 1;
-	return 1;
-     }
-# else
-
-#  if SLANG_VERSION < 20000
-   regdata.case_sensitive = 1;
-   regdata.buf = regbuf;
-   regdata.pat = Most_Case_Sensitive ? key : UpCaseKey;
-   regdata.buf_len = sizeof (regbuf);
-   posn = SLang_regexp_compile(&regdata);
-#  else
-   if (Regexp != NULL)
-     SLregexp_free (Regexp);
-   if (NULL == (Regexp = SLregexp_compile ((char *)key, Most_Case_Sensitive ? 0 : SLREGEXP_CASELESS)))
-     posn = -1;
-   else
-     posn = 0;
-#  endif
-
-   if (posn == 0)
-     {
-	regcompOK = 1;
-	return 1;
-     }
-   regerror ("Unable to compile pattern");
-# endif	/* HAVE_V8_REGCOMP */
-
-   /*
-    * regcomp has already printed error message via regerror().
-    */
-   savepattern[0] = '\0';
-   return 0;				/* failure */
-}
-
-/*
- * Call the appropriate regular expression execute function
- */
-
-static unsigned char *do_regexec(unsigned char *string, unsigned int len)
-{
-# ifdef	HAVE_V8_REGCOMP
-   if ( regexec(regpattern, (char *)string) )
-     return( (unsigned char *)regpattern->startp[0] );
-   else
-     return( NULL );
-# else
-#  if SLANG_VERSION < 20000
-   return ( SLang_regexp_match(string, len, &regdata) );
-#  else
-   return (unsigned char *)SLregexp_match (Regexp, (char *)string, len));
-#  endif
-# endif	/* HAVE_V8_REGCOMP */
-}
-
-/*
- *  Make a upper case copy of a string.	 Also changes any "c\b" character
- *  strings into just "" so that highlighted and underlined characters
- *  can be searched.
- *
- *  Reuses malloced memory, so a copy cannot be retained between calls.
- */
-
-static unsigned char *StrUpCaseCopy(unsigned char *input)
-{
-   static unsigned char *uppercase;	/* ptr to malloced area */
-   static size_t	  bufsize;	/* size of malloced area */
-   unsigned char	 *src;		/* ptr to source */
-   register unsigned char *dest;	/* ptr to destination */
-   register int	  idx;	/* index into uppercase[] */
-   register unsigned char c;		/* source character */
-   size_t		  length;	/* size of string to copy */
-
-   src = input;
-   length = strlen((char *)src) + 1;	/* len of line plus terminator */
-
-   if ( length > bufsize )
-     {
-	if ( uppercase != (unsigned char *)NULL )
-	  free(uppercase);
-
-	bufsize = (length > 256 ) ? length : 256;	/* 256 byte default */
-
-	uppercase = (unsigned char *)malloc(bufsize);
-	if ( uppercase == (unsigned char *)NULL )
-	  return(NULL);
-     }
-
-    /*
-     *	Make the copy converting to upper case as we go
-     */
-
-   dest = uppercase;
-
-   for ( idx = 0 ; (c = *src) != '\0' ; src++ )
-     {
-	if ( c == '\b' )		/* backspace */
-	  {
-	     if ( idx-- > 0 )
-	       dest--;			/* back up dest pointer */
-	  }
-	else
-	  {
-	     if ( idx++ >= 0 )
-	       *dest++ = UPCASE(c);
-	  }
-     }
-
-   *dest = '\0';		/* add termination */
-
-   return(uppercase);
-}
-
-/*
- *  Given an offset into a copy made by StrUpCaseCopy() and a pointer to the
- *  original string, returns a pointer into the original string corresponding
- *  to this offset.
- */
-
-static unsigned char *GetOrigPtr(unsigned char *original, int offset)
-{
-   register unsigned char *p = original;
-   register int	    j = offset;
-
-    /*
-     *	Step through, adjusting offset according to backspaces found
-     */
-   while ( *p != '\0' )
-     {
-	if ( *p == '\b' )
-	  j++;
-	else
-	  j--;
-
-	if ( j < 0 )
-	  break;
-	else
+	while ((p < end) && isdigit (*p))
 	  p++;
+
+	if (p == end)
+	  return 0;
+
+	ch = *p++;
+	if (ch == 'm')
+	  break;
+
+	if ((ch != ';') || (p == end))
+	  return 0;
+
+	ch = *p++;
+     }
+   if (ch != 'm')
+     return 0;
+
+   *begp = p;
+   return 1;
+}
+
+static int is_rev_ansi_escape (unsigned char *beg, unsigned char **endp)
+{
+   unsigned char *p, ch;
+
+   p = *endp;
+   if (p == beg)
+     return 0;
+
+   ch = *p--;
+   while (isdigit (ch))
+     {
+	while ((p > beg) && isdigit (*p))
+	  p--;
+
+	if (p == beg)
+	  return 0;
+
+	ch = *p--;
+
+	if (ch == '[')
+	  break;
+
+	if ((ch != ';') || (p == beg))
+	  return 0;
+
+	ch = *p--;
      }
 
-   return(p);
+   if ((ch != '[') || (p < beg) || (*p != 033))
+     return 0;
+
+   *endp = p-1;
+   return 1;
 }
-#endif	/* HAVE_V8_REGCOMP || SLANG_REGEXP */
-
+
+/* These routines have special processing for ANSI escape sequence and backspace handling.
+ * For example, "hello world" may occur as:
+ *   plain: hello world
+ *   underlined: h_e_l_l_o_ world
+ *   underlined: _h_e_l_l_o world
+ *   bold: hheelllloo world
+ *   ansi: [5mhello[m world
+ *   ansi: [5mh[32;43mello[m world
+ */
+
 /* This routine returns the 1 + position of first match of key in str.
-   key is modified to match the case of str. */
-/* We should try to optimize this routine */
-/* searches from beg up to but not including end */
-
-#if defined(SLANG_REGEXP)
+ * searches from beg up to but not including end.  Handles backspace, etc
+ */
 static unsigned char *
-  forw_search_region_regexp (unsigned char *beg, unsigned char *end,
-			     unsigned char *key)
+bs_fsearch (Search_Type *st,
+	    unsigned char *beg, unsigned char *end,
+	    unsigned char *key)
 {
-   if (Regexp != NULL)
-     SLregexp_free (Regexp);
-
-   if (NULL == (Regexp = SLregexp_compile ((char *)key, Most_Case_Sensitive ? 0 : SLREGEXP_CASELESS)))
-     return NULL;
-
-   if ( do_regcomp(key) == 0 )
-     return(Most_Eob);
-
-    /*
-     *	For regular expression searches we need to do a line by line
-     *	search, so it is necessary to temporarily replace '\n' with '\0'
-     *	characters.
-     *
-     * ***** THIS IS NOT ALLOWED FOR MMAPPED FILES!!!!!!!!! *****
-     */
-   p = beg;
-   linebeg = beg;
-
-   while (linebeg < end)
-     {
-	while ((p < end) && (*p != '\n')) p++;
-	if (p == end) break;
-	/* *p = 0; -- not allow for mmapped files */
-
-	if ( Most_Case_Sensitive == 0 )	/* i.e. case insensitive */
-	  {
-	     copy = StrUpCaseCopy(linebeg);
-	     if ( copy == (unsigned char *)NULL )
-	       return(Most_Eob);
-	  }
-
-	/*
-	 * Quick sanity check for beginning of line archored tests.
-	 * If 1st char of key is "^", then the character before linebeg (which
-	 * must be beyond the start of the window), must be a "\n",
-	 * otherwise do_regexec() isn't called.
-	 */
-	if (
-# if 0
-	     ((*key != '^')
-	      || (linebeg > Most_Win->beg_pos && linebeg[-1] == '\n'))
-	     &&
-#endif
-	     (match = do_regexec(Most_Case_Sensitive ? linebeg : copy)))
-	  {
-	     /* *p = '\n'; --- NOT ALLOWED */
-	     if ( Most_Case_Sensitive == 0 )
-	       {
-		/*
-		 *  Use offset into "copy" as idx to find point in
-		 *  real line.
-		 */
-		  return( GetOrigPtr(linebeg, match - copy) );
-	       }
-	     else
-	       {
-		  return( match );
-	       }
-	  }
-
-	/* *p++ = '\n'; */
-	linebeg = p;
-     }
-
-   return(Most_Eob);
-}
-
-#endif
-static unsigned char *forw_search_region(unsigned char *beg,
-					 unsigned char *end,
-					 unsigned char *key)
-{
-#if defined(HAVE_V8_REGCOMP) || defined(SLANG_REGEXP)
-   return forw_search_region_regexp (beg, end, key);
-#else
-   char ch, char1, work[256];
+   unsigned char ch, ch1, ch1up;
    unsigned char *pos;
-   int key_len,j, str_len;
+   int cis, key_len, j, str_len;
 
-   if (Most_Case_Sensitive)
-     {
-	strcpy(work, (char *) key);
-	key_len = strlen((char *) key);
-     }
-   else
-     {
-          /* upcase key */
-	key_len = 0;
-	while (0 != (ch = key[key_len]))
-	  {
-	     ch = UPCASE(ch);
-	     work[key_len++] = ch;        /* null char is ok */
-	  }
-     }
-
+   (void) st;
+   key_len = strlen ((char *)key);
    if (key_len == 0)
      return Most_Eob;
 
    str_len = (int) (end - beg);
    if (str_len < key_len) return (Most_Eob);
 
-# if 0
-   str_len -= key_len; /* effective length */
-   end -= (key_len - 1);
-# endif
-
-   char1 = work[0];
+   cis = (Most_Case_Sensitive == 0);
+   ch1 = key[0];
+   ch1up = UPCASE(ch1);
 
    while (1)
      {
-	 /* Find first character that matches */
+	/* Find first character that matches */
 	while (1)
 	  {
 	     if (beg == end) return Most_Eob;
 
 	     ch = *beg++;
-	     ch = UPCASE(ch);
-	     if (ch == char1)
+	     if ((ch == ch1)
+		 || (cis && (ch1up == UPCASE(ch))))
 	       break;
 	  }
 
@@ -448,8 +211,7 @@ static unsigned char *forw_search_region(unsigned char *beg,
 	      */
 	     if ((ch == 8)
 		 && (beg + 1 < end)
-		 && (Most_V_Opt == 0)
-		 && ((work[j - 1] == UPCASE(*beg))
+		 && (CHAR_EQS(key[j - 1], *beg)
 		     || (*beg == '_')))
 	       {
 		  ch = *(beg + 1);
@@ -465,8 +227,10 @@ static unsigned char *forw_search_region(unsigned char *beg,
 		       beg--;
 		    }
 	       }
+	     else if ((ch == 033) && is_ansi_escape (&beg, end))
+	       continue;
 
-	     if (UPCASE(ch) != work[j])
+	     if (!CHAR_EQS(ch, key[j]))
 	       break;
 
 	     j++;
@@ -474,150 +238,32 @@ static unsigned char *forw_search_region(unsigned char *beg,
 
 	beg = pos;
      }
-#endif	/* HAVE_V8_REGCOMP || SLANG_REGEXP */
 }
-
+
 /*
  *  Search backwards in the buffer "beg" up to, but not including "end" for
- *  pattern "key".
+ *  pattern "key".  It handles backspaces, etc
  */
-
-static unsigned char *back_search_region(unsigned char *beg,
-					 unsigned char *end,
-					 unsigned char *key)
+static unsigned char *
+bs_bsearch (Search_Type *st,
+	    unsigned char *beg, unsigned char *end,
+	    unsigned char *key)
 {
-#if	defined(HAVE_V8_REGCOMP) || defined(SLANG_REGEXP)
-   register unsigned char	*p;
-   unsigned char		*endp,		/* end of line */
-   *lastmatch,	/* last match in line */
-   *endprevline,	/* end of line before this one */
-   *match;		/* ptr to matching string */
-   unsigned char		savec;		/* last char on line */
-
-    /*
-     *	Compile "key" into an executable regular expression
-     */
-   if ( do_regcomp(key) == 0 )
-     return(Most_Eob);
-
-    /*
-     *	Starting from the end of the buffer, break the buffer into lines
-     *	then for each line do forward search to find a match.  If one is
-     *	found, move pointer forward one character and try again until
-     *	unsuccessful.  In this way we find the last match on the line
-     *	and isn't that what we want to do in a reverse search.
-     */
-   endp = end;
-   lastmatch = Most_Eob;
-   while ( 1 )			/* forever loop */
-     {
-	if ( (endp < beg) )
-	  return(Most_Eob);		/* Reach start of buffer, no match */
-
-	/* Find the real end of current line */
-	if ( (p = (unsigned char *)strchr((char *)endp, '\n')) != NULL )
-	  endp = p;
-
-	savec = *endp;
-	*endp = '\0';			/* terminate line with NULL */
-
-	/* Find the beginning of line */
-	for ( p = endp - 1 ; (p >= beg) && (*p != '\n') ; p-- )
-	  {
-	  }
-
-	endprevline = p;
-
-	p++;			/* point to 1st char after newline */
-
-	/*
-	 *  Keep searching forward in this line till no more matches
-	 */
-	if ( Most_Case_Sensitive == 0 )		/* i.e. case insensitive */
-	  {
-	     unsigned char	*copy;		/* ptr to upper case copy */
-	     unsigned char	*savecopy;	/* copy of "copy" */
-
-	     copy = StrUpCaseCopy(p);
-	     if ( copy == (unsigned char *)NULL )
-	       return(Most_Eob);
-
-	     savecopy = copy;
-
-	    /*
-	     * Quick sanity check for beginning of line archored tests.
-	     * Must be at start of line.
-	     */
-	     while ( ((*key != '^') || (copy == savecopy))
-		    && (match = do_regexec(copy)) )
-	       {
-		  if ( GetOrigPtr(p, match - savecopy) > end )
-		    break;
-		  lastmatch = match;
-		  if ( *lastmatch == '\0' )	/* key must be "$" or "^" */
-		    break;
-		  copy = lastmatch + 1;		/* character after match */
-	       }
-
-	     if ( lastmatch != Most_Eob )	/* found a match */
-	       lastmatch = GetOrigPtr(p, lastmatch - savecopy);
-	  }
-	else
-	  {
-	    /*
-	     * Quick sanity check for beginning of line archored tests.
-	     * Must be at start of buffer or start of line
-	     */
-	     while ( ( (*key != '^') || (p == endprevline + 1) )
-		    && (match = do_regexec(p)) )
-	       {
-		  if ( match > end )
-		    break;
-		  lastmatch = match;
-		  if ( *lastmatch == '\0' )	/* key must be "$" or "^" */
-		    break;
-		  p = lastmatch + 1;		/* character after match */
-	       }
-	  }
-
-	*endp = savec;
-	if ( lastmatch != Most_Eob )	/* found a match */
-	  return(lastmatch);
-
-	endp = endprevline;
-     }
-#else
-   char ch, char1, work[256];
+   unsigned char ch, ch1, ch1up;
    unsigned char *pos;
    int key_len,j, str_len;
+   int cis;
 
-   if (Most_Case_Sensitive)
-     {
-	strcpy(work, (char *) key);
-	key_len = strlen((char *) key);
-     }
-   else
-     {
-	 /* upcase key */
-	key_len = 0;
-	while (0 != (ch = key[key_len]))
-	  {
-	     ch = UPCASE(ch);
-	     work[key_len++] = ch;        /* null char is ok */
-	  }
-     }
-
+   (void) st;
+   key_len = strlen ((char *)key);
    if (key_len == 0) return Most_Eob;
 
    str_len = (int) (end - beg);
    if (str_len < key_len) return Most_Eob;
 
-# if 0
-   str_len = str_len - key_len; /* effective length */
-   beg += key_len;
-# endif
-
-   char1 = work [key_len - 1];
+   ch1 = key[key_len-1];
+   ch1up = UPCASE(ch1);
+   cis = (Most_Case_Sensitive == 0);
 
    while (1)
      {
@@ -627,8 +273,8 @@ static unsigned char *back_search_region(unsigned char *beg,
 	       return Most_Eob;
 
 	     ch = *end--;
-	     ch = UPCASE (ch);
-	     if (ch == char1)
+	     if ((ch == ch1)
+		 || (cis && (ch1up == UPCASE(ch))))
 	       break;
 	  }
 
@@ -647,16 +293,14 @@ static unsigned char *back_search_region(unsigned char *beg,
 
 	     if ((ch == 8)
 		 && (end >= beg + 1)
-		 && (Most_V_Opt == 0)
-		 && ((work[j + 1] == UPCASE(*end))
+		 && (CHAR_EQS(key[j + 1], *end)
 		     || (*end == '_')))
 	       {
 		  ch = *(end - 1);
 		  end -= 2;
 	       }
 	     else if ((ch == '_')
-		      && (end >= beg + 1)
-		      && (Most_V_Opt == 0))
+		      && (end >= beg + 1))
 	       {
 		  ch = *end--;
 		  if (ch == 8) ch = *end--;
@@ -666,31 +310,99 @@ static unsigned char *back_search_region(unsigned char *beg,
 		       end++;
 		    }
 	       }
+	     else if ((ch == 'm') && is_rev_ansi_escape (beg, &end))
+	       continue;
 
-	     if (UPCASE (ch) != work[j])
+	     if (!CHAR_EQS(ch, key[j]))
 	       break;
 
 	     j--;
 	  }
 	end = pos;
      }
-#endif	/* HAVE_V8_REGCOMP || SLANG_REGEXP */
 }
 
-int most_search(unsigned char *from, int repeat, MOST_INT *col)
+static int bs_open_search (Search_Type *st, char *key)
 {
-    /* return the line match was found as well as line number,
-     * search from i on; assume that line_array match the i so we need
-     * no initial lookup */
+   (void) key;
+
+   bs_search_init ();
+   st->fsearch_method = bs_fsearch;
+   st->bsearch_method = bs_bsearch;
+   st->close_method = NULL;
+   st->cd = NULL;
+   return 0;
+}
+
+static unsigned char *sl_fsearch (Search_Type *st,
+				  unsigned char *beg, unsigned char *end,
+				  unsigned char *key)
+{
+   unsigned char *p;
+
+   (void) key;
+   if (NULL == (p = SLsearch_forward ((SLsearch_Type *)st->cd, beg, end)))
+     p = Most_Eob;
+   return p;
+}
+
+static unsigned char *sl_bsearch (Search_Type *st,
+				  unsigned char *beg, unsigned char *end,
+				  unsigned char *key)
+{
+   unsigned char *p;
+
+   (void) key;
+   if (NULL == (p = SLsearch_backward ((SLsearch_Type *)st->cd, beg, end, end)))
+     p = Most_Eob;
+   return p;
+}
+
+static void sl_search_close (Search_Type *st)
+{
+   if (st->cd != NULL)
+     SLsearch_delete ((SLsearch_Type *) st->cd);
+}
+
+static int sl_open_search (Search_Type *st, char *key)
+{
+   unsigned int flags = 0;
+
+   if (Most_Case_Sensitive == 0) flags |= SLSEARCH_CASELESS;
+   if (Most_UTF8_Mode) flags |= SLSEARCH_UTF8;
+
+   if (NULL == (st->cd = SLsearch_new ((SLuchar_Type *) key, flags)))
+     return -1;
+
+   st->fsearch_method = sl_fsearch;
+   st->bsearch_method = sl_bsearch;
+   st->close_method = sl_search_close;
+   return 0;
+}
+
+static int
+do_search_internal (Search_Type *st,
+		    unsigned char *from, int repeat, MOST_INT *col)
+{
+   /* return the line match was found as well as line number,
+    * search from i on; assume that line_array match the i so we need
+    * no initial lookup */
 
    int test;
    MOST_INT save_line, the_col, row, s_len;
    char string[300];
-   unsigned char *pos;
+   unsigned char *pos, *eob;
    unsigned int save_ofs;
    unsigned int found_ofs;
 
-   if ((from < Most_Beg) || (from > Most_Eob)) return(-1);
+   if (*Most_Search_Str == 0)
+     {
+	most_message("Search string not specified.",1);
+	return -1;
+     }
+
+   if ((from < Most_Beg) || (from > Most_Eob)) return -1;
+
    save_ofs = Most_C_Offset;
    save_line = Most_C_Line;
    found_ofs = Most_Eob - Most_Beg;
@@ -698,78 +410,63 @@ int most_search(unsigned char *from, int repeat, MOST_INT *col)
    s_len = strlen (Most_Search_Str);
    pos = from;
 
-   if (*Most_Search_Str)
+   eob = Most_Eob;
+
+   test = repeat && (pos < Most_Eob) && (pos >= Most_Beg);
+   while(test)
      {
-	unsigned char *eob = Most_Eob;
-
-	test = repeat && (pos < Most_Eob) && (pos >= Most_Beg);
-	while(test)
+	if (Most_Search_Dir == 1)
 	  {
-	     if (Most_Search_Dir == 1)
+	     while (1)
 	       {
-		  while (1)
+		  unsigned int pos_ofs;
+
+		  pos = (*st->fsearch_method)(st, pos, Most_Eob, (unsigned char*) Most_Search_Str);
+		  pos_ofs = (unsigned int) (Most_Eob - Most_Beg);
+
+		  if (pos < Most_Eob)
+		    break;
+
+		  if (0 == most_read_file_dsc (10, 0))
 		    {
-		       unsigned int pos_ofs;
-
-		       pos = forw_search_region(pos, Most_Eob, (unsigned char*) Most_Search_Str);
-		       pos_ofs = (unsigned int) (Most_Eob - Most_Beg);
-
-		       if (pos < Most_Eob)
-			 break;
-
-		       if (0 == most_read_file_dsc (10, 0))
-			 {
-			    /* Pointer may be invalid after this call */
-			    pos = Most_Beg + pos_ofs;
-			    break;
-			 }
-
-		       /* This might need an adjustment */
-		       pos = Most_Beg + (pos_ofs - s_len);
-		       if (pos < Most_Beg) pos = Most_Beg;
+		       /* Pointer may be invalid after this call */
+		       pos = Most_Beg + pos_ofs;
+		       break;
 		    }
-	       }
-	     else
-	       pos = back_search_region(Most_Beg, pos,
-					(unsigned char *) Most_Search_Str);
 
-	     if (pos < Most_Eob)
-	       {
-		  repeat--;
-		  found_ofs = pos - Most_Beg;
-		  if (Most_Search_Dir == 1)
-		    pos += s_len;
-		  else pos--;
-	       }
-	     test = repeat && (pos < Most_Eob) && (pos >= Most_Beg);
-	     if (SLKeyBoard_Quit)
-	       {
-		  most_message ("Search Interrupted.", 1);
-		  break;
+		  /* This might need an adjustment */
+		  pos = Most_Beg + (pos_ofs - s_len);
+		  if (pos < Most_Beg) pos = Most_Beg;
 	       }
 	  }
-	if (eob != Most_Eob)
-	  Most_Num_Lines = most_count_lines (Most_Beg, Most_Eob);
+	else
+	  pos = (*st->bsearch_method)(st, Most_Beg, pos, (unsigned char *) Most_Search_Str);
+
+	if (pos < Most_Eob)
+	  {
+	     repeat--;
+	     found_ofs = pos - Most_Beg;
+	     if (Most_Search_Dir == 1)
+	       pos += s_len;
+	     else pos--;
+	  }
+	test = repeat && (pos < Most_Eob) && (pos >= Most_Beg);
+	if (SLKeyBoard_Quit)
+	  {
+	     most_message ("Search Interrupted.", 1);
+	     break;
+	  }
      }
+
+   if (eob != Most_Eob)
+     Most_Num_Lines = most_count_lines (Most_Beg, Most_Eob);
 
    if (repeat) /* not found */
      {
 	*col = 0;
-#if	defined(HAVE_V8_REGCOMP) || defined(SLANG_REGEXP)
-	if ( regcompOK )	/* don't print error msg if regerr msg */
-	  {
-#endif
-	     if (Most_Search_Str[0] == '\0')
-	       most_message("Search string not specified.",1);
-	     else
-	       {
-		  (void) sprintf(string,"Search failed: %s",Most_Search_Str);
-		  most_message(string,1);
-	       }
-#if	defined(HAVE_V8_REGCOMP) || defined(SLANG_REGEXP)
-	  }
-#endif
 
+	(void) sprintf(string,"Search failed: %s",Most_Search_Str);
+	most_message(string,1);
 	row = -1;
      }
    else /* if ( !Most_T_Opt && !Most_B_Opt) */   /* expand tabs to get col correct */
@@ -783,6 +480,188 @@ int most_search(unsigned char *from, int repeat, MOST_INT *col)
    Most_C_Offset = save_ofs;
    Most_C_Line = save_line;
    if (row > 0) Most_Curs_Offset = found_ofs;
+
    return row;
 }
 
+static int search_internal (Search_Type *st, unsigned char *from, int repeat, MOST_INT *colp)
+{
+   int status;
+
+   status = do_search_internal (st, from, repeat, colp);
+
+   if (st->close_method != NULL)
+     (st->close_method)(st);
+
+   return status;
+}
+
+static int simple_search (unsigned char *from, int repeat, MOST_INT *colp)
+{
+   Search_Type st;
+
+   if (Most_V_Opt || Most_B_Opt)
+     {
+	/* Nothing special about the ^H and _ chars.  User faster SLsearch */
+	if (-1 == sl_open_search (&st, Most_Search_Str))
+	  return -1;
+     }
+   else if (-1 == bs_open_search (&st, Most_Search_Str))
+     return -1;
+
+   return search_internal (&st, from, repeat, colp);
+}
+
+
+static void re_search_close (Search_Type *st)
+{
+   if (st->cd != NULL)
+     SLregexp_free ((SLRegexp_Type *) st->cd);
+}
+
+static unsigned char *
+re_fsearch (Search_Type *st,
+	    unsigned char *beg, unsigned char *end,
+	    unsigned char *key)
+{
+   SLRegexp_Type *re;
+   unsigned char *p;
+   unsigned int flags;
+
+   (void) key;
+
+   re = (SLRegexp_Type *)st->cd;
+   (void) SLregexp_get_hints (re, &flags);
+
+   while (beg < end)
+     {
+	unsigned char *line_end = beg;
+
+	while (line_end < end)
+	  {
+	     unsigned char ch = *line_end++;
+	     if (ch == '\n') break;
+	  }
+
+	p = (unsigned char *)SLregexp_match (re, (char *)beg, (line_end - beg));
+	if (p != NULL)
+	  {
+	     if ((0 == (flags & SLREGEXP_HINT_BOL))
+		 || (p != beg)
+		 || (beg == Most_Beg)
+		 || (*(beg - 1) == '\n'))
+	       return p;
+	  }
+	beg = line_end;
+     }
+
+   return Most_Eob;
+}
+
+static unsigned char *
+re_bsearch (Search_Type *st,
+	    unsigned char *beg, unsigned char *end,
+	    unsigned char *key)
+{
+   SLRegexp_Type *re;
+   unsigned char *line_end, *eob;
+   unsigned int flags;
+
+   (void) key;
+   re = (SLRegexp_Type *)st->cd;
+   (void) SLregexp_get_hints (re, &flags);
+
+   line_end = end;
+   eob = Most_Eob;
+   while (line_end < eob)
+     {
+	if (*line_end == '\n')
+	  break;
+	line_end++;
+     }
+
+   while (end > beg)
+     {
+	unsigned char *p, *match;
+	unsigned char *line = end;
+	while (line > beg)
+	  {
+	     line--;
+	     if (*line == '\n')
+	       {
+		  line++;
+		  break;
+	       }
+	  }
+
+	/* line is now at the start of a line */
+	if (NULL != (match = (unsigned char *)SLregexp_match (re, (char *)line, line_end-line)))
+	  {
+	     if (match >= end)
+	       {
+		  /* Match occurs to right of boundary.  Try previous line */
+		  end = line_end = line-1;
+		  continue;
+	       }
+
+	     if (flags & SLREGEXP_HINT_BOL)
+	       return match;
+
+	     /*    t    tt  z    t  t     t z */
+	     /* Find match closest to end */
+	     while ((line < end)
+		    && (NULL != (p = (unsigned char *)SLregexp_match (re, (char *)line, (line_end - line))))
+		    && (p < end))
+	       {
+		  match = p;
+		  line++;
+	       }
+	     return match;
+	  }
+
+	end = line-1;
+	line_end = end;
+     }
+
+   return Most_Eob;
+}
+
+
+static int regexp_search (unsigned char *from, int repeat, MOST_INT *colp)
+{
+   Search_Type st;
+   SLRegexp_Type *re;
+   char *pattern;
+   unsigned int flags;
+
+   pattern = Most_Search_Str;
+
+   flags = 0;
+   if (Most_Case_Sensitive == 0) flags |= SLREGEXP_CASELESS;
+
+   re = SLregexp_compile (pattern, flags);
+   if (re == NULL)
+     return -1;
+
+   (void) SLregexp_get_hints (re, &flags);
+   if (flags & SLREGEXP_HINT_OSEARCH)
+     {
+	SLregexp_free (re);
+	return simple_search (from, repeat, colp);
+     }
+
+   st.cd = (void *)re;
+   st.fsearch_method = re_fsearch;
+   st.bsearch_method = re_bsearch;
+   st.close_method = re_search_close;
+
+   return search_internal (&st, from, repeat, colp);
+}
+
+int most_search (unsigned char *from, int repeat, MOST_INT *colp)
+{
+   if (Most_Do_Regexp_Search)
+     return regexp_search (from, repeat, colp);
+
+   return simple_search (from, repeat, colp);
+}

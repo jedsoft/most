@@ -34,6 +34,7 @@ Changes since 5.0.0
 19. src/search.c: Rewrote the search functions from scratch.  Both
     ordinary and regexp searches are now supported.  Use -r to startup
     with regular-expression searches.
+20. src/keym.c: Added support for Home/End keys (top/bottom of buffer).
 
 {{{ Previous Versions
 Changes since 4.10.2

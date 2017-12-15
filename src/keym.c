@@ -589,6 +589,8 @@ void most_init_keymaps (void)
    SLkm_define_key ("\033[B", (FVOID_STAR) next_line_cmd, Most_Keymap);
    SLkm_define_key ("\033[C", (FVOID_STAR) column_right_cmd, Most_Keymap);
    SLkm_define_key ("\033[D", (FVOID_STAR) column_left_cmd, Most_Keymap);
+   SLkm_define_key ("\033[7~", (FVOID_STAR) top_of_buffer_cmd, Most_Keymap);
+   SLkm_define_key ("\033[8~", (FVOID_STAR) end_of_buffer_cmd, Most_Keymap);
    SLkm_define_key ("^@", (FVOID_STAR) set_mark_cmd, Most_Keymap);
 #else
    SLkm_define_key ("^@H", (FVOID_STAR) previous_line_cmd, Most_Keymap);

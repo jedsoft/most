@@ -138,6 +138,15 @@ int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colo
      return -1;
 
    beg++; /* skip [ */
+#if 1
+   if ((beg < end) && (*beg == 'K'))
+     {
+       if (colorp != NULL) *colorp = -1;
+       *begp = beg + 1;
+       return 0;
+     }
+#endif
+
    while (1)
      {
 	xx = 0;
@@ -296,7 +305,7 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	     int color;
 	     if (0 == most_parse_color_escape (&beg, end, &color))
 	       {
-		  default_attr = color;
+		  if (color != -1) default_attr = color;
 		  continue;
 	       }
 	     /* drop */

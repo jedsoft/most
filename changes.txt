@@ -35,6 +35,10 @@ Changes since 5.0.0
     ordinary and regexp searches are now supported.  Use -r to startup
     with regular-expression searches.
 20. src/keym.c: Added support for Home/End keys (top/bottom of buffer).
+21. src/line.c: Added a work-around for programs that try colorize the
+    output using the clear-to-end-of-line escape sequence (ESC[K)
+    without regard for the value of isatty(fileno(sdout)).  Most will
+    ignore ESC[K unless invoked with -v.
 
 {{{ Previous Versions
 Changes since 4.10.2

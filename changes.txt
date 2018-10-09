@@ -40,7 +40,7 @@ Changes since 5.0.0
     without regard for the value of isatty(fileno(sdout)).  Most will
     ignore ESC[K unless invoked with -v.
 22. configure: Updated to use aclocal.m4 v0.3.3-1
-
+23. src/Makefile.in: Added LDFLAGS to chkslang linker line (Denis Pronin)
 {{{ Previous Versions
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

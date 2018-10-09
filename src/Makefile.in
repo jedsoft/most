@@ -67,7 +67,7 @@ slangversion: $(OBJDIR)/chkslang
 	$(OBJDIR)/chkslang $(EXEC) 20000
 #
 $(OBJDIR)/chkslang: $(OBJDIR)/chkslang.o
-	$(CC) $(OBJDIR)/chkslang.o -o $(OBJDIR)/chkslang
+	$(CC) $(OBJDIR)/chkslang.o -o $(OBJDIR)/chkslang $(LDFLAGS) $(EXECLIBS)
 #
 $(SRCDIR)/version.h: $(SRCDIR)/../changes.txt
 	if [ -x $(UPDATE_VERSION_SCRIPT) ]; then \

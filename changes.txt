@@ -39,6 +39,7 @@ Changes since 5.0.0
     output using the clear-to-end-of-line escape sequence (ESC[K)
     without regard for the value of isatty(fileno(sdout)).  Most will
     ignore ESC[K unless invoked with -v.
+22. configure: Updated to use aclocal.m4 v0.3.3-1
 
 {{{ Previous Versions
 Changes since 4.10.2

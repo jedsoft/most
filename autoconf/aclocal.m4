@@ -1,4 +1,6 @@
 dnl# -*- mode: sh; mode: fold -*-
+dnl# 0.3.3-1: Use INSTALL instead of INSTALL_DATA to install modules to get executable permissions
+dnl# 0.3.3-0: Added $(OBJ_O_DEPS) and $(ELF_O_DEPS) to PROGRAM_OBJECT_RULES
 dnl# 0.3.2-0: Add rpath support for freebsd
 dnl# 0.3.1-0: New output variable: CC_SHARED_FLAGS; CC_SHARED is deprecated
 dnl# 0.3.0-0: Added support for parsing /etc/ld.so.conf
@@ -390,7 +392,7 @@ dnl#}}}
 AC_DEFUN([JD_CREATE_ORULE], dnl#{{{
 [
 PROGRAM_OBJECT_RULES="$PROGRAM_OBJECT_RULES
-\$(OBJDIR)/$1.o : \$(SRCDIR)/$1.c \$(DOT_O_DEPS) \$("$1"_O_DEP)
+\$(OBJDIR)/$1.o : \$(SRCDIR)/$1.c \$(DOT_O_DEPS) \$(OBJ_O_DEPS) \$("$1"_O_DEP)
 	cd \$(OBJDIR) && \$(COMPILE_CMD) \$("$1"_C_FLAGS) \$(SRCDIR)/$1.c
 "
 ])
@@ -400,7 +402,7 @@ dnl#}}}
 AC_DEFUN([JD_CREATE_ELFORULE], dnl#{{{
 [
 PROGRAM_ELF_ORULES="$PROGRAM_ELF_ORULES
-\$(ELFDIR)/$1.o : \$(SRCDIR)/$1.c \$(DOT_O_DEPS) \$("$1"_O_DEP)
+\$(ELFDIR)/$1.o : \$(SRCDIR)/$1.c \$(DOT_O_DEPS) \$(ELF_O_DEPS) \$("$1"_O_DEP)
 	cd \$(ELFDIR) && \$(ELFCOMPILE_CMD) \$("$1"_C_FLAGS) \$(SRCDIR)/$1.c
 "
 ])
@@ -605,7 +607,7 @@ ELFLIB_MAJOR_MINOR_MICRO="\$(ELFLIB_MAJOR_MINOR).\$(ELF_MICRO_VERSION)"
 dnl# This specifies the target to use in the makefile to install the shared library
 INSTALL_ELFLIB_TARGET="install-elf-and-links"
 ELFLIB_BUILD_NAME="\$(ELFLIB_MAJOR_MINOR_MICRO)"
-INSTALL_MODULE="\$(INSTALL_DATA)"
+INSTALL_MODULE="\$(INSTALL)"
 SLANG_DLL_CFLAGS=""
 M_LIB="-lm"
 

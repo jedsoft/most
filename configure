@@ -4125,7 +4125,7 @@ ELFLIB_MAJOR_MINOR_MICRO="\$(ELFLIB_MAJOR_MINOR).\$(ELF_MICRO_VERSION)"
 
 INSTALL_ELFLIB_TARGET="install-elf-and-links"
 ELFLIB_BUILD_NAME="\$(ELFLIB_MAJOR_MINOR_MICRO)"
-INSTALL_MODULE="\$(INSTALL_DATA)"
+INSTALL_MODULE="\$(INSTALL)"
 SLANG_DLL_CFLAGS=""
 M_LIB="-lm"
 
@@ -5477,7 +5477,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -5523,7 +5523,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -5547,7 +5547,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -5592,7 +5592,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -5616,7 +5616,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -6265,13 +6265,13 @@ fi
  for program_module in $Program_Modules; do
 
 PROGRAM_OBJECT_RULES="$PROGRAM_OBJECT_RULES
-\$(OBJDIR)/$program_module.o : \$(SRCDIR)/$program_module.c \$(DOT_O_DEPS) \$("$program_module"_O_DEP)
+\$(OBJDIR)/$program_module.o : \$(SRCDIR)/$program_module.c \$(DOT_O_DEPS) \$(OBJ_O_DEPS) \$("$program_module"_O_DEP)
 	cd \$(OBJDIR) && \$(COMPILE_CMD) \$("$program_module"_C_FLAGS) \$(SRCDIR)/$program_module.c
 "
 
 
 PROGRAM_ELF_ORULES="$PROGRAM_ELF_ORULES
-\$(ELFDIR)/$program_module.o : \$(SRCDIR)/$program_module.c \$(DOT_O_DEPS) \$("$program_module"_O_DEP)
+\$(ELFDIR)/$program_module.o : \$(SRCDIR)/$program_module.c \$(DOT_O_DEPS) \$(ELF_O_DEPS) \$("$program_module"_O_DEP)
 	cd \$(ELFDIR) && \$(ELFCOMPILE_CMD) \$("$program_module"_C_FLAGS) \$(SRCDIR)/$program_module.c
 "
 
@@ -7564,7 +7564,7 @@ fi
 
 
 PROGRAM_OBJECT_RULES="$PROGRAM_OBJECT_RULES
-\$(OBJDIR)/chkslang.o : \$(SRCDIR)/chkslang.c \$(DOT_O_DEPS) \$("chkslang"_O_DEP)
+\$(OBJDIR)/chkslang.o : \$(SRCDIR)/chkslang.c \$(DOT_O_DEPS) \$(OBJ_O_DEPS) \$("chkslang"_O_DEP)
 	cd \$(OBJDIR) && \$(COMPILE_CMD) \$("chkslang"_C_FLAGS) \$(SRCDIR)/chkslang.c
 "
 

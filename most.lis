@@ -4,12 +4,15 @@
 @COPYRIGHT
 @COPYING
 @lesskeys.rc
-@most.rc
-@most-fun.txt
-@most.1
-@most.doc
-@most.hlp
 @changes.txt
+
+@doc/most.rc
+@doc/most-fun.txt
+@doc/most.1
+@doc/most.doc
+@doc/most.hlp
+@doc/tm/most.tm
+@doc/tm/Makefile
 
 @autoconf/Makefile.in
 @autoconf/aclocal.m4

@@ -3,7 +3,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2018 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free

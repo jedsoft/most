@@ -1,10 +1,10 @@
 Compiling MOST requires an ANSI C compiler.  In addition you MUST have
-a copy of the S-Lang library version 2.X.  Version 1 is nolonger
+a copy of the S-Lang library version 2.X.  Version 1 is no longer
 supported.  This library is available from
 <http://www.jedsoft.org/slang/>.
 
                           INSTALLATION INSTRUCTIONS
-			  
+
 On Unix, you should be able to simply type:
 
     ./configure; make
@@ -14,7 +14,7 @@ that libslang.dll is on your PATH; otherwise the chkslang program will
 not run.
 
 If using DJGPP or MINGW32, do:
-   
+
     <edit src/makefile.w32, setting ARCH to either dgj or gw32>
     cd src
     make -f makefile.w32
@@ -26,16 +26,16 @@ installed as a foreign command.  This means that you must first type:
       $  most :== $device:[dir.containing.most]most.exe
 
 I suggest that you first build MOST then view the doc file using MOST (`most
-most.doc').  If you need help, hit the `h' key from within MOST. 
+most.doc').  If you need help, hit the `h' key from within MOST.
 
 MOST understands the following environment variables:
 
-    MOST_SWITCHES 
+    MOST_SWITCHES
     MOST_EDITOR, SLANG_EDITOR, EDITOR
     MOST_INITFILE
     MOST_HELP
 
-  1. MOST_SWITCHES is a list of commonly used switches.  
+  1. MOST_SWITCHES is a list of commonly used switches.
 
   2. MOST_EDITOR and SLANG_EDITOR are formatted strings describing what
      editor to use.  The string can contain %s and %d formatting descriptors
@@ -44,7 +44,7 @@ MOST understands the following environment variables:
      Since MOST is just one of several programs that use the S-Lang library,
      I suggest that you use SLANG_EDITOR instead of MOST_EDITOR.
 
- 3. MOST_INITFILE specifies a configuration file for MOST.  One can specifiy
+ 3. MOST_INITFILE specifies a configuration file for MOST.  One can specify
     keymaps, colors, etc. via this file.  In the absence of
     MOST_INITFILE, the program will look for a file call .mostrc in
     the home directory (most.rc on non-Unix systems).
@@ -57,8 +57,8 @@ MOST understands the following environment variables:
 
  4. If MOST_HELP is defined to point to an existing file, MOST will load a
     file as a help file.  This is useful for describing custom keymaps.
-    
-Any problems with MOST should be reported to davis@space.mit.edu.
+
+Any problems with MOST should be reported to jed@jedsoft.org.
 
   [Note also that this is really the first non-trivial C program that
   I ever wrote.  Because of this, much of the code appears very
@@ -74,13 +74,13 @@ Any problems with MOST should be reported to davis@space.mit.edu.
 
            if (-1 == some_function ())
 	     test = 0;
-	   
+
 	   if (test)
 	     some_other_function ();
        }
-       
+
    with:
-       
+
        while (1)
          {
 	    function ();

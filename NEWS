@@ -1,0 +1,12 @@
+NEWS for v5.1.0
+
+This is primarily a maintenance release.
+
+The most notable update is that regular expression (RE) searches are
+supported again.  In ancient times, most supported RE searches, but
+was RE support was dropped was dropped when UTF-8 support was added.
+The default is still to use a non-RE search. The -r command line
+switch may be used to make the default a RE-based search.  Within
+most, ":r" may be used to toggle the search type between RE and
+non-RE.
+

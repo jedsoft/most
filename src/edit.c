@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005-2017 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2018 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -168,7 +168,7 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, 
 
    if (d == 0)
      {
-	_pSLsnprintf (cmd, sizeof_cmd, edit, efile);
+	(void) _pSLsnprintf (cmd, sizeof_cmd, edit, efile);
 	SLfree (efile);
 	return 0;
      }
@@ -176,9 +176,9 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, 
    if (d && s)
      {
 	if (d == 1)
-	  _pSLsnprintf (cmd, sizeof_cmd, edit, Most_C_Line, efile);
+	  (void) _pSLsnprintf (cmd, sizeof_cmd, edit, Most_C_Line, efile);
 	else
-	  _pSLsnprintf (cmd, sizeof_cmd, edit, efile, Most_C_Line);
+	  (void) _pSLsnprintf (cmd, sizeof_cmd, edit, efile, Most_C_Line);
 
 	SLfree (efile);
 	return 0;

@@ -41,6 +41,10 @@ Changes since 5.0.0
     ignore ESC[K unless invoked with -v.
 22. configure: Updated to use aclocal.m4 v0.3.3-1
 23. src/Makefile.in: Added LDFLAGS to chkslang linker line (Denis Pronin)
+24. *: Converted the man page source most.1 to text-macro, and
+    regenerated it.  Updated copyrights for upcoming release.
+
+
 {{{ Previous Versions
 Changes since 4.10.2
 0. src/most.c: version bumped to 5.0.0-x

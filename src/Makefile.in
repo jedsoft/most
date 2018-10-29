@@ -27,7 +27,7 @@ DOC_DIR		= $(datarootdir)/doc/most
 SYS_INITFILE	= @sysconfdir@/most.conf
 MKINSDIR	= ../autoconf/mkinsdir.sh
 
-DOC_FILES = most.doc README most-fun.txt lesskeys.rc most.rc changes.txt
+DOC_FILES = ../doc/most.txt ../README ../doc/most-fun.txt ../doc/lesskeys.rc ../doc/most.rc ../changes.txt
 
 #----------------------------------------------------------------------------
 # Nothing below here should require changing.
@@ -84,12 +84,11 @@ installdirs:
 	$(MKINSDIR) $(DEST_BINDIR)
 install: all installdirs
 	$(INSTALL) -s $(OBJDIR)/most $(DEST_BINDIR)
-	$(INSTALL_DATA) ../most.1 $(DEST_MANDIR)/man1
+	$(INSTALL_DATA) ../doc/most.1 $(DEST_MANDIR)/man1
 	@for i in $(DOC_FILES); \
 	do \
-		i=../$$i; \
-		echo $(INSTALL_DATA) $$i $(DEST_DOCDIR); \
-		$(INSTALL_DATA) $$i $(DEST_DOCDIR); \
+		echo $(INSTALL_DATA) $$i $(DEST_DOCDIR)/; \
+		$(INSTALL_DATA) $$i $(DEST_DOCDIR)/; \
 		if [ "$$?" != "0" ]; then \
 		  exit 1; \
 		fi; \

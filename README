@@ -63,7 +63,7 @@ Any problems with MOST should be reported to jed@jedsoft.org.
   [Note also that this is really the first non-trivial C program that
   I ever wrote.  Because of this, much of the code appears very
   amateurish.  For example, I tried very hard to avoid C constructs
-  that some some authors considered very bad, e.g., goto, continue,
+  that some authors strongly discourage, e.g., goto, continue,
   break.  Of course this made some of the code convoluted, e.g.,
   contrast
 

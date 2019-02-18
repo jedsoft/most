@@ -385,7 +385,7 @@ one does not always get what one expects when scrolling right and left
 through a file.  When in doubt, use the -v and -b options of \most.
 \pp
 The regular-expression searches may fail to find strings that involve
-backspace/underscore used for high- lighting.  The regular-expression
+backspace/underscore used for highlighting.  The regular-expression
 syntax is described in the S-Lang Library documentation.
 \p-end
 \refsect1-end

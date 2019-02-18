@@ -381,7 +381,7 @@ BUGS
    -v and -b options of most.
 
    The regular-expression searches may fail to find strings that
-   involve backspace/underscore used for high- lighting. The
+   involve backspace/underscore used for highlighting. The
    regular-expression syntax is described in the S-Lang Library
    documentation.
 

@@ -43,7 +43,7 @@ Changes since 5.0.0
 23. src/Makefile.in: Added LDFLAGS to chkslang linker line (Denis Pronin)
 24. *: Converted the man page source most.1 to text-macro, and
     regenerated it.  Updated copyrights for upcoming release.
-
+25. Updated manifest and copyrights updated for 2019 release.
 
 {{{ Previous Versions
 Changes since 4.10.2

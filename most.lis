@@ -3,13 +3,14 @@
 @README
 @COPYRIGHT
 @COPYING
-@lesskeys.rc
+@NEWS
 @changes.txt
 
+@doc/lesskeys.rc
 @doc/most.rc
 @doc/most-fun.txt
 @doc/most.1
-@doc/most.doc
+@doc/most.txt
 @doc/most.hlp
 @doc/tm/most.tm
 @doc/tm/Makefile

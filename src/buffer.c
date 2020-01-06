@@ -548,10 +548,12 @@ Most_Buffer_Type *most_switch_to_buffer(Most_Buffer_Type *nnew)
    return old;
 }
 
+/* If file is NULL, then buffer is for stdin */
 Most_Buffer_Type *most_create_buffer(char *file)
 {
    Most_Buffer_Type *buf;
 
+   if (file == NULL) file = "*stdin*";
    buf = (Most_Buffer_Type *) MOSTMALLOC(sizeof(Most_Buffer_Type));
    memset ((char *) buf, 0, sizeof(Most_Buffer_Type));
    strcpy(buf->file,file);

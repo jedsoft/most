@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 2006-2018, 2019 John E. Davis
+ Copyright (c) 2006-2019, 2020 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -18,7 +18,7 @@
  Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MOST_VERSION
-#define MOST_VERSION	50100
+#define MOST_VERSION	50200
 
-#define MOST_VERSION_STR "5.1.0"
+#define MOST_VERSION_STR "pre5.2-1"
 #endif				       /* MOST_VERSION */

@@ -237,7 +237,7 @@ int most_close_buffer_file (Most_Buffer_Type *b)
    return 0;
 }
 
-/* If file[0] == 0, the file represents stdin */
+/* If file is NULL, the file represents stdin */
 static int insert_file(char *file)
 {
    int size = 0, fd;
@@ -248,9 +248,9 @@ static int insert_file(char *file)
    /* extern int stat(char *, struct stat *); */
 #endif
 
-   if (file[0] == '\0')        /* assume stdin */
+   if (file == NULL)        /* assume stdin */
      {
-	fd = 0;
+	fd = fileno (stdin);
 	strcpy (Most_Buf->file, "*stdin*");
      }
    else
@@ -522,6 +522,7 @@ void most_read_to_line(int n)
      }
 }
 
+/* file may be NULL, which implies *stdin* */
 int most_find_file(char *file)
 {
    Most_Buffer_Type *new_buf;
@@ -535,6 +536,7 @@ int most_find_file(char *file)
    First_Time_Hack = 1;
    if (insert_file(file) < 0)
      {
+	if (file == NULL) file = "*stdin*";
 	sprintf (msg, "%s failed to open.", file);
 	n = strlen (msg);
 	msgp = (char *) MOSTMALLOC((unsigned int) (n + 1));

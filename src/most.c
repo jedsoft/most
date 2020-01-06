@@ -427,7 +427,7 @@ static void utf8_config (void)
 int most (int argc, char **argv)
 {
    char file[MAX_PATHLEN], *switches;
-   int file_i = 0, quit,i,piped;
+   int quit,i,piped;
    int status = 0;
 
 #ifdef VMS
@@ -506,44 +506,53 @@ int most (int argc, char **argv)
 
    if (Most_B_Opt) Most_A_Opt = 0;   /* explicit b overrides a */
 
-   if (!piped)
+   if (piped)
      {
-	file_i = i;
-#ifdef VMS
-	while(i < argc)
-	  {
-	     if (Most_Num_Files >= MOST_MAX_FILES) break;
-	     if (argv[i][0] == '.') strcpy(file,"*"); else *file = 0;
-	     strcat(file, most_unix2vms(argv[i++]));
-	     while (RMS$_NORMAL == (status = most_expand_file_name(file,filename)))
-	       {
-		  Most_File_Ring[Most_Num_Files] = (char*) MOSTMALLOC(strlen(filename) + 1);
-		  strcpy(Most_File_Ring[Most_Num_Files++], filename);
-	       }
-	     if (status == RMS$_NMF) status = RMS$_NORMAL; /* avoid spurious warning message */
-	  }
-
-	if (Most_Num_Files) strcpy(file,Most_File_Ring[0]);
-	else fputs("%%MOST-W-NOFILES, no files found\n", stderr);
-#else
-	Most_Num_Files = argc - i;
-	if (Most_Num_Files > MOST_MAX_FILES)
-	  {
-	     Most_Num_Files = MOST_MAX_FILES;
-	     argc = Most_Num_Files + i;
-	  }
-
-	j = 0;
-	while (i < argc)
-	  {
-	     Most_File_Ring[j++] = argv[i++];
-	  }
-#endif
+	do_most(NULL, Most_Starting_Line);
+	most_exit_most ();
+	return status;
      }
 
-   if (Most_Num_Files || piped) do_most(file, Most_Starting_Line);
-   else if (Most_Num_Files == 0)
-     fprintf(stderr,"File %s not found\n", argv[file_i]);
+#ifdef VMS
+   while(i < argc)
+     {
+	if (Most_Num_Files >= MOST_MAX_FILES) break;
+	if (argv[i][0] == '.') strcpy(file,"*"); else *file = 0;
+	strcat(file, most_unix2vms(argv[i++]));
+	while (RMS$_NORMAL == (status = most_expand_file_name(file,filename)))
+	  {
+	     Most_File_Ring[Most_Num_Files] = (char*) MOSTMALLOC(strlen(filename) + 1);
+	     strcpy(Most_File_Ring[Most_Num_Files++], filename);
+	  }
+	if (status == RMS$_NMF) status = RMS$_NORMAL; /* avoid spurious warning message */
+     }
+
+   if (Most_Num_Files) strcpy(file,Most_File_Ring[0]);
+   else fputs("%%MOST-W-NOFILES, no files found\n", stderr);
+#else
+   Most_Num_Files = argc - i;
+   if (Most_Num_Files > MOST_MAX_FILES)
+     {
+	Most_Num_Files = MOST_MAX_FILES;
+	argc = Most_Num_Files + i;
+     }
+
+   j = 0;
+   while (i < argc)
+     {
+	if (argv[i][0] == 0)      /* no filename */
+	  {
+	     i++;
+	     Most_Num_Files--;
+	  }
+	else Most_File_Ring[j++] = argv[i++];
+     }
+#endif
+
+   if (Most_Num_Files)
+     do_most(Most_File_Ring[0], Most_Starting_Line);
+   else
+     fprintf(stderr,"No files were found\n");
 
    most_exit_most ();
    return status;

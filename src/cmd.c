@@ -279,7 +279,7 @@ void most_extended_key_cmd (void)
 	     most_delete_file_cmd ();
 	     break;
 	  }
-	/* drop */
+	/* fall through */
       default:
 	most_message ("Invalid option.", 1);
      }

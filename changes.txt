@@ -3,6 +3,8 @@ Changes since 5.1.0
 1. src/most.c: Ignore empty filenames on the command line
 2. src/cmd.c: Changed /* drop */ to /* fall through */ to avoid a
    gcc-8 warning in a switch statement
+3. src/keyparse.c,line.c: Add support for the embedded default
+   forground/background escape sequences (e.g., \e[39;49m)
 
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc

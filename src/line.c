@@ -123,7 +123,11 @@ static void output_binary_formatted_line (void)
  * The general escape sequence parsed here is assumed to look like:
  *   \e[ XX ; ... m
  * If 30 <= XX <= 37, then it specifies the foreground color
+ * 38: reserved
+ * 39: use default foreground
  * If 40 <= XX <= 47, then a background color is specified
+ * 48: reserved
+ * 49: use default background
  * If  0 <= XX <= 8, then an attribute (e.g, 8) is specified.
  * These numbers will be encoded as:
  *  offset + (FG-30 + 8*(BG-40 + 9*attribute))
@@ -159,9 +163,9 @@ int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colo
 	  at = xx;
 	else if ((xx >= 20) && (xx <= 28))
 	  xx = 0;
-	else if ((xx >= 30) && (xx <= 37))
+	else if (((xx >= 30) && (xx <= 37)) || (xx == 39))
 	  fg = xx;
-	else if ((xx >= 40) && (xx <= 47))
+	else if (((xx >= 40) && (xx <= 47)) || (xx = 49))
 	  bg = xx;
 	else return -1;
 
@@ -177,7 +181,7 @@ int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colo
 	     if (colorp != NULL)
 	       {
 		  if ((fg != 38) || (bg != 48))
-		    xx = ((fg-30) + 9*((bg-40) + 9*at));
+		    xx = ((fg-30) + 10*((bg-40) + 10*at));   /* see most_setup_colors */
 		  if (xx != 0)
 		    xx += MOST_EMBEDDED_COLOR_OFFSET;
 		  *colorp = xx;

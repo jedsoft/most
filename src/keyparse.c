@@ -266,7 +266,7 @@ static int mono_fun (int argc, SLcmd_Cmd_Table_Type *table)
    return -1;
 }
 
-static char *Ansi_Color_Map[9] =
+static char *Ansi_Color_Map[10] =
 {
    "black",
    "red",
@@ -276,6 +276,7 @@ static char *Ansi_Color_Map[9] =
    "magenta",
    "cyan",
    "white",
+   "default",			       /* unused; see line.c:most_parse_color_escape */
    "default"
 };
 
@@ -291,13 +292,13 @@ void most_setup_colors (void)
 	SLtt_set_mono (i, NULL, 0);
      }
 
-   for (at = 0; at < 9; at++)
+   for (at = 0; at < 10; at++)
      {
-	for (fg = 0; fg < 9; fg++)
+	for (fg = 0; fg < 10; fg++)
 	  {
-	     for (bg = 0; bg < 9; bg++)
+	     for (bg = 0; bg < 10; bg++)
 	       {
-		  i = fg + 9*(bg + 9*at);
+		  i = fg + 10*(bg + 10*at);   /* see most_parse_color_escape */
 		  if (i == 0)
 		    continue;
 		  i += MOST_EMBEDDED_COLOR_OFFSET;

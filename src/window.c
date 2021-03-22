@@ -608,7 +608,7 @@ static void update_status1 (void)
    eob = Most_Eob;
 #if MOST_HAS_MMAP
    if (Most_Buf->is_mmaped)
-     eob = Most_Beg + Most_Buf->mmap_size;
+     eob = Most_Beg + Most_Buf->mmap_file_size;
 #endif
 
    if (eob == Most_Beg) x = 100;

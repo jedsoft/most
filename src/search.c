@@ -387,13 +387,11 @@ do_search_internal (Search_Type *st,
    /* return the line match was found as well as line number,
     * search from i on; assume that line_array match the i so we need
     * no initial lookup */
-
-   int test;
-   MOST_INT save_line, the_col, row, s_len;
    char string[300];
    unsigned char *pos, *eob;
-   unsigned int save_ofs;
-   unsigned int found_ofs;
+   MOST_UINT save_ofs, found_ofs;
+   MOST_INT save_line, the_col, row, s_len;
+   int test;
 
    if (*Most_Search_Str == 0)
      {
@@ -419,10 +417,10 @@ do_search_internal (Search_Type *st,
 	  {
 	     while (1)
 	       {
-		  unsigned int pos_ofs;
+		  size_t pos_ofs;
 
 		  pos = (*st->fsearch_method)(st, pos, Most_Eob, (unsigned char*) Most_Search_Str);
-		  pos_ofs = (unsigned int) (Most_Eob - Most_Beg);
+		  pos_ofs = (Most_Eob - Most_Beg);
 
 		  if (pos < Most_Eob)
 		    break;

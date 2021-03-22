@@ -49,8 +49,8 @@ extern void most_exit_error (char *, ...);
 extern void most_usage (void);
 #define MOSTMALLOC most_malloc
 #define MOSTREALLOC most_realloc
-extern unsigned char *most_malloc(unsigned int);
-extern unsigned char *most_realloc(unsigned char *, unsigned int);
+extern unsigned char *most_malloc(size_t);
+extern unsigned char *most_realloc(unsigned char *, size_t);
 extern int Most_Tab_Width;
 
 #ifdef VMS

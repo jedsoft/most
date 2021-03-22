@@ -74,7 +74,7 @@ static int create_gunzip_cmd (char *cmd, char *file, char *buf, unsigned int siz
    return 0;
 }
 
-static int open_compressed_file(char *file, int mode, int *size)
+static int open_compressed_file(char *file, int mode, size_t *sizep)
 {
    int fd;
    char buf[4], cmdbuf[2*MAX_PATHLEN];
@@ -90,7 +90,7 @@ static int open_compressed_file(char *file, int mode, int *size)
    if (Most_Z_Opt)
      {
 	if (stat(file, &st)) return(-1);
-	*size = st.st_size;
+	*sizep = st.st_size;
 	return (open(file,mode));
      }
    fd = open(file, O_RDONLY);
@@ -126,7 +126,7 @@ static int open_compressed_file(char *file, int mode, int *size)
 	     fp = popen (cmdbuf, "r"); /* GLIBC doe not support "rb" */
 	     if (fp == NULL)
 	       return -1;
-	     *size = 0;
+	     *sizep = 0;
 	     fd = fileno (fp);
 	     Most_Buf->fp = fp;
 	     /* pclose (fp); */
@@ -136,7 +136,7 @@ static int open_compressed_file(char *file, int mode, int *size)
 
    close (fd);
    if (stat(file, &st)) return(-1);
-   *size = st.st_size;
+   *sizep = st.st_size;
    return (open(file,mode));
 }
 #endif /* VMS */
@@ -168,8 +168,8 @@ static int try_mmap_buffer (int fd)
 
    Most_Buf->fd = fd;
    Most_Eob = Most_Beg = Most_Buf->end = Most_Buf->beg = addr;
-   Most_Buf->size = 0;
-   Most_Buf->mmap_size = st.st_size;
+   Most_Buf->bufsize = 0;
+   Most_Buf->mmap_file_size = st.st_size;
    Most_Buf->is_mmaped = 1;
 
    return 0;
@@ -181,7 +181,7 @@ static int unmmap_buffer (Most_Buffer_Type *b)
      return 0;
 
    if (b->beg != NULL)
-     munmap ((char *)b->beg, b->size);
+     munmap ((char *)b->beg, b->bufsize);
 
    b->end = b->beg = NULL;
    if (b == Most_Buf)
@@ -203,7 +203,7 @@ static int resync_mmap (void)
    if (-1 == fstat (Most_Buf->fd, &st))
      return -1;
 
-   if ((unsigned int) st.st_size == Most_Buf->mmap_size)
+   if ((size_t)st.st_size == Most_Buf->mmap_file_size)
      return 0;
 
    (void) unmmap_buffer (Most_Buf);
@@ -240,13 +240,14 @@ int most_close_buffer_file (Most_Buffer_Type *b)
 /* If file is NULL, the file represents stdin */
 static int insert_file(char *file)
 {
-   int size = 0, fd;
+   size_t size = 0;
    /* int mode; */
 #ifdef VMS
    struct stat st;
    unsigned recsz = 512;
    /* extern int stat(char *, struct stat *); */
 #endif
+   int fd;
 
    if (file == NULL)        /* assume stdin */
      {
@@ -284,7 +285,7 @@ static int insert_file(char *file)
 
    /* This will fail on really large files. */
    Most_Eob = Most_Beg = Most_Buf->beg = (unsigned char *) MOSTMALLOC(size);
-   Most_Buf->size = size;
+   Most_Buf->bufsize = size;
 
    return most_read_file_dsc (1, 1);
 }
@@ -344,9 +345,9 @@ static int First_Time_Hack = 0;	       /* true if reading file for first time */
 #if MOST_HAS_MMAP
 static int read_mmap_file_dsc (int many, int count_lines)
 {
-   unsigned int size;
+   size_t size;
 
-   size = Most_Buf->size;
+   size = Most_Buf->bufsize;
 
    if (many == -1)
      {
@@ -354,20 +355,20 @@ static int read_mmap_file_dsc (int many, int count_lines)
 	  return -1;
      }
 
-   if (size == Most_Buf->mmap_size)
+   if (size == Most_Buf->mmap_file_size)
      return 0;
 
    if (many < 0)
-     size = Most_Buf->mmap_size;
+     size = Most_Buf->mmap_file_size;
    else
      {
-	size += many * 0xFFFF;
-	if (size > Most_Buf->mmap_size)
-	  size = Most_Buf->mmap_size;
+	size += many * (size_t) 0xFFFF;
+	if (size > Most_Buf->mmap_file_size)
+	  size = Most_Buf->mmap_file_size;
      }
 
    Most_Eob = Most_Buf->end = Most_Buf->beg + size;
-   Most_Buf->size = size;
+   Most_Buf->bufsize = size;
 
    most_flush_message ("Mapping file...");
 
@@ -386,8 +387,9 @@ static int read_mmap_file_dsc (int many, int count_lines)
 /* if read something, return non zero (1) */
 int most_read_file_dsc (int many, int count_lines)
 {
-   int fd = Most_Buf->fd, n = 0, i;
-   int dsize, size, passes = 0;
+   int fd = Most_Buf->fd;
+   size_t dsize, size, n = 0;
+   int passes = 0;
    unsigned char *pos;
 #ifdef VMS
    int recsz = Most_Buf->rec;
@@ -412,20 +414,22 @@ int most_read_file_dsc (int many, int count_lines)
 
    while (many--)
      {
+	ssize_t i;
+
 	passes++;
 	most_flush_message ("Reading...");
 
 	size = (Most_Eob - Most_Beg) + dsize;
 
-	if (Most_Buf->size > size) pos = Most_Beg;
+	if (Most_Buf->bufsize > size) pos = Most_Beg;
 	else
 	  {
-	     size = Most_Buf->size + 0xFFFF;
+	     size = Most_Buf->bufsize + 0xFFFF;
 	     pos = (unsigned char *) MOSTREALLOC(Most_Beg, (unsigned) size);
-	     Most_Buf->size = size;
+	     Most_Buf->bufsize = size;
 	  }
 
-	Most_Eob = pos + (unsigned int) (Most_Eob - Most_Beg);
+	Most_Eob = pos + (Most_Eob - Most_Beg);
 	Most_Beg = pos;
 
 	pos = Most_Eob;
@@ -526,7 +530,6 @@ void most_read_to_line(int n)
 int most_find_file(char *file)
 {
    Most_Buffer_Type *new_buf;
-   int n;
    char msg[MAX_PATHLEN+20], *msgp;
    int ret = 0;
 
@@ -536,10 +539,12 @@ int most_find_file(char *file)
    First_Time_Hack = 1;
    if (insert_file(file) < 0)
      {
+	size_t n;
+
 	if (file == NULL) file = "*stdin*";
 	sprintf (msg, "%s failed to open.", file);
 	n = strlen (msg);
-	msgp = (char *) MOSTMALLOC((unsigned int) (n + 1));
+	msgp = (char *) MOSTMALLOC(n + 1);
 	strcpy (msgp, msg);
 	Most_Buf->beg = (unsigned char *) msgp;
 	Most_Buf->end = Most_Buf->beg + n;

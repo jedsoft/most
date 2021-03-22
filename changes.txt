@@ -5,6 +5,8 @@ Changes since 5.1.0
    gcc-8 warning in a switch statement
 3. src/keyparse.c,line.c: Add support for the embedded default
    forground/background escape sequences (e.g., \e[39;49m)
+4. src/buffer.h,...: Changed various integer sizes to better support
+   files larger than 4 GB.
 
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc

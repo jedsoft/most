@@ -29,13 +29,13 @@ typedef struct
    unsigned int flags;
    int fd;			       /* file descriptor--- -1 if closed */
    FILE *fp;			       /* use pclose when EOF is reached */
-   int size;
+   size_t bufsize;
 # ifdef VMS
    int rec;			       /* record size for reads */
 # endif
 # if MOST_HAS_MMAP
    int is_mmaped;
-   unsigned int mmap_size;
+   size_t mmap_file_size;
 # endif
 }
 Most_Buffer_Type;

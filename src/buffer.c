@@ -560,9 +560,12 @@ Most_Buffer_Type *most_create_buffer(char *file)
    return(buf);
 }
 
-unsigned char *most_malloc(unsigned int n)
+unsigned char *most_malloc(size_t n)
 {
-   unsigned char *b = (unsigned char *) SLMALLOC(n);
+   unsigned char *b;
+
+   if (n == 0) n = 1;
+   b = (unsigned char *) malloc (n);
    if (b == NULL)
      {
 	most_exit_error("malloc: Memory Allocation Error.");
@@ -570,9 +573,14 @@ unsigned char *most_malloc(unsigned int n)
    return b;
 }
 
-unsigned char *most_realloc(unsigned char *p, unsigned int n)
+unsigned char *most_realloc(unsigned char *p, size_t n)
 {
-   unsigned char *b = (unsigned char *) SLREALLOC(p, n);
+   unsigned char *b;
+
+   if (p == NULL) return most_malloc (n);
+
+   if (n == 0) n = 1;
+   b = (unsigned char *) realloc (p, n);
    if (b == NULL)
      {
 	most_exit_error("malloc: Memory Allocation Error.");

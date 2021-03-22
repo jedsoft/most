@@ -163,14 +163,15 @@ bs_fsearch (Search_Type *st,
 {
    unsigned char ch, ch1, ch1up;
    unsigned char *pos;
-   int cis, key_len, j, str_len;
+   MOST_INT j, key_len, str_len;
+   int cis;
 
    (void) st;
    key_len = strlen ((char *)key);
    if (key_len == 0)
      return Most_Eob;
 
-   str_len = (int) (end - beg);
+   str_len = (MOST_INT)(end - beg);
    if (str_len < key_len) return (Most_Eob);
 
    cis = (Most_Case_Sensitive == 0);
@@ -251,14 +252,14 @@ bs_bsearch (Search_Type *st,
 {
    unsigned char ch, ch1, ch1up;
    unsigned char *pos;
-   int key_len,j, str_len;
+   MOST_INT key_len, str_len, j;
    int cis;
 
    (void) st;
    key_len = strlen ((char *)key);
    if (key_len == 0) return Most_Eob;
 
-   str_len = (int) (end - beg);
+   str_len = (MOST_INT) (end - beg);
    if (str_len < key_len) return Most_Eob;
 
    ch1 = key[key_len-1];

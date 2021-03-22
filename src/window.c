@@ -48,10 +48,10 @@ char *Most_Global_Msg = "Press `Q' to quit, `H' for help, and SPACE to scroll.";
 
 Most_Window_Type *Most_Win;
 Most_Window_Type *Most_Top_Win;
-int Most_Top_Line;		       /* row number of top window */
-int Most_Curs_Row;
-int Most_Curs_Col;
-int Most_Column = 1;
+MOST_INT Most_Top_Line;		       /* row number of top window */
+MOST_INT Most_Curs_Row;
+MOST_INT Most_Curs_Col;
+MOST_INT Most_Column = 1;
 int Most_Restore_Width_To = 0;
 char Most_Mini_Buf[256];
 unsigned long Most_Curs_Offset;
@@ -304,10 +304,10 @@ void most_check_minibuffer ()
        put_message_1 (Most_Global_Msg);
 }
 
-static int get_scroll(int *line)
+static int get_scroll(MOST_INT *line)
 {
     /* line is the line we want at the top of the window if possible */
-   int dtop, dbot,n,top,bot,wsize;
+   MOST_INT dtop, dbot, n, top, bot, wsize;
 
    top = Most_Win->beg_line;
    wsize = Most_Win->bot - Most_Win->top; /* actually 1 less than window size */
@@ -380,9 +380,9 @@ static void check_dirty_flag (void)
    Most_Win->n_lines = Most_Num_Lines;
 }
 
-void most_update_window (int line)
+void most_update_window (MOST_INT line)
 {
-   int save_line, save_col;
+   MOST_INT save_line, save_col;
    unsigned long save_offset;
 
    most_read_to_line (line);
@@ -415,10 +415,11 @@ void most_update_window (int line)
 /* updates current window as well as scroll lock ones */
 /* Although current window is update in an absolute fashion, scroll locked
    ones are updated in a relative fashion */
-void most_update_windows (int line)
+void most_update_windows (MOST_INT line)
 {
-   int dline,flg;
    Most_Window_Type *w;
+   MOST_INT dline;
+   int flg;
 
    if (line == -1)
      {
@@ -624,7 +625,7 @@ static void update_status1 (void)
    /* for files with end of file above the bottom row (due to window manipulations) */
    if (x > 100) x = 100;
 
-   sprintf (info, "(" MOST_INT_D_FMT ",%d) " MOST_INT_D_FMT "%%",
+   sprintf (info, "(" MOST_INT_D_FMT "," MOST_INT_D_FMT ")" MOST_INT_D_FMT "%%",
 	    Most_C_Line, Most_Column, x);
 
    r = Most_Win->bot + 1;
@@ -873,7 +874,7 @@ void most_other_window(int n)
 /* kills window by moving lower window up */
 static void delete_as_top_window (void)
 {
-   int t = Most_Win->top;
+   MOST_INT t = Most_Win->top;
 
    Most_Win->prev->next = Most_Win->next;
    Most_Win->next->prev = Most_Win->prev;
@@ -977,7 +978,7 @@ void most_delete_window (void)
 void most_redraw_display (void)
 {
    Most_Window_Type *w;
-   int n,t;
+   MOST_INT n, t;
 
    SLsmg_cls ();
 

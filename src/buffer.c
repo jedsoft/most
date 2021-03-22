@@ -102,8 +102,8 @@ static unsigned char *beg_of_line1(void)
 /* does not move point */
 static unsigned char *end_of_line1(void)
 {
-   register unsigned char *pos, *pmax;
-   int n, n2;
+   unsigned char *pos, *pmax;
+   MOST_INT n, n2;
 
    pos = Most_Beg + Most_C_Offset;
    pmax = Most_Eob;
@@ -165,8 +165,8 @@ static unsigned char *end_of_line1(void)
 unsigned char *most_beg_of_line(void)
 {
    unsigned char *b;
-   unsigned int ncols;
    unsigned char *e;
+   MOST_UINT ncols;
 
    if (Most_W_Opt == 0) return beg_of_line1();
 
@@ -193,7 +193,7 @@ unsigned char *most_beg_of_line(void)
 static unsigned char *end_of_line (unsigned char *b)
 {
    unsigned char *e, *b1;
-   int ncols;
+   MOST_UINT ncols;
 
    e = end_of_line1();
    if (Most_W_Opt == 0)
@@ -419,10 +419,10 @@ int most_extract_line(unsigned char **beg, unsigned char **end)
 
 MOST_INT most_what_line(unsigned char *pos)
 {
-   unsigned int save_pos;
+   MOST_UINT save_pos;
    MOST_INT save_line, dir;
    MOST_INT dif_c, dif_b,dif_t;
-   int ret;
+   MOST_INT ret;
 
    if (Most_B_Opt)
      {
@@ -508,7 +508,7 @@ MOST_INT most_what_line(unsigned char *pos)
 /* given a buffer position, find the line and column */
 void most_find_row_column(unsigned char *pos, MOST_INT *r, MOST_INT *c)
 {
-   unsigned int save_offset;
+   MOST_UINT save_offset;
    MOST_INT save_line;
 
    if (pos <= Most_Beg)
@@ -524,7 +524,7 @@ void most_find_row_column(unsigned char *pos, MOST_INT *r, MOST_INT *c)
 
    if (Most_B_Opt)
      {
-	*c = (int) (pos - Most_Beg) - (*r - 1) * 16 + 1;
+	*c = (MOST_INT) (pos - Most_Beg) - (*r - 1) * 16 + 1;
 	return;
      }
    Most_C_Line = *r;

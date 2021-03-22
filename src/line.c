@@ -516,15 +516,15 @@ void most_display_line (int reset)
 
 /* given a position in a line, return apparent distance from bol
    expanding tabs, etc... up to pos */
-int most_apparant_distance (unsigned char *pos)
+MOST_INT most_apparant_distance (unsigned char *pos)
 {
-   int i, prev_width;
+   MOST_INT i, prev_width;
    unsigned char *save_pos, ch;
    unsigned int save_offset;
 
    save_offset = Most_C_Offset;
    save_pos = pos;
-   Most_C_Offset = (unsigned int) (pos - Most_Beg);
+   Most_C_Offset = (MOST_UINT) (pos - Most_Beg);
    pos = most_beg_of_line();
    Most_C_Offset = save_offset;
 
@@ -597,10 +597,10 @@ int most_apparant_distance (unsigned char *pos)
  * If there the end of the buffer is reached, as delimited by argument
  * e, then e is returned.
  */
-unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, unsigned int num_cols)
+unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, MOST_UINT num_cols)
 {
-   unsigned int col = 0;
-   unsigned int prev_width = 1;
+   MOST_UINT col = 0;
+   MOST_UINT prev_width = 1;
 
    while (b < e)
      {

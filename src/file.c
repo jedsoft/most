@@ -203,7 +203,7 @@ static int resync_mmap (void)
    if (-1 == fstat (Most_Buf->fd, &st))
      return -1;
 
-   if ((size_t)st.st_size == Most_Buf->mmap_file_size)
+   if (st.st_size == Most_Buf->mmap_file_size)
      return 0;
 
    (void) unmmap_buffer (Most_Buf);
@@ -345,7 +345,7 @@ static int First_Time_Hack = 0;	       /* true if reading file for first time */
 #if MOST_HAS_MMAP
 static int read_mmap_file_dsc (int many, int count_lines)
 {
-   size_t size;
+   MOST_INT size;
 
    size = Most_Buf->bufsize;
 
@@ -385,10 +385,10 @@ static int read_mmap_file_dsc (int many, int count_lines)
 #endif
 
 /* if read something, return non zero (1) */
-int most_read_file_dsc (int many, int count_lines)
+MOST_INT most_read_file_dsc (MOST_INT many, int count_lines)
 {
+   MOST_INT dsize, size, n = 0;
    int fd = Most_Buf->fd;
-   size_t dsize, size, n = 0;
    int passes = 0;
    unsigned char *pos;
 #ifdef VMS
@@ -498,10 +498,9 @@ int most_read_file_dsc (int many, int count_lines)
 }
 
 /* This routines makes sure line n is read in. */
-void most_read_to_line(int n)
+void most_read_to_line(MOST_INT n)
 {
-   int dn;
-   long nbytes;
+   MOST_INT dn, nbytes;
 
    if (Most_Buf->fd == -1) return;
 

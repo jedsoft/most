@@ -24,14 +24,14 @@
 typedef struct _Most_Window_Type
 {
    unsigned long top_offset; /* offset of top line of window from bob */
-   int beg_line;             /* line number of top */
-   int curs_line;            /* line number of curs pos */
-   int curs_col;             /* column number of curs pos */
+   MOST_INT beg_line;             /* line number of top */
+   MOST_INT curs_line;            /* line number of curs pos */
+   MOST_INT curs_col;             /* column number of curs pos */
    unsigned long curs_offset;  /* pos of cursor from bob*/
-   int col;                  /* column offset */
-   int n_lines;              /* number of lines of buffer (mode dependent) */
-   int top;                  /* screen location of top */
-   int bot;                  /* screen location of bot */
+   MOST_INT col;                  /* column offset */
+   MOST_INT n_lines;              /* number of lines of buffer (mode dependent) */
+   MOST_INT top;                  /* screen location of top */
+   MOST_INT bot;                  /* screen location of bot */
    int display;              /* value of MOST_S_OPT for selective display */
 #if 0
    char *status;             /* status line */
@@ -48,9 +48,9 @@ Most_Window_Type;
 extern Most_Window_Type *Most_Win;
 extern Most_Window_Type *Most_Top_Win;
 extern unsigned long Most_Curs_Offset;
-extern int Most_Column;
-extern int Most_Curs_Row;
-extern int Most_Curs_Col;
+extern MOST_INT Most_Column;
+extern MOST_INT Most_Curs_Row;
+extern MOST_INT Most_Curs_Col;
 #define MOST_MINI_BUF_LEN	256
 extern char Most_Mini_Buf[MOST_MINI_BUF_LEN];
 extern int Most_Selective_Display;
@@ -59,7 +59,7 @@ extern int Most_Display_Inited;
 
 extern int most_split_window (void);
 extern void most_toggle_lock(void);
-extern void most_update_window(int); /* moves window to have arg lines on the top */
+extern void most_update_window(MOST_INT); /* moves window to have arg lines on the top */
 extern void most_update_status(void);
 extern void most_redraw_window(void);    /* redraws window updating the structure */
 extern void most_window_buffer(void);
@@ -67,7 +67,7 @@ extern void most_init_display(void);
 extern void most_reset_display(void);
 extern void most_other_window(int);
 extern void most_set_window (Most_Window_Type *);
-extern void most_update_windows(int);
+extern void most_update_windows(MOST_INT);
 extern void most_message(char *, int);
 extern void most_put_message(void);
 extern void most_clear_minibuffer(void);

@@ -7,6 +7,7 @@ Changes since 5.1.0
    forground/background escape sequences (e.g., \e[39;49m)
 4. src/buffer.h,...: Changed various integer sizes to better support
    files larger than 4 GB.
+5. Additional changes involving int -> MOST_INT were required.
 
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc

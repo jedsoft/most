@@ -118,6 +118,7 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, 
    char quote_char = '"';
    /* Look for %d and %s */
 
+   /* FIXME: The %d specifier needs to be changed to support a non-int Most_C_Line type */
    d = s = 0;
 
    while (0 != (ch = *p++))
@@ -176,9 +177,9 @@ static int create_edit_command (char *edit, char *cmd, unsigned int sizeof_cmd, 
    if (d && s)
      {
 	if (d == 1)
-	  (void) _pSLsnprintf (cmd, sizeof_cmd, edit, Most_C_Line, efile);
+	  (void) _pSLsnprintf (cmd, sizeof_cmd, edit, (int) Most_C_Line, efile);
 	else
-	  (void) _pSLsnprintf (cmd, sizeof_cmd, edit, efile, Most_C_Line);
+	  (void) _pSLsnprintf (cmd, sizeof_cmd, edit, efile, (int) Most_C_Line);
 
 	SLfree (efile);
 	return 0;

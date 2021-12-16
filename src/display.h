@@ -1,3 +1,6 @@
+#ifndef _MOST_DISPLAY_H_
+#define _MOST_DISPLAY_H_ 1
+
 /*
  This file is part of MOST.
 
@@ -18,13 +21,6 @@
  Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* These numbers match ANSI escape sequences of form ESC [ x m */
-#define MOST_BOLD_COLOR		1
-#define MOST_ULINE_COLOR	4
-#define MOST_STATUS_COLOR	7
-
-#define MOST_EMBEDDED_COLOR_OFFSET 32
-
 extern void most_tt_set_color (int color);
 extern void most_tt_reverse_video(void);
 extern void most_tt_bold_video(void);
@@ -35,4 +31,5 @@ extern void most_narrow_width(void);
 extern void most_enable_cursor_keys(void);
 
 extern void most_goto_rc (int, int);
-extern void most_setup_colors (void);
+
+#endif

@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005-2018, 2019 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2020, 2021 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -30,6 +30,7 @@
 #include "line.h"
 #include "window.h"
 #include "display.h"
+#include "color.h"
 
 int Most_Tab_Width = 8;
 
@@ -117,79 +118,6 @@ static void output_binary_formatted_line (void)
    binary_format_line (beg, end, buf + 12);
    SLsmg_write_string (buf);
    SLsmg_erase_eol ();
-}
-
-/* Here *begp points to the char after \e.
- * The general escape sequence parsed here is assumed to look like:
- *   \e[ XX ; ... m
- * If 30 <= XX <= 37, then it specifies the foreground color
- * 38: reserved
- * 39: use default foreground
- * If 40 <= XX <= 47, then a background color is specified
- * 48: reserved
- * 49: use default background
- * If  0 <= XX <= 8, then an attribute (e.g, 8) is specified.
- * These numbers will be encoded as:
- *  offset + (FG-30 + 8*(BG-40 + 9*attribute))
- */
-int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colorp)
-{
-   unsigned char *beg = *begp;
-   int fg = 38, bg = 48, at = 0;
-   int xx;
-
-   if ((beg >= end) || (*beg != '['))
-     return -1;
-
-   beg++; /* skip [ */
-#if 1
-   if ((beg < end) && (*beg == 'K'))
-     {
-       if (colorp != NULL) *colorp = -1;
-       *begp = beg + 1;
-       return 0;
-     }
-#endif
-
-   while (1)
-     {
-	xx = 0;
-	while ((beg < end) && isdigit (*beg))
-	  {
-	     xx = xx*10 + (*beg - '0');
-	     beg++;
-	  }
-	if ((xx >= 0) && (xx <= 8))
-	  at = xx;
-	else if ((xx >= 20) && (xx <= 28))
-	  xx = 0;
-	else if (((xx >= 30) && (xx <= 37)) || (xx == 39))
-	  fg = xx;
-	else if (((xx >= 40) && (xx <= 47)) || (xx = 49))
-	  bg = xx;
-	else return -1;
-
-	if ((beg < end) && (*beg == ';'))
-	  {
-	     beg++;
-	     continue;
-	  }
-
-	if ((beg < end) && ((*beg == 'm') || (*beg == ']')))
-	  {
-	     *begp = beg + 1;
-	     if (colorp != NULL)
-	       {
-		  if ((fg != 38) || (bg != 48))
-		    xx = ((fg-30) + 10*((bg-40) + 10*at));   /* see most_setup_colors */
-		  if (xx != 0)
-		    xx += MOST_EMBEDDED_COLOR_OFFSET;
-		  *colorp = xx;
-	       }
-	     return 0;
-	  }
-	return -1;
-     }
 }
 
 typedef struct

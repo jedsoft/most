@@ -10,6 +10,12 @@ Changes since 5.1.0
 5. Additional changes involving int -> MOST_INT were required.
 6. src/Makefile.in: Avoid a race condition when performing a parallel
    build (Sergei Trofimovich)
+7. src/color.c: Added support for true-color terminals.  If you have a
+   terminal that supports true-color, and you are on a 64 bit system
+   with a recent version of the slang library, then set the environment
+   variable COLORTERM to "truecolor", i.e.,
+
+      export COLORTERM=truecolor
 
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc

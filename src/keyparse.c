@@ -51,7 +51,7 @@
 #include "jdmacros.h"
 #include "most.h"
 #include "keyparse.h"
-#include "display.h"
+#include "color.h"
 
 static unsigned int Line_Num;
 
@@ -266,45 +266,15 @@ static int mono_fun (int argc, SLcmd_Cmd_Table_Type *table)
    return -1;
 }
 
-static char *Ansi_Color_Map[10] =
-{
-   "black",
-   "red",
-   "green",
-   "yellow",
-   "blue",
-   "magenta",
-   "cyan",
-   "white",
-   "default",			       /* unused; see line.c:most_parse_color_escape */
-   "default"
-};
-
-void most_setup_colors (void)
+int most_setup_colors (void)
 {
    Color_Handle_Type *h;
    int i;
-   int fg, bg, at;
 
-   for (i = 1; i < 128; i++)
+   for (i = 1; i < MOST_EMBEDDED_COLOR_OFFSET; i++)
      {
 	SLtt_set_color (i, NULL, "default", "default");
 	SLtt_set_mono (i, NULL, 0);
-     }
-
-   for (at = 0; at < 10; at++)
-     {
-	for (fg = 0; fg < 10; fg++)
-	  {
-	     for (bg = 0; bg < 10; bg++)
-	       {
-		  i = fg + 10*(bg + 10*at);   /* see most_parse_color_escape */
-		  if (i == 0)
-		    continue;
-		  i += MOST_EMBEDDED_COLOR_OFFSET;
-		  SLtt_set_color (i, NULL, Ansi_Color_Map[fg], Ansi_Color_Map[bg]);
-	       }
-	  }
      }
 
    h = Color_Handles;
@@ -312,10 +282,12 @@ void most_setup_colors (void)
      {
 	/* if (h->value != 0)*/	       /* Let COLORFGBG apply to initial color */
 	SLtt_set_color (h->value, NULL, h->fg, h->bg);
-	SLtt_set_color (h->value+MOST_EMBEDDED_COLOR_OFFSET, NULL, h->fg, h->bg);
 	SLtt_set_mono (h->value, NULL, h->mono);
-	SLtt_set_mono (h->value+MOST_EMBEDDED_COLOR_OFFSET, NULL, h->mono);
+	/* SLtt_set_color (h->value+MOST_EMBEDDED_COLOR_OFFSET, NULL, h->fg, h->bg); */
+	/* SLtt_set_mono (h->value+MOST_EMBEDDED_COLOR_OFFSET, NULL, h->mono); */
 
 	h++;
      }
+
+   return most_setup_embedded_colors ();
 }

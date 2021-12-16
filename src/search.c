@@ -31,6 +31,7 @@
 #include "file.h"
 #include "display.h"
 #include "search.h"
+#include "color.h"
 
 /* Note!!!  The regular expression searches may not work.  I have not
  * tested them.
@@ -186,6 +187,9 @@ bs_fsearch (Search_Type *st,
 	     if (beg == end) return Most_Eob;
 
 	     ch = *beg++;
+	     if ((ch == 033) && is_ansi_escape (&beg, end))
+	       continue;
+
 	     if ((ch == ch1)
 		 || (cis && (ch1up == UPCASE(ch))))
 	       break;
@@ -274,6 +278,10 @@ bs_bsearch (Search_Type *st,
 	       return Most_Eob;
 
 	     ch = *end--;
+
+	     if ((ch == 'm') && is_rev_ansi_escape (beg, &end))
+	       continue;
+
 	     if ((ch == ch1)
 		 || (cis && (ch1up == UPCASE(ch))))
 	       break;

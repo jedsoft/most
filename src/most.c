@@ -1,7 +1,7 @@
 /*
  This file is part of MOST.
 
- Copyright (c) 1991, 1999, 2002, 2005-2018, 2019 John E. Davis
+ Copyright (c) 1991, 1999, 2002, 2005-2020, 2021 John E. Davis
 
  This program is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the Free
@@ -50,6 +50,7 @@
 #include "keym.h"
 #include "display.h"
 #include "line.h"
+#include "keyparse.h"
 
 int Most_S_Opt = 0;		       /* squeeze liness */
 int Most_A_Opt = 1;		       /* automatically choose -b if necessary */
@@ -500,7 +501,7 @@ int most (int argc, char **argv)
    if (No_Colors)
      SLtt_Use_Ansi_Colors = 0;
 
-   most_setup_colors ();
+   (void) most_setup_colors ();
    most_init_tty ();
    most_init_keymaps ();
 

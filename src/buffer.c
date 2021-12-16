@@ -36,6 +36,7 @@
 #include "window.h"
 #include "line.h"
 #include "file.h"
+#include "color.h"
 
 int Most_W_Opt = 0;
 

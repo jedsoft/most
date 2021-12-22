@@ -1,7 +1,12 @@
+This file contains the installation instructions for the MOST pager.
+For basic information (screenshots, etc) about MOST, visit
+<https://www.jedsoft.org/most/>.
+
 Compiling MOST requires an ANSI C compiler.  In addition you MUST have
 a copy of the S-Lang library version 2.X.  Version 1 is no longer
 supported.  This library is available from
 <http://www.jedsoft.org/slang/>.
+
 
                           INSTALLATION INSTRUCTIONS
 

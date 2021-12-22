@@ -27,6 +27,7 @@
 #endif
 #include <ctype.h>
 
+#define ENABLE_SLFUTURE_CONST
 #include <slang.h>
 #include "jdmacros.h"
 #include "most.h"
@@ -34,6 +35,7 @@
 #include "display.h"
 #include "color.h"
 
+#define DEFAULT_COLOR_HANDLE 16
 
 /* These are used for FG ESC[30m - ESC[37m, and ESC[90 - ESC[97, and BG=FG+10 */
 static int Xterm256_Map[256] =
@@ -136,22 +138,22 @@ static int map_fgbgat_to_color (int fg, int bg, int at, int *colorp)
 	  {
 	     fg = -fg;
 	     bg = -bg;
-	     xx = fg + 10*(bg + 10*at);
+	     xx = fg + 17*(bg + 17*at);
 	     if (xx != 0) xx += MOST_EMBEDDED_COLOR_OFFSET;
 	     *colorp = xx;
 	     return 0;
 	  }
 
-	if (fg == -9) fg = -1;
-	else fg = Xterm256_Map[(-fg) & 0xFF];
+	if (fg != -DEFAULT_COLOR_HANDLE)
+	  fg = Xterm256_Map[(-fg) & 0xFF];
 
 	return get_color_handle (fg, bg, at, colorp);
      }
 
    if (bg < 0)
      {
-	if (bg == -9) bg = -1;
-	else bg = Xterm256_Map[(-bg) & 0xFF];
+	if (bg != -DEFAULT_COLOR_HANDLE)
+	  bg = Xterm256_Map[(-bg) & 0xFF];
      }
 
    return get_color_handle (fg, bg, at, colorp);
@@ -224,7 +226,7 @@ static int parse_setcolor_256 (unsigned char **begp, unsigned char *end, int *rg
  * 49: use default background
  * If  0 <= XX <= 8, then an attribute (e.g, 8) is specified.
  * These numbers will be encoded as:
- *  offset + (FG-30 + 8*(BG-40 + 9*attribute))
+ *  offset + (FG-30) + 17*(BG-40 + 17*attribute)
  */
 static int parse_color_escape_internal (unsigned char **begp, unsigned char *end,
 					int *fgp, int *bgp, int *atp)
@@ -245,10 +247,14 @@ static int parse_color_escape_internal (unsigned char **begp, unsigned char *end
 
 	if (xx <= 8)
 	  at = xx;/* attributes */
-	else if ((xx >= 30) && (xx <= 39) && (xx != 38))
-	  fg = -(xx-30);		       /* foreground color */
-	else if ((xx >= 40) && (xx <= 49) && (xx != 48))
-	  bg = -(xx-40);		       /* background color */
+	else if ((xx >= 30) && (xx <= 37))
+	  fg = -(xx-30);		       /* foreground color : 0-7 */
+	else if (xx == 39)
+	  fg = -DEFAULT_COLOR_HANDLE;   /* default */
+	else if ((xx >= 40) && (xx <= 47))
+	  bg = -(xx-40);		       /* background color : 0-7 */
+	else if (xx == 49)
+	  bg = -DEFAULT_COLOR_HANDLE;   /* default */
 	else if (xx == 38)
 	  {
 	     if (-1 == parse_setcolor_256 (&beg, end, &fg))
@@ -262,9 +268,9 @@ static int parse_color_escape_internal (unsigned char **begp, unsigned char *end
 	else if ((xx >= 20) && (xx <= 29))
 	  at = 0;
 	else if ((xx >= 90) && (xx <= 97))
-	  fg = -(xx-80);		       /* bright foreground color */
+	  fg = -(8 + xx-90);		       /* bright foreground color : 8-15 */
 	else if ((xx >= 100) && (xx <= 107))
-	  bg = -(xx-90);		       /* bright background color */
+	  bg = -(8 + xx-100);		       /* bright background color : 8-15 */
 
 	if ((beg < end) && (*beg == ';'))
 	  {
@@ -285,13 +291,13 @@ static int parse_color_escape_internal (unsigned char **begp, unsigned char *end
 }
 
 
-/* Parse a color escape and update *fgp and *bgp accoringly.
+/* Parse a color escape and update *fgp and *bgp accordingly.
  * Note that -1 for *fgp or *bgp indicates the default value
  */
 int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colorp)
 {
    unsigned char *start_beg, *beg = *begp;
-   int fg = -9, bg = -9, at = 0;
+   int fg = -DEFAULT_COLOR_HANDLE, bg = -DEFAULT_COLOR_HANDLE, at = 0;
    int numloops;
 
    start_beg = beg = *begp;
@@ -342,6 +348,95 @@ int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colo
    return 0;
 }
 
+typedef struct
+{
+   const char *name;
+   int rgb;
+   double h, s, v;
+}
+Ansi_Color_Map_Type;
+
+static Ansi_Color_Map_Type Ansi_Color_Map[16+1] =
+{
+   {"black",         0x000000, 0,0,0},
+   {"red",           0xCD0000, 0,0,0},
+   {"green",         0x00CD00, 0,0,0},
+   {"brown",         0xCDCD00, 0,0,0},
+   {"blue",          0x0000EE, 0,0,0},
+   {"magenta",       0xCD00CD, 0,0,0},
+   {"cyan",          0x00CDCD, 0,0,0},
+   {"lightgray",     0xE5E5E5, 0,0,0},
+   {"gray",          0x7F7F7F, 0,0,0},
+   {"brightred",     0xFF0000, 0,0,0},
+   {"brightgreen",   0x00FF00, 0,0,0},
+   {"yellow",        0xFFFF00, 0,0,0},
+   {"brightblue",    0x5C5CFF, 0,0,0},
+   {"brightmagenta", 0xFF00FF, 0,0,0},
+   {"brightcyan",    0x00FFFF, 0,0,0},
+   {"white",         0xFFFFFF, 0,0,0},
+   {"default",       0, 0,0,0} /* at offset 16 */
+};
+
+
+static void compute_hsv (int rgb, double *hp, double *sp, double *vp)
+{
+   double r = (rgb>>16)&0xFF;
+   double g = (rgb>>8)&0xFF;
+   double b = (rgb&0xFF);
+   double h, s, v, u, d;
+
+   r /= 255.0; g /= 255.0; b /= 255.0;
+   u = v = r;
+   if (g > v) v = g;
+   if (g < u) u = g;
+   if (b > v) v = b;
+   if (b < u) u = b;
+
+   d = v-u;
+   if (v == u) h = 0.0;
+   else if (v == r) h = (g-b)/d;
+   else if (v == g) h = 2 + (b-r)/d;
+   else h = 4 + (r-g)/d;
+
+   h = (int)(60*h + 360) % 360;
+   s = (v == 0) ? 0 : d/v;
+
+   *hp = h;
+   *sp = s*100;
+   *vp = v*100;
+}
+
+static int map_rgb_to_ansi16 (int rgb)
+{
+   /* This is a naive algorithm that uses the euclidean distance */
+   double h, s, v;
+   int i, imin, dmin;
+
+   if (rgb < 0)
+     return DEFAULT_COLOR_HANDLE;
+
+   compute_hsv (rgb, &h, &s, &v);
+   imin = 0;
+   dmin = 3*255*255;
+   for (i = 0; i < 16; i++)
+     {
+	double dh, ds, dv, d;
+
+	dh = h - Ansi_Color_Map[i].h;
+	ds = s - Ansi_Color_Map[i].s;
+	dv = v - Ansi_Color_Map[i].v;
+
+	d = 4*dh*dh + 3*ds*ds + 1*dv*dv;
+
+	if ((i == 0) || (d < dmin))
+	  {
+	     imin = i;
+	     dmin = d;
+	  }
+     }
+   return imin;
+}
+
 static int Max_Color;
 typedef struct Color_Obj_Type_
 {
@@ -359,6 +454,22 @@ static int get_color_handle (int fg, int bg, int at, int *colorp)
    Color_Obj_Type *cot;
    unsigned long hash;
    char bgname[16], fgname[16];
+
+   if (Has_True_Color == 0)
+     {
+	fg = map_rgb_to_ansi16 (fg);
+	bg = map_rgb_to_ansi16 (bg);
+	if (fg == bg)
+	  {
+	     fg = 15;
+	     if (bg == 15) fg = 0;
+	  }
+	/* if ((fg == 0) && (bg == 8)) fg = 15; */
+	/* if ((fg == 8) && (bg == 0)) fg = 15; */
+	if ((fg == 0) && (bg == 8)) fg = 7;
+	*colorp = MOST_EMBEDDED_COLOR_OFFSET + (fg + 17*(bg + 17*at));
+	return 0;
+     }
 
    hash = at;
    if ((fg == -1) || (Has_True_Color == 0))
@@ -416,19 +527,6 @@ static int get_color_handle (int fg, int bg, int at, int *colorp)
    return 0;
 }
 
-static char *Ansi_Color_Map[10] =
-{
-   "black",
-   "red",
-   "green",
-   "yellow",
-   "blue",
-   "magenta",
-   "cyan",
-   "white",
-   "default",			       /* unused; see line.c:most_parse_color_escape */
-   "default"
-};
 
 static SLtt_Char_Type Color_Attributes[10] =
 {
@@ -447,21 +545,30 @@ static SLtt_Char_Type Color_Attributes[10] =
 int most_setup_embedded_colors (void)
 {
    int i, c, at, fg, bg;
+   Ansi_Color_Map_Type *cm, *cmmax;
 
-   /* ESC [ 30-37m and ESC [ 40-47 forms with attributes */
+   cm = Ansi_Color_Map;
+   cmmax = cm + 16;
+   while (cm < cmmax)
+     {
+	compute_hsv (cm->rgb, &cm->h, &cm->s, &cm->v);
+	cm++;
+     }
+
+   /* ESC [ 30-37m, 40-47, 90-97, and 100-107 forms with attributes */
    for (at = 0; at < 10; at++)
      {
 	SLtt_Char_Type attr = Color_Attributes[at];
 
-	for (fg = 0; fg < 10; fg++)
+	for (fg = 0; fg < 17; fg++)
 	  {
-	     for (bg = 0; bg < 10; bg++)
+	     for (bg = 0; bg < 17; bg++)
 	       {
-		  c = fg + 10*(bg + 10*at);   /* see most_parse_color_escape */
+		  c = fg + 17*(bg + 17*at);   /* see most_parse_color_escape */
 		  if (c == 0)
 		    continue;
 		  c += MOST_EMBEDDED_COLOR_OFFSET;
-		  SLtt_set_color (c, NULL, Ansi_Color_Map[fg], Ansi_Color_Map[bg]);
+		  SLtt_set_color (c, NULL, Ansi_Color_Map[fg].name, Ansi_Color_Map[bg].name);
 		  SLtt_add_color_attribute (c, attr);
 	       }
 	  }
@@ -469,7 +576,7 @@ int most_setup_embedded_colors (void)
 
    /* Now add some of ESC[38;5;Xm and ESC[38;5;Xm but not all fg/bg combinations */
    /* Start at unused color handle */
-   Max_Color = 10*10*10 + MOST_EMBEDDED_COLOR_OFFSET;
+   Max_Color = 17*17*10 + MOST_EMBEDDED_COLOR_OFFSET;
 
    /* First, test for true color */
    if (-1 == SLtt_set_color (Max_Color, NULL, "#FFFFFF", "#000000"))

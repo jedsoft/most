@@ -17,6 +17,10 @@ Changes since 5.1.0
 
       export COLORTERM=truecolor
 
+8. Added pseudo-truecolor support for terminals that provide only the
+   basic 16 colors by mapping the desired truecolor to
+   the nearest 16 color version.
+
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc
 2. src/most.h,sysdep.c: win32-specific patches (Andrew Wu)

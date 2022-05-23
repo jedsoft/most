@@ -20,6 +20,8 @@ Changes since 5.1.0
 8. Added pseudo-truecolor support for terminals that provide only the
    basic 16 colors by mapping the desired truecolor to
    the nearest 16 color version.
+9. src/line.c: Fixed a bug that caused a character following a
+   0-width character not be be displayed (reported by MalteHei)
 
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc

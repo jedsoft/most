@@ -251,13 +251,15 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 		 && (NULL != SLutf8_decode (pch, end, &wch, NULL)))
 	       {
 		  int width = SLwchar_wcwidth (wch);
-		  beg = SLutf8_skip_chars (pch, end, 1, NULL, 1);
+		  beg = SLutf8_skip_chars (pch, end, 1, NULL, 0);
 
 		  prev_width = width;
 		  if (width == 0)
 		    {
+		       if (col <= min_col) continue;
+
 		       col--;
-		       if ((col >= min_col) && (col < max_col))
+		       if (col < max_col)
 			 {
 			    cell = cells + (col-min_col);
 			    cell->len += beg-pch;

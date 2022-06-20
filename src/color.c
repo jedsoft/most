@@ -165,13 +165,13 @@ static int parse_setcolor_256 (unsigned char **begp, unsigned char *end, int *rg
    unsigned char *beg = *begp;
    int xx;
 
-   if ((beg >= end) || (*beg != ';')) return -1;
+   if ((beg >= end) || ((*beg != ';') && (*beg != ':'))) return -1;
    beg++;
 
    if (-1 == parse_int (&beg, end, &xx))
      return -1;
 
-   if ((beg >= end) || (*beg != ';'))
+   if ((beg >= end) || ((*beg != ';') && (*beg != ':')))
      return -1;
    beg++;
 
@@ -191,13 +191,13 @@ static int parse_setcolor_256 (unsigned char **begp, unsigned char *end, int *rg
 
 	if (-1 == parse_int (&beg, end, &r))
 	  r = 0;
-	if ((beg >= end) || (*beg != ';') || (r > 256))
+	if ((beg >= end) || ((*beg != ';') && (*beg != ':')) || (r > 256))
 	  return -1;
 	beg++;
 
 	if (-1 == parse_int (&beg, end, &g))
 	  g = 0;
-	if ((beg >= end) || (*beg != ';') || (g > 256))
+	if ((beg >= end) || ((*beg != ';') && (*beg != ':')) || (g > 256))
 	  return -1;
 	beg++;
 
@@ -272,7 +272,7 @@ static int parse_color_escape_internal (unsigned char **begp, unsigned char *end
 	else if ((xx >= 100) && (xx <= 107))
 	  bg = -(8 + xx-100);		       /* bright background color : 8-15 */
 
-	if ((beg < end) && (*beg == ';'))
+	if ((beg < end) && ((*beg == ';') || (*beg == ':')))
 	  {
 	     beg++;
 	     continue;

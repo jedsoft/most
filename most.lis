@@ -40,6 +40,8 @@
 @src/window.c
 @src/line.c
 @src/display.c
+@src/color.c
+@src/color.h
 @src/sysdep.c
 @src/keym.c
 @src/most.c

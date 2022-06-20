@@ -24,6 +24,8 @@ Changes since 5.1.0
    0-width character not be be displayed (reported by MalteHei)
 10. color.c: Support color escape sequences that use the colon
     character as a delimiter
+11. src/color.c: An unspecifed FG or BG color was not getting properly
+    mapped to the default color
 
 
 {{{ Previous Versions

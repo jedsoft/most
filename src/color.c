@@ -472,10 +472,9 @@ static int get_color_handle (int fg, int bg, int at, int *colorp)
      }
 
    hash = at;
-   if ((fg == -1) || (Has_True_Color == 0))
+   if (fg == -DEFAULT_COLOR_HANDLE)
      {
 	strcpy (fgname, "default");
-	fg = -1;
      }
    else
      {
@@ -483,10 +482,9 @@ static int get_color_handle (int fg, int bg, int at, int *colorp)
 	hash = (fg << 8) ^ hash;
      }
 
-   if ((bg == -1) || (Has_True_Color == 0))
+   if (bg == -DEFAULT_COLOR_HANDLE)
      {
 	strcpy (bgname, "default");
-	bg = -1;
      }
    else
      {
@@ -590,8 +588,8 @@ int most_setup_embedded_colors (void)
      {
 	int rgb = Xterm256_Map[i];
 	int color;
-	(void) get_color_handle (-1, rgb, 0, &color);
-	(void) get_color_handle (rgb, -1, 0, &color);
+	(void) get_color_handle (-DEFAULT_COLOR_HANDLE, rgb, 0, &color);
+	(void) get_color_handle (rgb, -DEFAULT_COLOR_HANDLE, 0, &color);
      }
    return 0;
 }

@@ -26,7 +26,7 @@ Changes since 5.1.0
     character as a delimiter
 11. src/color.c: An unspecifed FG or BG color was not getting properly
     mapped to the default color
-
+12. Updated copyright years
 
 {{{ Previous Versions
 

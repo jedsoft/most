@@ -63,6 +63,17 @@ DESCRIPTION
 
    Commands are listed below.
 
+COLOR SUPPORT
+
+   most has supported both 256-color and 24 bit truecolor
+   terminals since version 5.2. Not all terminals are capable of
+   generating arbitrary 24 bit colors. If your terminal supports
+   24 bit colors, but most does not detect it, then set the
+   environment variable
+     COLORTERM=truecolor
+
+   to force 24 bit truecolors to be used.
+
 OPTIONS
 
    -1

@@ -27,6 +27,6 @@
 
 #define MOST_EMBEDDED_COLOR_OFFSET 256
 
-extern int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colorp);
+extern int most_parse_color_escape (unsigned char **begp, unsigned char *end, int *colorp, int *atp);
 extern int most_setup_embedded_colors (void);
 #endif

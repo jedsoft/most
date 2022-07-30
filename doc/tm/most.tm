@@ -96,6 +96,20 @@
 \p-end
 \refsect1-end
 
+\refsect1{COLOR SUPPORT}
+\p
+  \most has supported both 256-color and 24 bit truecolor terminals
+  since version 5.2.  Not all terminals are capable of generating
+  arbitrary 24 bit colors. If your terminal supports 24 bit colors,
+  but \most does not detect it, then set the environment variable
+#v+
+     COLORTERM=truecolor
+#v-
+\pp
+  to force 24 bit truecolors to be used.
+\p
+\refsect1-end
+
 \refsect1{OPTIONS}
  \variablelist
 

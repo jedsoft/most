@@ -228,7 +228,7 @@ static unsigned char *end_of_line (unsigned char *b)
 		  unsigned char ch = 033;
 		  b1++;
 		  while ((ch == 033) && (b1 < e) && (b1 < Most_Eob)
-			 && (0 == most_parse_color_escape (&b1, e, NULL)))
+			 && (0 == most_parse_color_escape (&b1, e, NULL, NULL)))
 		    {
 		       b = b1;
 		       ch = *b1++;

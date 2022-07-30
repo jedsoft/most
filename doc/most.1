@@ -3,7 +3,7 @@
 .\" <http://shell.ipoline.com/~elmert/comp/docbook2X/> 
 .\" Please send any bug reports, improvements, comments, patches, 
 .\" etc. to Steve Cheng <steve@ggi-project.org>.
-.TH "MOST" "1" "17 February 2019" "" ""
+.TH "MOST" "1" "30 July 2022" "" ""
 
 .SH NAME
 most \- browse or page through a text file
@@ -60,6 +60,19 @@ used to override this feature.  When a window is wrapped, the
 character `\\' will appear at the right edge of the window.
 .PP
 Commands are listed below.
+.SH "COLOR SUPPORT"
+.PP
+\fBmost\fR has supported both 256-color and 24 bit truecolor terminals
+since version 5.2.  Not all terminals are capable of generating
+arbitrary 24 bit colors. If your terminal supports 24 bit colors,
+but \fBmost\fR does not detect it, then set the environment variable
+
+.nf
+     COLORTERM=truecolor
+.fi
+.PP
+to force 24 bit truecolors to be used.
+.PP
 .SH "OPTIONS"
 .TP
 \fB-1\fR

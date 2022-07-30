@@ -15,11 +15,15 @@ define slsh_main ()
 	if (g > 255) g = 510 - 255;
 	rainbow = strcat (rainbow,
 			  sprintf (e2, r, g, b, 255-r, 255-g, 255-b),
-			  "-\e[0m");
+			  "-");
      }
+   rainbow += "\e[0m";
+
+   () = fprintf (stdout, "\e[3mThe next line assumes a truecolor terminal:\e[0m\n");
    rainbow = rainbow + "\n";
    () = fputs (rainbow, stdout);
-   () = fputs ("\n", stdout);
+
+   () = fprintf (stdout, "\e[3mThe next line uses 16 colors:\n\e[0m");
 
    _for i (0, 7, 1)
      {
@@ -31,21 +35,9 @@ define slsh_main ()
 	() = fprintf (stdout, e1, 0, i);
 	() = fprintf (stdout, "%4d", i);
      }
-   () = fputs ("\e[0m\n\n", stdout);
-#iffalse
-   _for i (40, 47, 1)
-     {
-	() = fprintf (stdout, e3, 37, i);
-	() = fprintf (stdout, "%4d", i);
-     }
-   _for i (100, 107, 1)
-     {
-	() = fprintf (stdout, e3, 97, i);
-	() = fprintf (stdout, "%4d", i);
-     }
-   () = fputs ("\e[0m\n\n", stdout);
-#endif
+   () = fputs ("\e[0m\n", stdout);
 
+   () = fputs ("\e[3mThe following lines assume a 256-color terminal\n\e[m", stdout);
    i = 16;
    loop (6)
      {
@@ -91,7 +83,9 @@ define slsh_main ()
 	() = fprintf (stdout, e1, 0, i);
 	() = fprintf (stdout, "%4d", i);
      }
-   () = fputs ("\e[0m\n\n", stdout);
+   () = fputs ("\e[0m\n", stdout);
 
+   () = fprintf (stdout, "\e[3mThe next line assumes a truecolor terminal:\n\e[m");
+   () = fputs ("\e[4m", stdout);
    () = fputs (rainbow, stdout);
 }

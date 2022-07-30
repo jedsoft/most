@@ -130,12 +130,13 @@ typedef struct
 Multibyte_Cell_Type;
 
 static int most_analyse_line (unsigned char *begg, unsigned char *endd,
-			      Multibyte_Cell_Type *cells, unsigned int num_cols, int *start_colorp)
+			      Multibyte_Cell_Type *cells, unsigned int num_cols,
+			      int *start_colorp, int *start_atp)
 {
    unsigned char *beg, *end;
    unsigned int min_col, max_col, prev_width;
    unsigned int col, max_col_reached;
-   int default_attr;
+   int start_attr, start_at;
    Multibyte_Cell_Type *cell, *max_cell;
 
    beg = begg;
@@ -146,11 +147,12 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
    min_col = Most_Column - 1;
    max_col = min_col + num_cols;
 
-   default_attr = *start_colorp;
+   start_attr = *start_colorp;
+   start_at = *start_atp;
    prev_width = 1;
    while (beg < end)
      {
-	int attr = default_attr;
+	int attr = start_attr;
 	unsigned char ch;
 	unsigned char *pch = beg++;
 	char buf[16];
@@ -234,10 +236,14 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 #if 1
 	if ((ch == 033) && (Most_V_Opt == 0))
 	  {
-	     int color;
-	     if (0 == most_parse_color_escape (&beg, end, &color))
+	     int color, at;
+	     if (0 == most_parse_color_escape (&beg, end, &color, &at))
 	       {
-		  if (color != -1) default_attr = color;
+		  if (color != -1)
+		    {
+		       start_attr = color;
+		       start_at = at;
+		    }
 		  continue;
 	       }
 	     /* drop */
@@ -366,7 +372,8 @@ static int most_analyse_line (unsigned char *begg, unsigned char *endd,
 	       }
 	  }
      }
-   *start_colorp = default_attr;
+   *start_colorp = start_attr;
+   *start_atp = start_at;
    return max_cell - cells;
 }
 
@@ -407,6 +414,7 @@ void most_display_line (int reset)
    unsigned int screen_cols;
    unsigned int num_cells_set;
    static int last_color = 0;	       /* used for a line that wrapped */
+   static int last_at = 0;
 
    if (Most_B_Opt)
      {
@@ -427,8 +435,12 @@ void most_display_line (int reset)
    (void) most_extract_line (&beg, &end);
 
    if (reset || (Most_W_Opt == 0))
-     last_color = 0;
-   num_cells_set = most_analyse_line (beg, end, cells, num_cells, &last_color);
+     {
+	last_color = 0;
+	last_at = 0;
+     }
+
+   num_cells_set = most_analyse_line (beg, end, cells, num_cells, &last_color, &last_at);
 
    dollar = 0;
    if (Most_W_Opt)
@@ -490,7 +502,7 @@ MOST_INT most_apparant_distance (unsigned char *pos)
 	  }
 
 	if ((ch == 033) && (Most_V_Opt == 0)
-	    && (0 == most_parse_color_escape (&pos, save_pos, NULL)))
+	    && (0 == most_parse_color_escape (&pos, save_pos, NULL, NULL)))
 	  continue;
 
 	if (ch & 0x80)
@@ -541,7 +553,7 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, MOST_UI
 	     if ((ch == 033) && (Most_V_Opt == 0))
 	       {
 		  while ((ch == 033)
-			 && (0 == most_parse_color_escape (&b, e, NULL))
+			 && (0 == most_parse_color_escape (&b, e, NULL, NULL))
 			 && (b < e))
 		    ch = *b++;
 	       }
@@ -610,7 +622,7 @@ unsigned char *most_forward_columns (unsigned char *b, unsigned char *e, MOST_UI
 	  }
 
 	if ((ch == 033) && (Most_V_Opt == 0)
-	    && (0 == most_parse_color_escape (&b, e, NULL)))
+	    && (0 == most_parse_color_escape (&b, e, NULL, NULL)))
 	  continue;
 
 	/* Ctrl-char ^X */

@@ -1,3 +1,17 @@
+Only the highlights are lised here.  For more detailed changes, see
+the git logs or the changes.txt file.
+
+---------------------------------------------------------------------------
+NEWS for v5.2.0
+
+* Better support for files larger than 4 GB
+
+* Truecolor support on 64 bit systems for terminals that support it.
+  This may involve setting the COLORTERM environment variable to
+  "truecolor". See <https://github.com/termstandard/colors> for a list
+  of terminals that support truecolor.
+
+---------------------------------------------------------------------------
 NEWS for v5.1.0
 
 This is primarily a maintenance release.
@@ -9,4 +23,3 @@ The default is still to use a non-RE search. The -r command line
 switch may be used to make the default a RE-based search.  Within
 most, ":r" may be used to toggle the search type between RE and
 non-RE.
-

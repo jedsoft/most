@@ -64,37 +64,3 @@ MOST understands the following environment variables:
     file as a help file.  This is useful for describing custom keymaps.
 
 Any problems with MOST should be reported to jed@jedsoft.org.
-
-  [Note also that this is really the first non-trivial C program that
-  I ever wrote.  Because of this, much of the code appears very
-  amateurish.  For example, I tried very hard to avoid C constructs
-  that some authors strongly discourage, e.g., goto, continue,
-  break.  Of course this made some of the code convoluted, e.g.,
-  contrast
-
-      int test = 1;
-      while (test)
-       {
-           function ();
-
-           if (-1 == some_function ())
-	     test = 0;
-
-	   if (test)
-	     some_other_function ();
-       }
-
-   with:
-
-       while (1)
-         {
-	    function ();
-	    if (-1 == some_function ()) break;
-	    some_other_function ();
-	 }
-
-   I have since concluded that many text-book authors never actually
-   wrote anything non-trivial.  Whenever I work on MOST, I try to make
-   some changes in an effort to clean it up. ]
-
---John Davis

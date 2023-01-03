@@ -23,8 +23,8 @@ SRCDIR = .
 #----------------------------------------------------------------------------
 # Nothing below here should require changing.
 #----------------------------------------------------------------------------
-OBJS =  $(OBJDIR)/buffer.o $(OBJDIR)/cmd.o $(OBJDIR)/display.o $(OBJDIR)/edit.o $(OBJDIR)/file.o $(OBJDIR)/help.o $(OBJDIR)/keym.o $(OBJDIR)/keyparse.o $(OBJDIR)/line.o $(OBJDIR)/main.o $(OBJDIR)/most.o $(OBJDIR)/search.o $(OBJDIR)/sysdep.o $(OBJDIR)/window.o
-OFILES =  buffer.o cmd.o display.o edit.o file.o help.o keym.o keyparse.o line.o main.o most.o search.o sysdep.o window.o
+OBJS =  $(OBJDIR)/buffer.o $(OBJDIR)/cmd.o $(OBJDIR)/display.o $(OBJDIR)/edit.o $(OBJDIR)/file.o $(OBJDIR)/help.o $(OBJDIR)/keym.o $(OBJDIR)/keyparse.o $(OBJDIR)/line.o $(OBJDIR)/main.o $(OBJDIR)/most.o $(OBJDIR)/search.o $(OBJDIR)/sysdep.o $(OBJDIR)/window.o $(OBJDIR)/color.o
+OFILES =  buffer.o cmd.o display.o edit.o file.o help.o keym.o keyparse.o line.o main.o most.o search.o sysdep.o window.o color.o
 
 EXEC = most
 CONFIG_H = config.h
@@ -88,3 +88,6 @@ $(OBJDIR)/sysdep.o : $(SRCDIR)/sysdep.c $(DOT_O_DEPS) $(sysdep_O_DEP)
 
 $(OBJDIR)/window.o : $(SRCDIR)/window.c $(DOT_O_DEPS) $(window_O_DEP)
 	$(COMPILE_CMD) $(SRCDIR)/window.c -o $(OBJDIR)/window.o
+
+$(OBJDIR)/color.o : $(SRCDIR)/color.c $(DOT_O_DEPS) $(color_O_DEP)
+	$(COMPILE_CMD) $(SRCDIR)/color.c -o $(OBJDIR)/color.o

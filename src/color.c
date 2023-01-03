@@ -659,7 +659,11 @@ int most_setup_embedded_colors (void)
    Has_True_Color = 0;
 
    /* Assume 256 color is possible if the number of colors > 16 */
+#ifdef __WIN32__
+   Has_256_Color = 0;
+#else
    Has_256_Color = (SLtt_tgetnum ("Co") > 16);
+#endif
 
    /* Set up the HSV map for simulated true colors */
    cm = Ansi_Color_Map;

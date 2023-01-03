@@ -37,6 +37,10 @@ extern char *most_unix2vms(char *);
 
 # endif /* VMS */
 
+# ifdef __WIN32__
+extern int most_expand_file_name(char *,char *);
+# endif
+
 extern int most_reinit_terminal (void);
 extern void most_init_tty(void);
 extern void most_reset_tty(void);

@@ -1,4 +1,8 @@
 -*- mode: text; mode: fold -*-
+Changes since 5.2.0
+1. Updated to support windows using the MingW compiler.  Note: Colors
+    are not yet supported
+
 Changes since 5.1.0
 1. src/most.c: Ignore empty filenames on the command line
 2. src/cmd.c: Changed /* drop */ to /* fall through */ to avoid a

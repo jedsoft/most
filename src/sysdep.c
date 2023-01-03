@@ -258,6 +258,56 @@ int most_expand_file_name(char *file,char *expanded_file)
 }
 #endif /* VMS */
 
+#ifdef __WIN32__
+/* Returns -1 upon error, 0 upon success.  If no new file was found,
+ * *expanded_file will be 0.
+ */
+int most_expand_file_name (char *filepat, char *expanded_file)
+{
+   static HANDLE h = INVALID_HANDLE_VALUE;
+   WIN32_FIND_DATA fd;
+   static char inputname [MAX_PATHLEN] = "";
+
+   *expanded_file = 0;
+   if (strcmp (inputname, filepat))
+     {
+	/* Start a new expansion pattern */
+	if (h != INVALID_HANDLE_VALUE)
+	  {
+	     FindClose (h);
+	     h = INVALID_HANDLE_VALUE;
+	  }
+	strcpy (inputname, filepat);
+
+	h = FindFirstFile (inputname, &fd);
+	if (h == INVALID_HANDLE_VALUE)
+	  {
+	     if (ERROR_NO_MORE_FILES == GetLastError())
+	       return 0;
+
+	     return -1;
+	  }
+	strcpy (expanded_file, fd.cFileName);
+	return 0;
+     }
+   if (h == INVALID_HANDLE_VALUE) return -1;
+
+   if (FALSE == FindNextFile(h, &fd))
+     {
+	int status = 0;
+	if (ERROR_NO_MORE_FILES != GetLastError())
+	  status = -1;
+
+	FindClose (h);
+	h = INVALID_HANDLE_VALUE;
+	return status;
+     }
+
+   strcpy (expanded_file, fd.cFileName);
+   return 0;
+}
+#endif /* VMS */
+
 /*
  *
  *

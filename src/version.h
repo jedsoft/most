@@ -18,7 +18,7 @@
  Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifndef MOST_VERSION
-#define MOST_VERSION	50200
+#define MOST_VERSION	50201
 
-#define MOST_VERSION_STR "5.2.0"
+#define MOST_VERSION_STR "pre5.2.1"
 #endif				       /* MOST_VERSION */

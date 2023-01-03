@@ -425,112 +425,82 @@ static void utf8_config (void)
      }
 }
 
-int most (int argc, char **argv)
+
+#ifdef VMS
+static int fill_file_ring_vms (int argc, char **argv, int i)
 {
-   char file[MAX_PATHLEN], *switches;
-   int quit,i,piped;
-   int status = 0;
+   char filename[MAX_PATHLEN];
+   char file[MAX_PATHLEN];
 
-#ifdef VMS
-   char filename[256];
-#else
-   int j;
-#endif
-
-   Most_Program = argv[0];
-   piped = 0;
-
-   switches = getenv ("MOST_PROMPT");
-   if ((switches != NULL) && (*switches != 0)) Most_Global_Msg = switches;
-
-   switches = getenv("MOST_SWITCHES");
-   if (switches !=  NULL)  do_switches(switches);
-
-   i = 1;
-   if (argc > 1)
-     {
-	quit = 0;
-	while ((!quit) && (i < argc))
-	  {
-	     if (argv[i][0] == '-')
-	       do_switches(argv[i++]);
-	     else if (argv[i][0] == '+')
-	       do_extended_switches(argv[i++]);
-	     else quit = 1;
-	  }
-     }
-
-#if MOST_HAS_MMAP
-   /* if (Most_D_Opt) */
-   /*   Most_Disable_MMap = 1; */
-#endif
-
-   if (i == argc)
-     {
-	if (isatty(0))   /* 1 if stdin is a terminal, 0 otherwise */
-	  {
-	     most_usage ();
-	     return 0;
-	  }
-	/* assume input is from stdin */
-	file[0] = '\0';  /* tells most this is stdin */
-	piped = 1;
-	if (!isatty(fileno(stdout)))
-	  {
-	     play_cat(NULL);
-	     return 0;
-	  }
-     }
-   else
-     {
-	strncpy (file, argv[i], sizeof(file));
-	file[sizeof(file)-1] = 0;
-     }
-
-   if (!isatty(fileno(stdout)))
-     {
-	while (i < argc) play_cat(argv[i++]);
-	exit(0);
-     }
-
-   Most_Num_Files = 0;
-
-   SLtt_get_terminfo();
-   utf8_config ();
-   SLtt_Ignore_Beep = 1;
-   if (No_Colors)
-     SLtt_Use_Ansi_Colors = 0;
-
-   (void) most_setup_colors ();
-   most_init_tty ();
-   most_init_keymaps ();
-
-   if (Most_B_Opt) Most_A_Opt = 0;   /* explicit b overrides a */
-
-   if (piped)
-     {
-	do_most(NULL, Most_Starting_Line);
-	most_exit_most ();
-	return status;
-     }
-
-#ifdef VMS
-   while(i < argc)
+   while (i < argc)
      {
 	if (Most_Num_Files >= MOST_MAX_FILES) break;
 	if (argv[i][0] == '.') strcpy(file,"*"); else *file = 0;
-	strcat(file, most_unix2vms(argv[i++]));
-	while (RMS$_NORMAL == (status = most_expand_file_name(file,filename)))
+	strcat (file, most_unix2vms(argv[i]));
+	while (RMS$_NORMAL == (status = most_expand_file_name (file, filename)))
 	  {
 	     Most_File_Ring[Most_Num_Files] = (char*) MOSTMALLOC(strlen(filename) + 1);
 	     strcpy(Most_File_Ring[Most_Num_Files++], filename);
 	  }
 	if (status == RMS$_NMF) status = RMS$_NORMAL; /* avoid spurious warning message */
+	i++;
      }
-
    if (Most_Num_Files) strcpy(file,Most_File_Ring[0]);
    else fputs("%%MOST-W-NOFILES, no files found\n", stderr);
+
+   return 0;
+}
 #else
+# ifdef __WIN32__
+static int fill_file_ring_win32 (int argc, char **argv, int i)
+{
+   char filename[MAX_PATHLEN];
+
+   while (i < argc)
+     {
+	char *arg = argv[i];
+	char *dir = NULL;
+
+	if (arg != SLpath_basename (arg))
+	  {
+	     /* Has a directory */
+	     dir = SLpath_dirname (arg);
+	     if (dir == NULL) return -1;
+	  }
+
+	while (0 == most_expand_file_name (arg, filename))
+	  {
+	     char *dirfile;
+
+	     if (*filename == 0)
+	       break;
+
+	     if (NULL == (dirfile = SLpath_dircat (dir, filename)))
+	       {
+		  SLfree (dir);
+		  return -1;
+	       }
+
+	     Most_File_Ring[Most_Num_Files++] = dirfile;
+
+	     if (Most_Num_Files >= MOST_MAX_FILES)
+	       {
+		  SLfree (dir);
+		  return 0;
+	       }
+	  }
+	SLfree (dir);
+	i++;
+     }
+   return 0;
+}
+
+# else
+
+static int fill_file_ring (int argc, char **argv, int i)
+{
+   int j;
+
    Most_Num_Files = argc - i;
    if (Most_Num_Files > MOST_MAX_FILES)
      {
@@ -548,15 +518,105 @@ int most (int argc, char **argv)
 	  }
 	else Most_File_Ring[j++] = argv[i++];
      }
+   return 0;
+}
+# endif				       /* __WIN32__ */
+#endif				       /* VMS */
+
+int most (int argc, char **argv)
+{
+   char *switches;
+   int i, piped;
+
+   Most_Program = argv[0];
+   piped = 0;
+
+   switches = getenv ("MOST_PROMPT");
+   if ((switches != NULL) && (*switches != 0)) Most_Global_Msg = switches;
+
+   switches = getenv("MOST_SWITCHES");
+   if (switches !=  NULL)  do_switches(switches);
+
+   i = 1;
+   if (argc > 1)
+     {
+	while (i < argc)
+	  {
+	     if (argv[i][0] == '-')
+	       do_switches(argv[i++]);
+	     else if (argv[i][0] == '+')
+	       do_extended_switches(argv[i++]);
+	     else break;
+	  }
+     }
+
+   if (i == argc)
+     {
+	if (isatty(0))   /* 1 if stdin is a terminal, 0 otherwise */
+	  {
+	     most_usage ();
+	     return 0;
+	  }
+	/* assume input is from stdin */
+	piped = 1;
+	if (!isatty(fileno(stdout)))
+	  {
+	     play_cat(NULL);
+	     return 0;
+	  }
+     }
+
+   if (!isatty (fileno(stdout)))
+     {
+	while (i < argc) play_cat(argv[i++]);
+	return 0;
+     }
+
+   Most_Num_Files = 0;
+
+   if (i < argc)
+     {
+	int status;
+#ifdef VMS
+	status = fill_file_ring_vms (argc, argv, i);
+#else
+# ifdef __WIN32__
+	status = fill_file_ring_win32 (argc, argv, i);
+# else
+	status = fill_file_ring (argc, argv, i);
+# endif
 #endif
+	if (status == -1)
+	  return -1;
+     }
+
+   SLtt_get_terminfo();
+   utf8_config ();
+   SLtt_Ignore_Beep = 1;
+   if (No_Colors)
+     SLtt_Use_Ansi_Colors = 0;
+
+   (void) most_setup_colors ();
+   most_init_tty ();
+   most_init_keymaps ();
+
+   if (Most_B_Opt) Most_A_Opt = 0;   /* explicit b overrides a */
+
+   if (piped)
+     {
+	do_most(NULL, Most_Starting_Line);
+	most_exit_most ();
+	return 0;
+     }
 
    if (Most_Num_Files)
-     do_most(Most_File_Ring[0], Most_Starting_Line);
+     do_most (Most_File_Ring[0], Most_Starting_Line);
    else
      fprintf(stderr,"No files were found\n");
 
    most_exit_most ();
-   return status;
+
+   return 0;
 }
 
 #if SLANG_VERSION <= 10409

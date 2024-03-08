@@ -324,7 +324,7 @@ ENVIRONMENT
           This variable sets commonly used switches. For example,
           some people prefer to use most with the -s option so
           that excess blank lines are not displayed. On VMS this
-          is normally done done in the login.com through the line:
+          is normally done in the login.com through the line:
 
    $ define MOST_SWITCHES "-s"
 
@@ -369,7 +369,7 @@ CONFIGURATION FILE SYNTAX
     unsetkey "^F"
 
    Colors may be defined through the use of the color keyword in
-   the the configuration file using the syntax:
+   the configuration file using the syntax:
     color OBJECT-NAME FOREGROUND-COLOR BACKGROUND-COLOR
 
    Here, OBJECT-NAME can be any one of the following items:

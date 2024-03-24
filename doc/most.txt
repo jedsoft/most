@@ -306,6 +306,9 @@ COMMAND USAGE
           where the `...' indicates lines that follow are not
           displayed.
 
+   SHIFT F
+   		Toggles follow mode, shows new lines in the file (like tail -f). 
+
 HINTS
 
    CTRL-G aborts the commands requiring the user to type something
@@ -349,8 +352,8 @@ ENVIRONMENT
 CONFIGURATION FILE SYNTAX
 
    When most starts up, it tries to read a system configuration
-   file and then a personal configuration file. These files may be
-   used to specify key-bindings and colors.
+   file (located at /etc/most.conf) and then a personal configuration
+   file. These files may be used to specify key-bindings and colors.
 
    To bind a key to a particular function use the syntax:
     setkey function-name key-sequence
@@ -395,6 +398,9 @@ BUGS
    involve backspace/underscore used for highlighting. The
    regular-expression syntax is described in the S-Lang Library
    documentation.
+
+   To report bugs or open issues, please visit
+   https://github.com/jedsoft/most/issues.
 
 AUTHOR
 

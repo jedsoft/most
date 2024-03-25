@@ -298,6 +298,8 @@ all lines indented beyond the first column.  So for the example above,
 #v-
 where the `...' indicates lines that follow are not displayed.
 \desc-item-continue-end
+\desc-item{F}{Toggles follow mode, shows new lines in the file (like
+tail -f)}
 \desc-list-end
 \p-end
 \refsect1-end
@@ -320,7 +322,7 @@ where the `...' indicates lines that follow are not displayed.
 \desc-list
 \desc-item{MOST_SWITCHES}{This  variable  sets  commonly used switches.
 For example, some people prefer to use \most with the -s option so that
-excess blank lines are not displayed.  On VMS this is normally done
+excess blank lines are not displayed.  On VMS this is normally
 done in the login.com through the line:}
 \desc-item-continue
 #v+
@@ -346,9 +348,9 @@ file called .mostrc on Unix, and most.rc on other systems.}
 
 \refsect1{CONFIGURATION FILE SYNTAX}
 \p
-When \most starts up, it tries to read a system configuration file and
-then a personal configuration file. These files may be used to specify
-key-bindings and colors.
+When \most starts up, it tries to read a system configuration
+file (located at /etc/most.conf) and then a personal configuration
+file. These files may be used to specify key-bindings and colors.
 \pp
 To bind a key to a particular function use the syntax:
 #v+
@@ -370,7 +372,7 @@ rebinding it in order via the unsetkey function:
     unsetkey "^F"
 #v-
 \pp
-Colors may be defined through the use of the color keyword in the the
+Colors may be defined through the use of the color keyword in the
 configuration file using the syntax:
 #v+
     color OBJECT-NAME FOREGROUND-COLOR BACKGROUND-COLOR
@@ -401,6 +403,9 @@ through a file.  When in doubt, use the -v and -b options of \most.
 The regular-expression searches may fail to find strings that involve
 backspace/underscore used for highlighting.  The regular-expression
 syntax is described in the S-Lang Library documentation.
+\pp
+To report bugs or open issues, please visit
+https://github.com/jedsoft/most/issues.
 \p-end
 \refsect1-end
 

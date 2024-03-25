@@ -306,6 +306,10 @@ COMMAND USAGE
           where the `...' indicates lines that follow are not
           displayed.
 
+   F
+          Toggles follow mode, shows new lines in the file (like
+          tail -f)
+
 HINTS
 
    CTRL-G aborts the commands requiring the user to type something
@@ -324,7 +328,7 @@ ENVIRONMENT
           This variable sets commonly used switches. For example,
           some people prefer to use most with the -s option so
           that excess blank lines are not displayed. On VMS this
-          is normally done done in the login.com through the line:
+          is normally done in the login.com through the line:
 
    $ define MOST_SWITCHES "-s"
 
@@ -349,8 +353,9 @@ ENVIRONMENT
 CONFIGURATION FILE SYNTAX
 
    When most starts up, it tries to read a system configuration
-   file and then a personal configuration file. These files may be
-   used to specify key-bindings and colors.
+   file (located at /etc/most.conf) and then a personal
+   configuration file. These files may be used to specify
+   key-bindings and colors.
 
    To bind a key to a particular function use the syntax:
     setkey function-name key-sequence
@@ -369,7 +374,7 @@ CONFIGURATION FILE SYNTAX
     unsetkey "^F"
 
    Colors may be defined through the use of the color keyword in
-   the the configuration file using the syntax:
+   the configuration file using the syntax:
     color OBJECT-NAME FOREGROUND-COLOR BACKGROUND-COLOR
 
    Here, OBJECT-NAME can be any one of the following items:
@@ -395,6 +400,9 @@ BUGS
    involve backspace/underscore used for highlighting. The
    regular-expression syntax is described in the S-Lang Library
    documentation.
+
+   To report bugs or open issues, please visit
+   https://github.com/jedsoft/most/issues.
 
 AUTHOR
 

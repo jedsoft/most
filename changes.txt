@@ -4,6 +4,9 @@ Changes since 5.2.0
     are not yet supported
 2. Added a few typecasts to suppress warnings when compiled against
    slang v3 which uses const and void in its API
+3. Updated autoconf/config.guess, autoconf/config.sub, doc/tm/most.tm
+   and regenerated most.txt and most.1 (based on patches from Basil
+   Feitknecht to address 3, 5, 13, 14 and pull request 22)
 
 Changes since 5.1.0
 1. src/most.c: Ignore empty filenames on the command line

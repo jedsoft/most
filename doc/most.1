@@ -3,7 +3,7 @@
 .\" <http://shell.ipoline.com/~elmert/comp/docbook2X/> 
 .\" Please send any bug reports, improvements, comments, patches, 
 .\" etc. to Steve Cheng <steve@ggi-project.org>.
-.TH "MOST" "1" "30 July 2022" "" ""
+.TH "MOST" "1" "24 March 2024" "" ""
 
 .SH NAME
 most \- browse or page through a text file
@@ -312,6 +312,10 @@ all lines indented beyond the first column.  So for the example above,
    }
 .fi
 where the `...' indicates lines that follow are not displayed.
+.TP
+\fBF\fR
+Toggles follow mode, shows new lines in the file (like
+tail -f) 
 .SH "HINTS"
 .PP
 CTRL-G aborts the commands requiring the user to type something in
@@ -328,7 +332,7 @@ CTRL-J.
 \fBMOST_SWITCHES\fR
 This  variable  sets  commonly used switches.
 For example, some people prefer to use \fBmost\fR with the -s option so that
-excess blank lines are not displayed.  On VMS this is normally done
+excess blank lines are not displayed.  On VMS this is normally
 done in the login.com through the line: 
 .TP
 \fB\fR
@@ -355,9 +359,9 @@ load the system configuration file and then a personal configuration
 file called .mostrc on Unix, and most.rc on other systems. 
 .SH "CONFIGURATION FILE SYNTAX"
 .PP
-When \fBmost\fR starts up, it tries to read a system configuration file and
-then a personal configuration file. These files may be used to specify
-key-bindings and colors.
+When \fBmost\fR starts up, it tries to read a system configuration
+file (located at /etc/most.conf) and then a personal configuration
+file. These files may be used to specify key-bindings and colors.
 .PP
 To bind a key to a particular function use the syntax:
 
@@ -382,7 +386,7 @@ rebinding it in order via the unsetkey function:
     unsetkey "^F"
 .fi
 .PP
-Colors may be defined through the use of the color keyword in the the
+Colors may be defined through the use of the color keyword in the
 configuration file using the syntax:
 
 .nf
@@ -412,6 +416,9 @@ through a file.  When in doubt, use the -v and -b options of \fBmost\fR\&.
 The regular-expression searches may fail to find strings that involve
 backspace/underscore used for highlighting.  The regular-expression
 syntax is described in the S-Lang Library documentation.
+.PP
+To report bugs or open issues, please visit
+https://github.com/jedsoft/most/issues.
 .SH "AUTHOR"
 .PP
 John E. Davis <jed@jedsoft.org>

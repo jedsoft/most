@@ -68,7 +68,7 @@ extern void most_reset_display(void);
 extern void most_other_window(int);
 extern void most_set_window (Most_Window_Type *);
 extern void most_update_windows(MOST_INT);
-extern void most_message(char *, int);
+extern void most_message (const char *, int);
 extern void most_put_message(void);
 extern void most_clear_minibuffer(void);
 extern void most_check_minibuffer(void);

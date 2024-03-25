@@ -80,8 +80,8 @@ static SLcmd_Cmd_Table_Type Cmd_Table;
 
 static int setkey_fun (int argc, SLcmd_Cmd_Table_Type *table) /*{{{*/
 {
-   char *fun = table->string_args[1];
-   char *key = table->string_args[2];
+   SLFUTURE_CONST char *fun = table->string_args[1];
+   SLFUTURE_CONST char *key = table->string_args[2];
 
    (void) argc;
    if (NULL == SLang_find_key_function(fun, Most_Keymap))
@@ -97,7 +97,7 @@ static int setkey_fun (int argc, SLcmd_Cmd_Table_Type *table) /*{{{*/
 
 static int unsetkey_fun (int argc, SLcmd_Cmd_Table_Type *table) /*{{{*/
 {
-   char *key = table->string_args[1];
+   SLFUTURE_CONST char *key = table->string_args[1];
 
    (void) argc;
 
@@ -202,7 +202,7 @@ static Color_Handle_Type Color_Handles[] = /*{{{*/
      {NULL, -1, NULL, NULL, 0}
 };
 
-static int set_object_color (char *name, char *fg, char *bg)
+static int set_object_color (SLFUTURE_CONST char *name, SLFUTURE_CONST char *fg, SLFUTURE_CONST char *bg)
 {
    Color_Handle_Type *ct = Color_Handles;
 
@@ -222,9 +222,9 @@ static int set_object_color (char *name, char *fg, char *bg)
 
 static int color_fun (int argc, SLcmd_Cmd_Table_Type *table)
 {
-   char *what = table->string_args[1];
-   char *fg = table->string_args[2];
-   char *bg = table->string_args[3];
+   SLFUTURE_CONST char *what = table->string_args[1];
+   SLFUTURE_CONST char *fg = table->string_args[2];
+   SLFUTURE_CONST char *bg = table->string_args[3];
 
    (void) argc;
    return set_object_color (what, fg, bg);
@@ -232,8 +232,8 @@ static int color_fun (int argc, SLcmd_Cmd_Table_Type *table)
 
 static int mono_fun (int argc, SLcmd_Cmd_Table_Type *table)
 {
-   char *what = table->string_args[1];
-   char *attr;
+   const char *what = table->string_args[1];
+   const char *attr;
    int i;
 
    Color_Handle_Type *ct = Color_Handles;

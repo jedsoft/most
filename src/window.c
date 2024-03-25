@@ -59,9 +59,9 @@ unsigned long Most_Curs_Offset;
 static int Beep_Mini = 0;
 static int Minibuffer_Selected;
 
-void most_message(char *what, int how)
+void most_message(const char *what, int how)
 {
-   strcpy (Most_Mini_Buf,what);
+   strcpy (Most_Mini_Buf, what);
    if (how) Beep_Mini = 1; else Beep_Mini = 0;
 }
 
@@ -138,8 +138,8 @@ static void rline_update (unsigned char *buf, int len, int col)
    SLsmg_refresh ();
 }
 #else
-static void rline_update (SLrline_Type *rli, char *prompt,
-			  char *buf, unsigned int len, unsigned int point,
+static void rline_update (SLrline_Type *rli, SLFUTURE_CONST char *prompt,
+			  SLFUTURE_CONST char *buf, unsigned int len, unsigned int point,
 			  VOID_STAR client_data)
 {
    int col;
@@ -550,7 +550,7 @@ static Most_Window_Type *make_window(int r1,int r2)
 
 int Most_Display_Inited = 0;
 
-static void error_hook (char *msg)
+static void error_hook (SLFUTURE_CONST char *msg)
 {
    most_message (msg, 1);
 }

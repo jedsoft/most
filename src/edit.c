@@ -53,7 +53,7 @@ char *most_escape_filename (char *file, char quote_char)
 {
    char *efile, *e;
 
-   if (NULL == (efile = SLmalloc (5 + 2*strlen(file))))
+   if (NULL == (efile = (char *)SLmalloc (5 + 2*strlen(file))))
      return NULL;
 
    e = efile;

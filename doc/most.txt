@@ -349,6 +349,15 @@ ENVIRONMENT
           system configuration file and then a personal
           configuration file called .mostrc on Unix, and most.rc
           on other systems.
+   
+   MOST_SECURE
+          Set this variable to enable the secure mode. This means - 
+          no edit, cd, shell, and reading files not  already listed
+          on the command line.
+   
+   PAGERSECURE
+          A universal environment variable for pager programs, it 
+          has the same effect as MOST_SECURE.
 
 CONFIGURATION FILE SYNTAX
 

@@ -531,7 +531,10 @@ int most (int argc, char **argv)
    Most_Program = argv[0];
    piped = 0;
 
-   switches = getenv ("MOST_PROMPT");
+   if (strcmp(getenv("MOST_SECURE"), "1") == 0 || strcmp(getenv("PAGERSECURE"), "1") == 0)
+	 Most_Secure_Mode = 1;
+   
+   switches = getenv("MOST_PROMPT");
    if ((switches != NULL) && (*switches != 0)) Most_Global_Msg = switches;
 
    switches = getenv("MOST_SWITCHES");

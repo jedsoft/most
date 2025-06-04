@@ -525,17 +525,25 @@ static int fill_file_ring (int argc, char **argv, int i)
 
 int most (int argc, char **argv)
 {
-   char *switches;
+   char *envvar;
    int i, piped;
 
    Most_Program = argv[0];
    piped = 0;
 
-   switches = getenv ("MOST_PROMPT");
-   if ((switches != NULL) && (*switches != 0)) Most_Global_Msg = switches;
+   envvar = getenv("MOST_SECURE");
+   if ((envvar != NULL) && (0 == strcmp (envvar, "1")))
+     Most_Secure_Mode = 1;
 
-   switches = getenv("MOST_SWITCHES");
-   if (switches !=  NULL)  do_switches(switches);
+   envvar = getenv("PAGERSECURE");
+   if ((envvar != NULL) && (0 == strcmp (envvar, "1")))
+     Most_Secure_Mode = 1;
+
+   envvar = getenv ("MOST_PROMPT");
+   if ((envvar != NULL) && (*envvar != 0)) Most_Global_Msg = envvar;
+
+   envvar = getenv("MOST_envvar");
+   if (envvar !=  NULL)  do_switches(envvar);
 
    i = 1;
    if (argc > 1)

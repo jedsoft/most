@@ -356,7 +356,14 @@ help file.
 Set this variable to specify the
 initialization file to load during startup.  The default action is to
 load the system configuration file and then a personal configuration
-file called .mostrc on Unix, and most.rc on other systems. 
+file called .mostrc on Unix, and most.rc on other systems.
+\fBMOST_SECURE\fR
+Set this variable to enable
+the secure mode. This means - no edit, cd, shell, and reading files not 
+already listed on the command line.
+\fBPAGERSECURE\fR
+A universal environment variable for pager programs, it has the same effect
+as MOST_SECURE.
 .SH "CONFIGURATION FILE SYNTAX"
 .PP
 When \fBmost\fR starts up, it tries to read a system configuration

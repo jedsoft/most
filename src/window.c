@@ -61,7 +61,8 @@ static int Minibuffer_Selected;
 
 void most_message(const char *what, int how)
 {
-   strcpy (Most_Mini_Buf, what);
+   strncpy (Most_Mini_Buf, what, sizeof(Most_Mini_Buf));
+   Most_Mini_Buf[sizeof(Most_Mini_Buf)-1] = 0;
    if (how) Beep_Mini = 1; else Beep_Mini = 0;
 }
 

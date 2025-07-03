@@ -11,6 +11,8 @@ Changes since 5.2.0
    environment variables to restrict viewing of files listed only on
    the command line and to prevent other shell access functions (patch
    provided by C hristian Goeschel Ndjomouo)
+5. src/window.c: Avoid a buffer overflow in most_message.  This addresses
+   https://gitlab.archlinux.org/archlinux/packaging/packages/most/-/issues/1
 
 Changes since 5.1.0
 1. src/most.c: Ignore empty filenames on the command line

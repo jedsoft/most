@@ -13,6 +13,9 @@ Changes since 5.2.0
    provided by C hristian Goeschel Ndjomouo)
 5. src/window.c: Avoid a buffer overflow in most_message.  This addresses
    https://gitlab.archlinux.org/archlinux/packaging/packages/most/-/issues/1
+6. src/{file.c,buffer.c}: The Most_C_Line variable was not getting
+   properly initialized by the unmmap_buffer and the most_count_lines
+   functions.  This was causing an issue with "follow-mode".
 
 Changes since 5.1.0
 1. src/most.c: Ignore empty filenames on the command line

@@ -350,6 +350,7 @@ MOST_INT most_count_lines(unsigned char *beg, unsigned char *end)
 
    Most_Beg = beg; Most_Eob = end;
    Most_C_Offset = 0;
+   Most_C_Line = 1;
 
    n = 1;
    while((dn = most_forward_line(dn)) != 0) n += dn;

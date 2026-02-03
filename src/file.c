@@ -187,8 +187,9 @@ static int unmmap_buffer (Most_Buffer_Type *b)
    if (b == Most_Buf)
      {
 	Most_Beg = Most_Eob = NULL;
-	Most_C_Line = 0;
-	Most_Num_Lines = Most_C_Line = 0;
+	Most_C_Line = 1;
+	Most_C_Offset = 0;
+	Most_Num_Lines = 0;
      }
    return 0;
 }

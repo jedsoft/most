@@ -57,6 +57,7 @@ int Most_A_Opt = 1;		       /* automatically choose -b if necessary */
 int Most_V_Opt = 0;		       /* display control chars */
 int Most_B_Opt = 0;		       /* display Binary File */
 int Most_T_Opt = 0;		       /* display tab as ^I-- valid only with V option */
+int Most_F_Opt = 0;		       /* startup in tail-mode */
 int Most_D_Opt = 0;		       /* delete file mode  (see ':D')  */
 int Most_K_Opt = 0;		       /* Display 8 bit unformatted (Kanji) */
 int Most_Z_Opt = 0;		       /* Gunzip on the fly */
@@ -97,6 +98,7 @@ void most_usage (void)
    fputs("        -c:  Make searches case sensitive.\n", stderr);
    fputs("        -d:  Do not display the \\ wrap marker when wrapping lines.\n", stderr);
    /* fputs("        -k:  Kanji mode.\n", stderr); */
+   fputs("        -F:  Startup in follow-mode\n", stderr);
 #if MOST_HAS_MMAP
    fputs("        -M:  Do not attempt to mmap files.\n", stderr);
 #endif
@@ -217,6 +219,10 @@ static void do_switches(char *str)
 	   case 'd':
 	   case 'D':
 	     Most_Show_Wrap_Marker = 0;
+	     break;
+	   case 'f':
+	   case 'F':
+	     Most_F_Opt = 1;
 	     break;
 	   case 'r':
 	     Most_Do_Regexp_Search = 1;
@@ -345,6 +351,7 @@ void most_initialize_most (void)
    Most_D_Opt = 0;
    Most_K_Opt = 0;
    Most_W_Opt = 0;
+   Most_F_Opt = 0;
 
    Most_Selective_Display = 0;
    *Most_Search_Str = 0;   Most_Search_Dir = 1;
@@ -389,6 +396,8 @@ static void do_most (char *file, int start)
    Most_Curs_Col = Most_Win->curs_col = col;
    most_redraw_window();
    most_update_status();
+
+   if (Most_F_Opt) most_tail_mode_cmd ();
 
    while (Most_Want_Exit == 0)
      {

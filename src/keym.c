@@ -110,25 +110,6 @@ static void previous_line_cmd(void)
    most_update_windows(Most_C_Line - n);
 }
 
-static void tail_mode_cmd (void)
-{
-   Most_Tail_Mode = 1;
-
-   do
-     {
-	if (0 != most_read_file_dsc (-1, 1))
-	  most_update_windows (-1);
-
-	most_message ("Most Tail Mode--  MOST keys are still active.", 0);
-	most_put_message ();
-
-	most_point_cursor ();
-	SLsmg_refresh ();
-     }
-   while (0 == SLang_input_pending (15));
-   Most_Tail_Mode = 0;
-}
-
 static void top_of_buffer_cmd(void)
 {
    most_update_windows(1);
@@ -431,6 +412,28 @@ static void edt_find_next_cmd(void)
    find_next_cmd();
 }
 
+void most_tail_mode_cmd (void)
+{
+   Most_Tail_Mode = 1;
+
+   end_of_buffer_cmd ();
+
+   do
+     {
+	if (0 != most_read_file_dsc (-1, 1))
+	  most_update_windows (-1);
+
+	most_message ("Most Tail Mode--  MOST keys are still active.", 0);
+	most_put_message ();
+
+	most_point_cursor ();
+	SLsmg_refresh ();
+     }
+   while (0 == SLang_input_pending (15));
+   Most_Tail_Mode = 0;
+}
+
+
 #define A_KEY(s, f)  {s, (int (*)(void)) f}
 SLKeymap_Function_Type Most_Functions [] =
 {
@@ -474,7 +477,7 @@ SLKeymap_Function_Type Most_Functions [] =
    A_KEY("search_forward", search_cmd),
    A_KEY("set_mark", set_mark_cmd),
    A_KEY("show_time", time_cmd),
-   A_KEY("tail_mode", tail_mode_cmd),
+   A_KEY("tail_mode", most_tail_mode_cmd),
    A_KEY("toggle_width", toggle_width_cmd),
    A_KEY("two_windows", two_window_cmd),
    A_KEY("up", previous_line_cmd),
@@ -532,7 +535,7 @@ void most_init_keymaps (void)
    SLkm_define_key ("B", (FVOID_STAR) end_of_buffer_cmd, Most_Keymap);
    SLkm_define_key ("D", (FVOID_STAR) page_down_cmd, Most_Keymap);
    SLkm_define_key ("E", (FVOID_STAR) most_edit_cmd, Most_Keymap);
-   SLkm_define_key ("F", (FVOID_STAR) tail_mode_cmd, Most_Keymap);
+   SLkm_define_key ("F", (FVOID_STAR) most_tail_mode_cmd, Most_Keymap);
    SLkm_define_key ("G", (FVOID_STAR) goto_line_cmd, Most_Keymap);
    SLkm_define_key ("H", (FVOID_STAR) help_cmd, Most_Keymap);
    SLkm_define_key ("J", (FVOID_STAR) goto_line_cmd, Most_Keymap);

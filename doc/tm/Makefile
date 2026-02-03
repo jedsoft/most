@@ -5,6 +5,8 @@
 #
 TM2SGML = tmexpand
 SGML2HTML = sgml2html
+#DOCBOOK2MAN = docbook-to-man
+#DOCBOOK2TXT = docbook-to-txt
 DOCBOOK2MAN = docbook2man
 DOCBOOK2TXT = docbook2txt
 

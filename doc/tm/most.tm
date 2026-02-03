@@ -28,6 +28,7 @@
   \arg{\option{-C}}
   \arg{\option{-c}}
   \arg{\option{-d}}
+  \arg{\option{-F}}
   \arg{\option{-M}}
   \arg{\option{-r}}
   \arg{\option{-s}}
@@ -136,7 +137,8 @@
   \man_options_entry{\option{-C}}{Disable color support.}
   \man_options_entry{\option{-c}}{Make searches case-sensitive}
   \man_options_entry{\option{-d}}{Omit the backslash mark used to denote a wrapped line.}
-  \man_options_entry{\option{-M}}{Disable the use of mmap.}
+  \man_options_entry{\option{-F}}{Startup in follow-mode}
+  \man_options_entry{\option{-M}}{Disable the use of mmap}
   \man_options_entry{\option{-r}}{Default to using regexp searches}
   \man_options_entry{\option{-s}}{Squeeze-mode.  Replace multiple blank
   lines with a single blank line.}
@@ -343,6 +345,13 @@ help file.}
 initialization file to load during startup.  The default action is to
 load the system configuration file and then a personal configuration
 file called .mostrc on Unix, and most.rc on other systems.}
+
+\desc-item{MOST_SECURE}{Set this variable to enable
+the secure mode. This means - no edit, cd, shell, and reading files not
+already listed on the command line.}
+
+\desc-item{PAGERSECURE}{A universal environment variable for pager
+programs; it has the same effect as MOST_SECURE.}
 \desc-list-end
 \refsect1-end
 

@@ -21,6 +21,7 @@ extern void most_init_keymaps (void);
 extern void most_execute_key (void);
 extern int *Most_Digit_Arg;
 extern void most_do_help_command (void);
+extern void most_tail_mode_cmd (void);
 
 /* These are in  cmd.c */
 extern void most_extended_key_cmd(void);

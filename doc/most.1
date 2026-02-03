@@ -3,13 +3,13 @@
 .\" <http://shell.ipoline.com/~elmert/comp/docbook2X/> 
 .\" Please send any bug reports, improvements, comments, patches, 
 .\" etc. to Steve Cheng <steve@ggi-project.org>.
-.TH "MOST" "1" "24 March 2024" "" ""
+.TH "MOST" "1" "02 February 2026" "" ""
 
 .SH NAME
 most \- browse or page through a text file
 .SH SYNOPSIS
 
-\fBmost\fR [ \fB-1\fR ] [ \fB-b\fR ] [ \fB-C\fR ] [ \fB-c\fR ] [ \fB-d\fR ] [ \fB-M\fR ] [ \fB-r\fR ] [ \fB-s\fR ] [ \fB-t\fR ] [ \fB-u\fR ] [ \fB-v\fR ] [ \fB-w\fR ] [ \fB-z\fR ] [ \fB+/\fIstring\fB\fR ] [ \fB+\fIline-number\fB\fR ] [ \fB+d\fR ] [ \fB+s\fR ] [ \fB+u\fR ] [ \fB\fIfile...\fB\fR ]
+\fBmost\fR [ \fB-1\fR ] [ \fB-b\fR ] [ \fB-C\fR ] [ \fB-c\fR ] [ \fB-d\fR ] [ \fB-F\fR ] [ \fB-M\fR ] [ \fB-r\fR ] [ \fB-s\fR ] [ \fB-t\fR ] [ \fB-u\fR ] [ \fB-v\fR ] [ \fB-w\fR ] [ \fB-z\fR ] [ \fB+/\fIstring\fB\fR ] [ \fB+\fIline-number\fB\fR ] [ \fB+d\fR ] [ \fB+s\fR ] [ \fB+u\fR ] [ \fB\fIfile...\fB\fR ]
 
 .SH "DESCRIPTION"
 .PP
@@ -107,8 +107,11 @@ Make searches case-sensitive
 \fB-d\fR
 Omit the backslash mark used to denote a wrapped line. 
 .TP
+\fB-F\fR
+Startup in follow-mode 
+.TP
 \fB-M\fR
-Disable the use of mmap. 
+Disable the use of mmap 
 .TP
 \fB-r\fR
 Default to using regexp searches 
@@ -356,14 +359,16 @@ help file.
 Set this variable to specify the
 initialization file to load during startup.  The default action is to
 load the system configuration file and then a personal configuration
-file called .mostrc on Unix, and most.rc on other systems.
+file called .mostrc on Unix, and most.rc on other systems. 
+.TP
 \fBMOST_SECURE\fR
 Set this variable to enable
-the secure mode. This means - no edit, cd, shell, and reading files not 
-already listed on the command line.
+the secure mode. This means - no edit, cd, shell, and reading files not
+already listed on the command line. 
+.TP
 \fBPAGERSECURE\fR
-A universal environment variable for pager programs, it has the same effect
-as MOST_SECURE.
+A universal environment variable for pager
+programs; it has the same effect as MOST_SECURE. 
 .SH "CONFIGURATION FILE SYNTAX"
 .PP
 When \fBmost\fR starts up, it tries to read a system configuration

@@ -16,6 +16,9 @@ Changes since 5.2.0
 6. src/{file.c,buffer.c}: The Most_C_Line variable was not getting
    properly initialized by the unmmap_buffer and the most_count_lines
    functions.  This was causing an issue with "follow-mode".
+7. Added -F command line option to startup in "follow-mode"
+
+{{{ Previous Versions
 
 Changes since 5.1.0
 1. src/most.c: Ignore empty filenames on the command line
@@ -46,8 +49,6 @@ Changes since 5.1.0
     mapped to the default color
 12. Updated copyright years
 13. Better support for 256 color terminals; added additional test file
-
-{{{ Previous Versions
 
 Changes since 5.0.0
 1. src/Makefile.in: Install docs in $prefix/share/doc

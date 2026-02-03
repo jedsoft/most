@@ -6,8 +6,9 @@ Name
 
 Synopsis
 
-   most [-1] [-b] [-C] [-c] [-d] [-M] [-r] [-s] [-t] [-u] [-v]
-   [-w] [-z] [+/string] [+line-number] [+d] [+s] [+u] [file...]
+   most [-1] [-b] [-C] [-c] [-d] [-F] [-M] [-r] [-s] [-t] [-u]
+   [-v] [-w] [-z] [+/string] [+line-number] [+d] [+s] [+u]
+   [file...]
 
 DESCRIPTION
 
@@ -104,8 +105,11 @@ OPTIONS
    -d
           Omit the backslash mark used to denote a wrapped line.
 
+   -F
+          Startup in follow-mode
+
    -M
-          Disable the use of mmap.
+          Disable the use of mmap
 
    -r
           Default to using regexp searches
@@ -349,6 +353,15 @@ ENVIRONMENT
           system configuration file and then a personal
           configuration file called .mostrc on Unix, and most.rc
           on other systems.
+
+   MOST_SECURE
+          Set this variable to enable the secure mode. This means
+          - no edit, cd, shell, and reading files not already
+          listed on the command line.
+
+   PAGERSECURE
+          A universal environment variable for pager programs; it
+          has the same effect as MOST_SECURE.
 
 CONFIGURATION FILE SYNTAX
 
